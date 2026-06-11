@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://ck1v1gdomdskk"
+
+[deps]
+
+files=["res://Config/MerchantGoods.tab.translation", "res://Config/MerchantGoods.name.translation", "res://Config/MerchantGoods.desc.translation", "res://Config/MerchantGoods.cost.translation", "res://Config/MerchantGoods.unlock.translation", "res://Config/MerchantGoods.effect.translation", "res://Config/MerchantGoods.value.translation", "res://Config/MerchantGoods.purchase.translation", "res://Config/MerchantGoods.captive.translation", "res://Config/MerchantGoods.event.translation", "res://Config/MerchantGoods.one.translation"]
+
+source_file="res://Config/MerchantGoods.csv"
+dest_files=["res://Config/MerchantGoods.tab.translation", "res://Config/MerchantGoods.name.translation", "res://Config/MerchantGoods.desc.translation", "res://Config/MerchantGoods.cost.translation", "res://Config/MerchantGoods.unlock.translation", "res://Config/MerchantGoods.effect.translation", "res://Config/MerchantGoods.value.translation", "res://Config/MerchantGoods.purchase.translation", "res://Config/MerchantGoods.captive.translation", "res://Config/MerchantGoods.event.translation", "res://Config/MerchantGoods.one.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

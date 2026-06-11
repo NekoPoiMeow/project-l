@@ -1,0 +1,9 @@
+id,name,unlock_chapter,description,effect_key,effect_value
+CPT_CLEAR_001,通关俘虏,1,标准模式首次胜利获得的占位俘虏,player_attack_mul,0.08
+CPT_SLIME_001,史莱姆娘俘虏,1,商人或事件可获得的占位俘虏,player_area_mul,0.10
+CPT_KNIGHT_001,女骑士俘虏,1,偏向强化小兵推进的占位俘虏,minion_attack_mul,0.12
+CPT_WITCH_001,魔女俘虏,2,偏向强化技能和Mana的占位俘虏,player_mana_regen_add,2.0
+CPT_PRIEST_001,修女俘虏,2,偏向提高战后收益的占位俘虏,battle_lust_reward_mul,0.12
+CAP_MERCHANT_SLIME_01,商人史莱姆娘俘虏,1,商人带来的基础俘虏 可用于地窖占位流程,player_area_mul,0.10
+CAP_MERCHANT_SCOUT_01,斥候少女俘虏,2,章节推进后出现的商人俘虏 偏向射程和速度,player_range_mul,0.10
+CAP_MERCHANT_MAGE_01,魔法使俘虏,3,中期章节俘虏 偏向Mana和技能,player_mana_regen_add,2.0

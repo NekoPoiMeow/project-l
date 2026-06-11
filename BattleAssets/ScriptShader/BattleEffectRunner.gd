@@ -310,7 +310,9 @@ func apply_chain_attack(director, source, target, effect: Dictionary, context: D
 	next_context["position"] = target.global_position
 	next_context["trigger_target"] = best
 	next_context["direction"] = (best.global_position - target.global_position).normalized()
-	if director.has_method("spawn_line_fx"):
+	if director.has_method("spawn_textured_line_fx"):
+		director.spawn_textured_line_fx(target.global_position, best.global_position, "res://BattleAssets/Lighting.png", 54.0, 0.18, Color(1.0, 0.92, 0.55, 0.98))
+	elif director.has_method("spawn_line_fx"):
 		director.spawn_line_fx(target.global_position, best.global_position, Color(1.0, 0.88, 0.35, 0.98), 16.0, 0.28)
 		director.spawn_line_fx(target.global_position, best.global_position, Color(1.0, 0.25, 0.92, 0.70), 5.0, 0.34)
 	director.spawn_attack(source, attack, next_context)

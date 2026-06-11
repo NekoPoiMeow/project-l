@@ -268,12 +268,12 @@
     "level": 1,
     "max_level": 7,
     "upgrade_thresholds": [
-      120,
-      280,
-      560,
-      920,
-      1350,
-      1850
+      160,
+      380,
+      760,
+      1240,
+      1840,
+      2600
     ],
     "upgrade_cd": 10.0,
     "low_power_queue_speed": 0.5,
@@ -281,12 +281,12 @@
     "bio_cycle_interval": 5.0,
     "bio_cycle_amounts": [
       0,
-      5,
-      15,
-      40,
-      80,
-      160,
-      280
+      4,
+      12,
+      34,
+      72,
+      145,
+      260
     ],
     "level_passive_bio_per_second": [
       0,
@@ -336,8 +336,8 @@
       },
       {
         "level": 5,
-        "hp_mul": 1.1,
-        "regen_mul": 1.1,
+        "hp_mul": 1.133,
+        "regen_mul": 1.144,
         "zones": {
           "contact_radius": 192,
           "contact_damage": 120,
@@ -346,8 +346,8 @@
       },
       {
         "level": 6,
-        "hp_mul": 1.12,
-        "regen_mul": 1.12,
+        "hp_mul": 1.154,
+        "regen_mul": 1.165,
         "zones": {
           "contact_radius": 216,
           "contact_damage": 160,
@@ -356,8 +356,8 @@
       },
       {
         "level": 7,
-        "hp_mul": 1.11,
-        "regen_mul": 1.11,
+        "hp_mul": 1.143,
+        "regen_mul": 1.154,
         "zones": {
           "contact_radius": 240,
           "contact_damage": 200,

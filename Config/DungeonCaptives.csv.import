@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dfktyao06jqde"
+
+[deps]
+
+files=["res://Config/DungeonCaptives.name.translation", "res://Config/DungeonCaptives.unlock.translation", "res://Config/DungeonCaptives.description.translation", "res://Config/DungeonCaptives.effect.translation", "res://Config/DungeonCaptives.effect.translation"]
+
+source_file="res://Config/DungeonCaptives.csv"
+dest_files=["res://Config/DungeonCaptives.name.translation", "res://Config/DungeonCaptives.unlock.translation", "res://Config/DungeonCaptives.description.translation", "res://Config/DungeonCaptives.effect.translation", "res://Config/DungeonCaptives.effect.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

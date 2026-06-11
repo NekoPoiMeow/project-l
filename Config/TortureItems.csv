@@ -1,3 +1,4 @@
-id,name,unlocked,icon,description,effect_keys
-T001,Basic Restraint,TRUE,,Basic dungeon item for normal scenes.,
-T002,Confession Needle,FALSE,,Dungeon item for special humiliation scenes.,
+id,name,unlocked,icon,description,effect_keys,min_humiliation_level,scene_tag
+T001,基础拘束具,TRUE,,基础地窖道具 可触发普通调教CG,,0,basic_restraint
+T002,告白针,FALSE,,中级地窖道具 需要俘虏屈辱Lv1,,1,confession_needle
+T003,深层刻印器,FALSE,,高级地窖道具 需要俘虏屈辱Lv2,,2,deep_mark

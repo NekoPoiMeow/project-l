@@ -1,9 +1,9 @@
 SaveSlotId=Save1
 SaveRole=manual
 SaveName=New Game
-SaveTime=2026-06-10 09:07:49
-SaveChapterID=0
-SaveChapterName=未开始
+SaveTime=2026-06-11 17:27:19
+SaveChapterID=1.0
+SaveChapterName=Chapter 1
 SaveFormatVersion=1
-SaveReason=new_game
-SaveDataJSON={"dungeon":{"captives":{},"last_processed_battle_id":""},"economy":{"humiliation":0,"lust":0},"flags":{},"meta":{"autosave_generation":0,"chapter_id":0,"chapter_name":"未开始","format_version":1,"is_zero_progress":false,"last_autosave_slot":"SaveAuto2","last_scene":"res://scenes/Basement.tscn","play_seconds":0,"save_name":"New Game","save_time":"2026-06-10 09:07:49","slot_id":"Save1","slot_role":"manual"},"progress":{"cleared_levels":[],"last_level_id":"","level_bonus_collect":{},"unlocked_chapters":[]},"unlocks":{"characters":["C001"],"codex":[],"equipments":["E001"],"torture_items":[],"weapons":["W001"]},"upgrades":{"building":{},"player":{},"tentacle":{}}}
+SaveReason=return_basement_from_dungeon
+SaveDataJSON={"battle_loadout":{"character_id":"C001","equipment_id":"E001","weapon_id":"W001"},"dungeon":{"captives":{},"events_seen":{},"last_processed_battle_id":""},"economy":{"humiliation":0.0,"lust":0.0},"flags":{},"merchant":{"events_seen":{},"next_battle_effects":{},"purchases":{}},"meta":{"autosave_generation":16,"chapter_id":1.0,"chapter_name":"Chapter 1","format_version":1,"is_zero_progress":false,"last_autosave_slot":"SaveAuto2","last_scene":"res://scenes/Basement.tscn","play_seconds":0.0,"save_name":"New Game","save_time":"2026-06-11 17:27:19","slot_id":"Save1","slot_role":"manual"},"progress":{"cleared_levels":[],"last_level_id":"","level_bonus_collect":{},"unlocked_chapters":["1"]},"unlocks":{"characters":["C001"],"codex":[],"equipments":["E001"],"torture_items":[],"weapons":["W001"]},"upgrades":{"base":{},"building":{},"dungeon":{},"minion":{},"player":{},"tentacle":{}}}

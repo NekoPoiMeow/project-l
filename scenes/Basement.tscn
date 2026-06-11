@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://dbbaavow14r0p" path="res://GraphicAssets/05_Basement/NPC御所.gif" id="8_rkwqm"]
 [ext_resource type="Texture2D" uid="uid://cui6hewwsdgkj" path="res://GraphicAssets/05_Basement/03_Palace.png" id="8_v2gnl"]
 [ext_resource type="AudioStream" uid="uid://cepujvp8lfrkf" path="res://Sound+BGM/05Basement/03_Palace_NPC.mp3" id="9_3wm7j"]
+[ext_resource type="Script" uid="uid://34n4sl4f3qai" path="res://Script/Basement/BasementPortal.gd" id="10_portal"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_jnl0s"]
 radius = 113.0
@@ -23,6 +24,15 @@ height = 372.0
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3fd3q"]
 radius = 92.0
 height = 322.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_outupgrade"]
+radius = 117.03845
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_dungeon"]
+radius = 92.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_merchant"]
+radius = 92.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_v2gnl"]
 shader = ExtResource("8_jef7w")
@@ -69,7 +79,7 @@ stream = ExtResource("6_emia8")
 bus = &"SFX"
 
 [node name="CollisionShape2D传送阵判定范围" type="CollisionShape2D" parent="Area2D传送阵" unique_id=1099736643]
-position = Vector2(806, 502)
+position = Vector2(748, 454)
 rotation = -1.5707964
 shape = SubResource("CapsuleShape2D_jnl0s")
 
@@ -107,6 +117,97 @@ bus = &"SFX"
 position = Vector2(548, 186)
 rotation = -1.5707964
 shape = SubResource("CapsuleShape2D_3fd3q")
+
+[node name="Area2D局外升级" type="Area2D" parent="." unique_id=1183150615]
+position = Vector2(1060, 500)
+script = ExtResource("10_portal")
+portal_name = "局外升级"
+target_scene = "res://scenes/OutGame/OutGameUpgrade.tscn"
+placeholder_message = "进入局外升级树"
+
+[node name="Sprite2D局外升级底圈" type="Sprite2D" parent="Area2D局外升级" unique_id=28436308]
+position = Vector2(128.99998, -150.99998)
+scale = Vector2(0.62, 0.62)
+texture = ExtResource("4_kvs36")
+
+[node name="Sprite2D局外升级图标" type="Sprite2D" parent="Area2D局外升级" unique_id=1636663558]
+position = Vector2(120.99999, -279)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("5_3fd3q")
+
+[node name="Label局外升级" type="Label" parent="Area2D局外升级" unique_id=568058383]
+offset_left = -80.0
+offset_top = -155.0
+offset_right = 80.0
+offset_bottom = -119.0
+theme_override_font_sizes/font_size = 22
+text = "局外升级"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CollisionShape2D局外升级" type="CollisionShape2D" parent="Area2D局外升级" unique_id=2085461714]
+position = Vector2(94, -147)
+shape = SubResource("CircleShape2D_outupgrade")
+
+[node name="Area2D地窖" type="Area2D" parent="." unique_id=620973049]
+position = Vector2(1250, 610)
+script = ExtResource("10_portal")
+portal_name = "地窖"
+target_scene = "res://scenes/Dungeon/Dungeon.tscn"
+placeholder_message = "进入地窖"
+
+[node name="Sprite2D地窖底圈" type="Sprite2D" parent="Area2D地窖" unique_id=2016629851]
+position = Vector2(-406, 133)
+scale = Vector2(0.56, 0.56)
+texture = ExtResource("4_kvs36")
+
+[node name="Sprite2D地窖图标" type="Sprite2D" parent="Area2D地窖" unique_id=345873438]
+position = Vector2(-528, 95)
+scale = Vector2(0.38, 0.38)
+texture = ExtResource("8_v2gnl")
+
+[node name="Label地窖" type="Label" parent="Area2D地窖" unique_id=1408173460]
+offset_left = -80.0
+offset_top = -150.0
+offset_right = 80.0
+offset_bottom = -114.0
+theme_override_font_sizes/font_size = 22
+text = "地窖"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CollisionShape2D地窖" type="CollisionShape2D" parent="Area2D地窖" unique_id=1954112252]
+position = Vector2(-420, 137)
+shape = SubResource("CircleShape2D_dungeon")
+
+[node name="Area2D商人" type="Area2D" parent="." unique_id=2036754471]
+position = Vector2(350, 600)
+script = ExtResource("10_portal")
+portal_name = "商人"
+target_scene = "res://scenes/Merchant/Merchant.tscn"
+placeholder_message = "进入史莱姆娘商店"
+
+[node name="Sprite2D商人底圈" type="Sprite2D" parent="Area2D商人" unique_id=195363522]
+scale = Vector2(0.56, 0.56)
+texture = ExtResource("4_kvs36")
+
+[node name="Sprite2D商人图标" type="Sprite2D" parent="Area2D商人" unique_id=2031669371]
+position = Vector2(0, -92)
+scale = Vector2(0.38, 0.38)
+texture = ExtResource("5_3fd3q")
+
+[node name="Label商人" type="Label" parent="Area2D商人" unique_id=491073166]
+offset_left = -80.0
+offset_top = -150.0
+offset_right = 80.0
+offset_bottom = -114.0
+theme_override_font_sizes/font_size = 22
+text = "商人"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CollisionShape2D商人" type="CollisionShape2D" parent="Area2D商人" unique_id=1080951898]
+shape = SubResource("CircleShape2D_merchant")
 
 [node name="CanvasLayer营地UI" type="CanvasLayer" parent="." unique_id=1782210650]
 

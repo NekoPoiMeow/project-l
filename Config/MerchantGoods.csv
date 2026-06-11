@@ -1,0 +1,13 @@
+id,tab,name,desc,cost,unlock_chapter,effect_key,value,purchase_limit,captive_id,event_id,one_time
+TEMP_ATK_01,temp,下局触须兴奋剂,下次战斗玩家伤害 +18%。只持续一局。,60,1,player_attack_mul,0.18,0,,,
+TEMP_RATE_01,temp,下局神经加速液,下次战斗攻击频度 +18%。只持续一局。,70,1,player_attack_frequency_mul,0.18,0,,,
+TEMP_AREA_01,temp,下局扩散黏液,下次战斗攻击范围 +20%。只持续一局。,70,1,player_area_mul,0.20,0,,,
+TEMP_RANGE_01,temp,下局追猎眼膜,下次战斗射程 +18%。只持续一局。,55,1,player_range_mul,0.18,0,,,
+TEMP_LUST_01,temp,下局淫能香料,下次战斗淫能结算 +35%。只持续一局。,90,1,battle_lust_reward_mul,0.35,0,,,
+TEMP_BULLET_01,temp,下局增殖弹囊,下次战斗弹幕数量 +1。只持续一局。,160,2,player_projectile_count_add,1,0,,,
+CAP_SLIME_01,captive,史莱姆娘俘虏,商人带来的基础俘虏。购买后进入地窖占位名单。,220,1,,,1,CAP_MERCHANT_SLIME_01,,
+CAP_SCOUT_01,captive,斥候少女俘虏,章节推进后出现的俘虏商品。,360,2,,,1,CAP_MERCHANT_SCOUT_01,,
+CAP_MAGE_01,captive,魔法使俘虏,中期章节商品，占位用于后续地窖与装备解锁。,520,3,,,1,CAP_MERCHANT_MAGE_01,,
+DATE_SLIME_01,event,和史莱姆娘逛街,触发一个商人逛街剧情占位，当前只记录事件。,40,1,,,,,MERCHANT_DATE_SLIME_01,TRUE
+DATE_MARKET_01,event,黑市闲逛,章节2后开放的商人剧情占位。,80,2,,,,,MERCHANT_DATE_MARKET_01,TRUE
+DATE_NIGHT_01,event,夜市约会,章节3后开放的商人剧情占位。,120,3,,,,,MERCHANT_DATE_NIGHT_01,TRUE

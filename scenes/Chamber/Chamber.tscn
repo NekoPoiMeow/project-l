@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bnm1iqwmqsjrr"]
+[gd_scene format=3 uid="uid://bnm1iqwmqsjrr"]
 
-[ext_resource type="Script" path="res://Script/Chamber/chamber.gd" id="1_chamber"]
+[ext_resource type="Script" uid="uid://dmkatinlc5i5g" path="res://Script/Chamber/chamber.gd" id="1_chamber"]
 
-[node name="ControlChamber" type="Control"]
+[node name="ControlChamber" type="Control" unique_id=31516094]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_chamber")
 
-[node name="ColorRectBackground" type="ColorRect" parent="."]
+[node name="ColorRectBackground" type="ColorRect" parent="." unique_id=136518122]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.055, 0.036, 0.07, 1)
 
-[node name="LabelLevel" type="Label" parent="ColorRectBackground"]
+[node name="LabelLevel" type="Label" parent="ColorRectBackground" unique_id=2040204346]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 30.0
@@ -29,7 +29,7 @@ offset_bottom = 96.0
 theme_override_font_sizes/font_size = 26
 text = "出击准备"
 
-[node name="HBoxLists" type="HBoxContainer" parent="ColorRectBackground"]
+[node name="HBoxLists" type="HBoxContainer" parent="ColorRectBackground" unique_id=1092770360]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 120.0
@@ -37,46 +37,46 @@ offset_right = 1540.0
 offset_bottom = 610.0
 theme_override_constants/separation = 24
 
-[node name="VBoxCharacter" type="VBoxContainer" parent="ColorRectBackground/HBoxLists"]
+[node name="VBoxCharacter" type="VBoxContainer" parent="ColorRectBackground/HBoxLists" unique_id=1229279264]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="LabelCharacter" type="Label" parent="ColorRectBackground/HBoxLists/VBoxCharacter"]
+[node name="LabelCharacter" type="Label" parent="ColorRectBackground/HBoxLists/VBoxCharacter" unique_id=389445569]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "角色"
 
-[node name="ItemListCharacter" type="ItemList" parent="ColorRectBackground/HBoxLists/VBoxCharacter"]
+[node name="ItemListCharacter" type="ItemList" parent="ColorRectBackground/HBoxLists/VBoxCharacter" unique_id=1734969368]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VBoxWeapon" type="VBoxContainer" parent="ColorRectBackground/HBoxLists"]
+[node name="VBoxWeapon" type="VBoxContainer" parent="ColorRectBackground/HBoxLists" unique_id=1048089542]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="LabelWeapon" type="Label" parent="ColorRectBackground/HBoxLists/VBoxWeapon"]
+[node name="LabelWeapon" type="Label" parent="ColorRectBackground/HBoxLists/VBoxWeapon" unique_id=1333527742]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "初始武器"
 
-[node name="ItemListWeapon" type="ItemList" parent="ColorRectBackground/HBoxLists/VBoxWeapon"]
+[node name="ItemListWeapon" type="ItemList" parent="ColorRectBackground/HBoxLists/VBoxWeapon" unique_id=1264642454]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VBoxEquipment" type="VBoxContainer" parent="ColorRectBackground/HBoxLists"]
+[node name="VBoxEquipment" type="VBoxContainer" parent="ColorRectBackground/HBoxLists" unique_id=1398498421]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="LabelEquipment" type="Label" parent="ColorRectBackground/HBoxLists/VBoxEquipment"]
+[node name="LabelEquipment" type="Label" parent="ColorRectBackground/HBoxLists/VBoxEquipment" unique_id=1985976805]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "装备"
 
-[node name="ItemListEquipment" type="ItemList" parent="ColorRectBackground/HBoxLists/VBoxEquipment"]
+[node name="ItemListEquipment" type="ItemList" parent="ColorRectBackground/HBoxLists/VBoxEquipment" unique_id=1619810045]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="LabelSummary" type="Label" parent="ColorRectBackground"]
+[node name="LabelSummary" type="Label" parent="ColorRectBackground" unique_id=1100529354]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 632.0
@@ -85,7 +85,7 @@ offset_bottom = 672.0
 theme_override_font_sizes/font_size = 22
 text = "角色 / 武器 / 装备"
 
-[node name="LabelDetail" type="Label" parent="ColorRectBackground"]
+[node name="LabelDetail" type="Label" parent="ColorRectBackground" unique_id=2131988987]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 686.0
@@ -95,7 +95,7 @@ theme_override_font_sizes/font_size = 18
 text = "Detail"
 autowrap_mode = 3
 
-[node name="HBoxButtons" type="HBoxContainer" parent="ColorRectBackground"]
+[node name="HBoxButtons" type="HBoxContainer" parent="ColorRectBackground" unique_id=1659159224]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 810.0
@@ -103,17 +103,17 @@ offset_right = 1540.0
 offset_bottom = 870.0
 theme_override_constants/separation = 20
 
-[node name="ButtonBack" type="Button" parent="ColorRectBackground/HBoxButtons"]
-layout_mode = 2
+[node name="ButtonBack" type="Button" parent="ColorRectBackground/HBoxButtons" unique_id=802456385]
 custom_minimum_size = Vector2(180, 54)
+layout_mode = 2
 text = "返回关卡选择"
 
-[node name="ButtonCodex" type="Button" parent="ColorRectBackground/HBoxButtons"]
-layout_mode = 2
+[node name="ButtonCodex" type="Button" parent="ColorRectBackground/HBoxButtons" unique_id=854739091]
 custom_minimum_size = Vector2(180, 54)
+layout_mode = 2
 text = "图鉴"
 
-[node name="ButtonConfirm" type="Button" parent="ColorRectBackground/HBoxButtons"]
-layout_mode = 2
+[node name="ButtonConfirm" type="Button" parent="ColorRectBackground/HBoxButtons" unique_id=902556795]
 custom_minimum_size = Vector2(220, 54)
+layout_mode = 2
 text = "确认出击"

@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://jgnu72yh7fvp"
+
+[deps]
+
+files=["res://Config/OutGameUpgrades.tab.translation", "res://Config/OutGameUpgrades.group.translation", "res://Config/OutGameUpgrades.name.translation", "res://Config/OutGameUpgrades.desc.translation", "res://Config/OutGameUpgrades.max.translation", "res://Config/OutGameUpgrades.costs.translation", "res://Config/OutGameUpgrades.effect.translation", "res://Config/OutGameUpgrades.values.translation", "res://Config/OutGameUpgrades.prereq.translation", "res://Config/OutGameUpgrades.position.translation"]
+
+source_file="res://Config/OutGameUpgrades.csv"
+dest_files=["res://Config/OutGameUpgrades.tab.translation", "res://Config/OutGameUpgrades.group.translation", "res://Config/OutGameUpgrades.name.translation", "res://Config/OutGameUpgrades.desc.translation", "res://Config/OutGameUpgrades.max.translation", "res://Config/OutGameUpgrades.costs.translation", "res://Config/OutGameUpgrades.effect.translation", "res://Config/OutGameUpgrades.values.translation", "res://Config/OutGameUpgrades.prereq.translation", "res://Config/OutGameUpgrades.position.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true
