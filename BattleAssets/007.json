@@ -1,0 +1,40 @@
+{
+  "id": "007",
+  "name": "EnemyHeavyTest",
+  "type": "enemy",
+  "faction": "enemy",
+  "tags": ["enemy", "heavy"],
+  "visual": {
+    "gif": "res://BattleAssets/007.gif",
+    "scale": 1.0,
+    "size": [136, 136],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 30,
+    "sense_radius": 650
+  },
+  "stats": {
+    "max_hp": 220,
+    "move_speed": 55,
+    "attack": 24,
+    "defense": 3
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "target_factions": ["player", "tentacle"]
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "fire_point": "center",
+      "target_point": "center",
+      "interval": 1.6,
+      "range": 170,
+      "damage": 24
+    }
+  ],
+  "reward": {
+    "bio": 40
+  }
+}

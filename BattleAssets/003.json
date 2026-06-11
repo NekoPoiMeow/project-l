@@ -1,0 +1,40 @@
+{
+  "id": "003",
+  "name": "EnemyBase",
+  "type": "base",
+  "faction": "enemy",
+  "tags": ["base", "building"],
+  "visual": {
+    "gif": "res://BattleAssets/003.gif",
+    "scale": 1.7,
+    "size": [112, 144],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 142,
+    "block_radius": 142,
+    "sense_radius": 600
+  },
+  "stats": {
+    "max_hp": 1500,
+    "move_speed": 0,
+    "attack": 20,
+    "defense": 4
+  },
+  "ai": {
+    "mode": "idle",
+    "target_factions": ["player", "tentacle"]
+  },
+  "zones": {
+    "alert_radius": 760,
+    "contact_radius": 170,
+    "contact_damage": 24,
+    "contact_cooldown": 0.9,
+    "contact_knockback_min": 110,
+    "contact_knockback_max": 210
+  },
+  "attacks": [],
+  "reward": {
+    "bio": 120
+  }
+}

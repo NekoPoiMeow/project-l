@@ -1,0 +1,51 @@
+{
+  "id": "blackhole_test",
+  "name": "测试力场：黑洞牵引",
+  "description": "在镜头内随机生成黑洞，持续牵引并伤害敌人",
+  "kind": "attack_instance",
+  "interval": 7.0,
+  "requires_target": false,
+  "origin": {
+    "mode": "camera_random_inside"
+  },
+  "emitter": {
+    "mode": "single",
+    "count": 1
+  },
+  "motion": {
+    "mode": "static",
+    "duration": 4.0
+  },
+  "hit_shape": {
+    "mode": "circle",
+    "radius": 620
+  },
+  "hit_rule": {
+    "mode": "while_active_tick",
+    "tick_interval": 0.05,
+    "hit_same_target_delay": 0.05
+  },
+  "target_filter": {
+    "relation": "enemy",
+    "include_building": false
+  },
+  "effects": [
+    {
+      "mode": "force",
+      "force_type": "pull_to_origin",
+      "strength": 2600,
+      "falloff": "inverse_distance",
+      "min_scale": 0.22
+    },
+    {
+      "mode": "damage",
+      "value": 3
+    }
+  ],
+  "visual": {
+    "primary": "5a2cff",
+    "secondary": "ff5ba8",
+    "alpha": 0.62,
+    "pixel_count": 18
+  }
+}

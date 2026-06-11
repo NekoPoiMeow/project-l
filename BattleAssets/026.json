@@ -1,0 +1,59 @@
+{
+  "id": "026",
+  "name": "尸山蛆蝇触",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "ultimate"],
+  "visual": {
+    "gif": "res://BattleAssets/026.gif",
+    "scale": 0.95,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "ffd45a", "tint_strength": 0.18, "pulse_strength": 0.10, "pulse_speed": 2.8},
+    "halo": {"color": "ffd45a", "alpha": 0.18, "size": [150, 82], "offset": [0, 28], "pulse": 0.18},
+    "aura_ring": {"color": "ffd45a", "alpha": 0.48, "radius": 74, "width": 5, "pulse": 0.22},
+    "orbit_dots": {"color": "fff4b8", "alpha": 0.86, "count": 8, "radius": 66, "size": 5, "speed": 1.1}
+  },
+  "body": {
+    "radius": 38,
+    "sense_radius": 980
+  },
+  "stats": {
+    "max_hp": 1200,
+    "move_speed": 125,
+    "attack": 120,
+    "defense": 10,
+    "hp_regen": 8
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "objective_fallback": true,
+    "objective_fallback_radius": 0,
+    "objective_fallback_priority_order": ["base", "building"],
+    "leash_radius": 0,
+    "target_priority": "minion_first",
+    "target_priority_order": ["unit", "minion", "base", "building"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"],
+    "close_range": 140
+  },
+  "combat": {
+    "damage_multipliers": {
+      "building": 0.45
+    }
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "interval": 0.45,
+      "range": 105,
+      "damage": 120,
+      "damage_multipliers": {
+        "building": 0.35
+      }
+    }
+  ]
+}

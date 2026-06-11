@@ -1,0 +1,21 @@
+{
+  "id": "player_overdrive",
+  "name": "触感过载",
+  "slot": 1,
+  "mode": "channel_buff",
+  "mana_start_cost": 12,
+  "mana_drain_per_second": 18,
+  "cooldown": 1.0,
+  "heal_per_second": 10,
+  "status": {
+    "status": "skill_overdrive",
+    "duration": 0.22,
+    "attack_damage_mul": 2.0,
+    "attack_interval_mul": 0.5,
+    "speed_mul": 1.12
+  },
+  "visual": {
+    "color": "78eaff",
+    "radius": 92
+  }
+}

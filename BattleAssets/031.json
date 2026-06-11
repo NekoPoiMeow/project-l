@@ -1,0 +1,58 @@
+{
+  "id": "031",
+  "name": "暗影美少女",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "mutation", "shadow_girl"],
+  "visual": {
+    "gif": "res://BattleAssets/031.gif",
+    "scale": 0.92,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "6c5cff", "tint_strength": 0.18, "pulse_strength": 0.10, "pulse_speed": 5.0},
+    "halo": {"color": "6c5cff", "alpha": 0.16, "size": [120, 62], "offset": [0, 20], "pulse": 0.22},
+    "aura_ring": {"color": "a35cff", "alpha": 0.34, "radius": 50, "width": 4, "pulse": 0.24}
+  },
+  "body": {
+    "radius": 30,
+    "sense_radius": 980
+  },
+  "stats": {
+    "max_hp": 640,
+    "move_speed": 260,
+    "attack": 72,
+    "defense": 12
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "objective_fallback": true,
+    "objective_fallback_radius": 0,
+    "objective_fallback_priority_order": ["base", "building"],
+    "leash_radius": 0,
+    "target_priority": "base_first",
+    "target_priority_order": ["unit", "minion", "base", "building"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"],
+    "close_range": 90,
+    "close_speed_mul": 1.0
+  },
+  "combat": {
+    "damage_multipliers": {
+      "building": 0.55
+    }
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "interval": 0.42,
+      "range": 82,
+      "damage": 80,
+      "damage_multipliers": {
+        "building": 0.50
+      }
+    }
+  ]
+}

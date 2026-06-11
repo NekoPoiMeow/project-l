@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://d3w4mnp1c5xlo"
+
+[deps]
+
+files=["res://Config/Equipments.name.translation", "res://Config/Equipments.unlocked.translation", "res://Config/Equipments.en.translation", "res://Config/Equipments.description.translation", "res://Config/Equipments.effect.translation"]
+
+source_file="res://Config/Equipments.csv"
+dest_files=["res://Config/Equipments.name.translation", "res://Config/Equipments.unlocked.translation", "res://Config/Equipments.en.translation", "res://Config/Equipments.description.translation", "res://Config/Equipments.effect.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

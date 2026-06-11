@@ -1,0 +1,20 @@
+{
+  "id": "control_seed_test",
+  "name": "测试控制：短暂策反",
+  "description": "命中普通敌人后短暂改成我方阵营，用来验证控制/寄生接口",
+  "kind": "attack_instance",
+  "interval": 4.5,
+  "requires_target": true,
+  "origin": {"mode": "self_center"},
+  "aim": {"mode": "nearest_enemy"},
+  "emitter": {"mode": "spread", "count": 2, "spread_angle": 24},
+  "motion": {"mode": "homing", "speed": 360, "life_time": 3.0, "max_distance": 850},
+  "hit_shape": {"mode": "circle", "radius": 22},
+  "hit_rule": {"mode": "on_contact", "destroy_on_hit": true, "hit_same_target_delay": 999},
+  "target_filter": {"relation": "enemy", "include_building": false},
+  "effects": [
+    {"mode": "damage", "value": 12},
+    {"mode": "status", "status": "control", "duration": 3.0}
+  ],
+  "visual": {"primary": "b86cff", "secondary": "ffd6bf", "alpha": 0.88, "pixel_count": 12}
+}

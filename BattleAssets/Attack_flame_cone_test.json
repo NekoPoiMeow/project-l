@@ -1,0 +1,25 @@
+{
+  "id": "flame_cone_test",
+  "name": "测试喷火：持续锥形",
+  "description": "贴着玩家移动，朝鼠标持续喷射，连续小伤害",
+  "kind": "attack_instance",
+  "interval": 3.2,
+  "requires_target": false,
+  "origin": {"mode": "self_center"},
+  "aim": {"mode": "mouse"},
+  "emitter": {"mode": "single", "count": 1},
+  "motion": {
+    "mode": "static",
+    "duration": 2.0,
+    "follow_source": true,
+    "track_aim": true
+  },
+  "hit_shape": {"mode": "sector", "radius": 360, "angle": 62},
+  "hit_rule": {"mode": "while_active_tick", "tick_interval": 0.12, "hit_same_target_delay": 0.12},
+  "target_filter": {"relation": "enemy", "include_building": true},
+  "effects": [
+    {"mode": "damage", "value": 8, "scale_over_life": {"from": 1.0, "to": 0.55}, "scale_by_distance": {"from": 0.65, "to": 1.25}},
+    {"mode": "status", "status": "burn", "duration": 1.2, "tick_interval": 0.4, "value": 4}
+  ],
+  "visual": {"primary": "ff315d", "secondary": "ffd36e", "alpha": 0.72}
+}

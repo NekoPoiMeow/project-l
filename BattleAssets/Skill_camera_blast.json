@@ -1,0 +1,22 @@
+{
+  "id": "camera_blast",
+  "name": "视域崩坏",
+  "slot": 2,
+  "mode": "attack",
+  "mana_cost": 46,
+  "cooldown": 9.0,
+  "attack": {
+    "kind": "attack_instance",
+    "requires_target": false,
+    "origin": {"mode": "player"},
+    "aim": {"mode": "fixed_angle", "angle": 0},
+    "motion": {"mode": "static", "duration": 0.22},
+    "hit_shape": {"mode": "circle", "radius": 900},
+    "hit_rule": {"mode": "on_spawn_once"},
+    "target_filter": {"relation": "enemy", "include_building": false},
+    "effects": [
+      {"mode": "damage", "value": 999}
+    ],
+    "visual": {"primary": "ffd45a", "secondary": "ff5fdc", "alpha": 0.34, "pixel_count": 22}
+  }
+}

@@ -1,0 +1,110 @@
+﻿{
+    "id":  "000",
+    "name":  "PlayerTest",
+    "type":  "player",
+    "faction":  "player",
+    "tags":  [
+                 "player"
+             ],
+    "visual":  {
+                   "gif":  "res://BattleAssets/000.gif",
+                   "scale":  1.0,
+                   "size":  [
+                                88,
+                                184
+                            ],
+                   "offset":  [
+                                  0,
+                                  0
+                              ]
+               },
+    "body":  {
+                 "radius":  24,
+                 "sense_radius":  520
+             },
+    "stats":  {
+                  "max_hp":  300,
+                  "move_speed":  180,
+                  "attack":  20,
+                  "defense":  0,
+                  "hp_regen":  3.5,
+                  "bio_cargo_max":  100,
+                  "bio_visual_unit":  10,
+                  "bio_transfer_chunk":  10
+              },
+    "ai":  {
+               "mode":  "player",
+               "target_factions":  [
+                                       "enemy"
+                                   ]
+           },
+    "combat":  {
+                   "damage_multipliers":  {
+                                              "building":  0.1,
+                                              "enemy":  1.0
+                                          }
+               },
+    "attacks":  [
+                    {
+                        "id":  "weapon_straight_shot",
+                        "name":  "Straight Shot",
+                        "description":  "Mouse aimed standard projectile.",
+                        "kind":  "attack_instance",
+                        "tags":  [
+                                     "weapon",
+                                     "projectile",
+                                     "manual",
+                                     "ranged"
+                                 ],
+                        "interval":  0.55,
+                        "requires_target":  false,
+                        "origin":  {
+                                       "mode":  "self_center"
+                                   },
+                        "aim":  {
+                                    "mode":  "mouse"
+                                },
+                        "emitter":  {
+                                        "mode":  "spread",
+                                        "count":  1,
+                                        "spread_angle":  0
+                                    },
+                        "motion":  {
+                                       "mode":  "linear",
+                                       "speed":  720,
+                                       "life_time":  1.1,
+                                       "max_distance":  760
+                                   },
+                        "hit_shape":  {
+                                          "mode":  "circle",
+                                          "radius":  14
+                                      },
+                        "hit_rule":  {
+                                         "mode":  "on_contact",
+                                         "destroy_on_hit":  true,
+                                         "hit_same_target_delay":  999
+                                     },
+                        "target_filter":  {
+                                              "relation":  "enemy",
+                                              "include_building":  true
+                                          },
+                        "effects":  [
+                                        {
+                                            "mode":  "damage",
+                                            "value":  26
+                                        }
+                                    ],
+                        "visual":  {
+                                       "primary":  "ff4f72",
+                                       "secondary":  "ffe1c8",
+                                       "alpha":  0.86,
+                                       "pixel_count":  8
+                                   }
+                    }
+                ],
+    "sfx":  {
+                "attack":  "res://BattleAssets/000Attack.mp3",
+                "hurt":  "res://BattleAssets/000Hurt.mp3",
+                "die":  "res://BattleAssets/000Die.mp3"
+            }
+}

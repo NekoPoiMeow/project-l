@@ -1,0 +1,47 @@
+{
+  "id": "004",
+  "name": "TentacleMinionTest",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion"],
+  "visual": {
+    "gif": "res://BattleAssets/004.gif",
+    "scale": 1.0,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 22,
+    "sense_radius": 700
+  },
+  "stats": {
+    "max_hp": 120,
+    "move_speed": 90,
+    "attack": 14,
+    "defense": 1
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "target_priority": "building_first",
+    "target_priority_order": ["building", "enemy", "unit"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"]
+  },
+  "combat": {
+    "damage_multipliers": {
+      "building": 1.0,
+      "enemy": 1.0
+    }
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "fire_point": "center",
+      "target_point": "center",
+      "interval": 1.0,
+      "range": 190,
+      "damage": 14
+    }
+  ]
+}

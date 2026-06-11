@@ -1,0 +1,28 @@
+{
+  "id": "029",
+  "name": "影之从者触",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["minion", "shadow_servant", "tentacle"],
+  "visual": {"gif": "res://BattleAssets/029.gif", "scale": 1.0, "max_size": [92, 132], "offset": [0, -12]},
+  "visual_fx": {"shader": {"tint": "7c5cff", "tint_strength": 0.12, "pulse_strength": 0.05}, "aura_ring": {"color": "775cff", "alpha": 0.22, "radius": 70, "width": 3}},
+  "body": {"radius": 30, "block_radius": 24, "sense_radius": 720},
+  "stats": {"max_hp": 820, "move_speed": 175, "attack": 58, "defense": 4, "hp_regen": 2.0},
+  "ai": {"mode": "attack_building_first", "movement_mode": "direct", "target_factions": ["enemy"], "target_priority_order": ["base", "building", "unit", "minion"], "objective_fallback": true, "objective_fallback_priority_order": ["base", "building"]},
+  "combat": {"damage_multipliers": {"building": 1.25}},
+  "attacks": [{
+    "id": "shadow_servant_slash",
+    "kind": "attack_instance",
+    "interval": 0.72,
+    "requires_target": false,
+    "origin": {"mode": "self_center"},
+    "aim": {"mode": "nearest_enemy"},
+    "motion": {"mode": "static", "duration": 0.18, "follow_source": true},
+    "hit_shape": {"mode": "sector", "radius": 138, "angle": 92},
+    "hit_rule": {"mode": "while_active_tick", "tick_interval": 0.1, "hit_same_target_delay": 0.18},
+    "target_filter": {"relation": "enemy", "include_building": true},
+    "effects": [{"mode": "damage", "value": 58, "damage_multipliers": {"building": 1.25}}],
+    "visual": {"texture": "res://BattleAssets/StrongMelee.png", "primary": "8c6dff", "secondary": "f0dcff", "alpha": 0.78}
+  }],
+  "reward": {"xp": 0, "bio": 0}
+}

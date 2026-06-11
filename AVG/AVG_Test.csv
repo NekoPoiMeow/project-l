@@ -1,0 +1,23 @@
+Text_ID,Script_Type,Movie,Role_Name,Text,Label_Box,BG_IMG,BG_Shader,A_IMG,A_IMG_Position,A_Shader,B_IMG,B_IMG_Position,B_Shader,C_IMG,C_IMG_Position,C_Shader,D_IMG,D_IMG_Position,D_Shader,BGM,SFX,Voice
+1,,,A,开始,,BG1.png,,A.png,,,,,,,,,,,,BGM.MP3,,
+2,,,B,第二,,,,,,,B.png,,,,,,,,,,,
+3,,,C,三,,,,,,,,,,C.png,,,,,,,,Voice.MP3
+4,,,D,四,,,,,,,,,,,,,D.png,,,,,
+5,,,众人,OK 5,,,,A.png,,,B.png,,,C.png,,,D.png,,,END,,
+6,,Movie.ogv,,Null,,,,,,,,,,,,,,,,,,Voice2.MP3
+7,,,,7,,BG2.png,,,,,,,,,,,,,,,SFX.MP3,
+8,,,,8,,Movie2.gif,,,,,,,,,,,,,,,SFX2.MP3,
+9,,,,9,,BG2.png,,A.png,,,,,,,,,,,,BGM2.MP3,,
+10,,,10,10,,Movie2.gif,,,,,,,,,,,,,,,,
+11,,,11,11,,BG2.png,,,,,,,,,,,,,,BGM1.MP3,,
+12,,,,12,,BG1.png,fade,,,,,,,,,,,,,,,
+13,,,,13,,BG2.png,dissolve,,,,,,,,,,,,,,,
+14,,,,14,,BG1.png,wipe_left,,,,,,,,,,,,,,,
+15,,,,15,,BG2.png,iris,,,,,,,,,,,,,,,
+16,,,,16,,BG1.png,flash,,,,,,,,,,,,,,,
+17,,,,17,,BG2.png,blur_fade,,,,,,,,,,,,,,,
+18,,,,18,,BG1.png,wave_distort,,,,,,,,,,,,,,,
+19,,,,19,,BG2.png,glitch_soft,,,,,,,,,,,,,,,
+20,,,,20,,,,A.png,,white_key,B.png,,breath,C.png,,gloss,D.png,,soft_wave,,,
+21,,,,21,,,,A.png,,damage_flash,B.png,,damage_flash,C.png,,darken,D.png,,highlight,,,
+EndAll,,,,,,,,,,,,,,,,,,,,,,

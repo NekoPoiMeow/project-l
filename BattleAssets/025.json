@@ -1,0 +1,60 @@
+{
+  "id": "025",
+  "name": "强袭触战兵",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "assault"],
+  "visual": {
+    "gif": "res://BattleAssets/025.gif",
+    "scale": 0.9,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "ff2e63", "tint_strength": 0.16, "pulse_strength": 0.08, "pulse_speed": 3.6},
+    "halo": {"color": "ff2e63", "alpha": 0.14, "size": [116, 62], "offset": [0, 22], "pulse": 0.12},
+    "aura_ring": {"color": "ff244f", "alpha": 0.34, "radius": 52, "width": 4, "pulse": 0.18}
+  },
+  "body": {
+    "radius": 30,
+    "sense_radius": 820
+  },
+  "stats": {
+    "max_hp": 380,
+    "move_speed": 82,
+    "attack": 38,
+    "defense": 6
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "objective_fallback": true,
+    "objective_fallback_radius": 0,
+    "objective_fallback_priority_order": ["base", "building"],
+    "leash_radius": 0,
+    "target_priority": "base_first",
+    "target_priority_order": ["base", "building", "unit", "enemy"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"],
+    "close_range": 120
+  },
+  "combat": {
+    "damage_multipliers": {
+      "building": 1.35
+    }
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "interval": 0.85,
+      "range": 90,
+      "damage": 44,
+      "damage_multipliers": {
+        "building": 1.25
+      }
+    }
+  ],
+  "reward": {
+    "bio": 12
+  }
+}

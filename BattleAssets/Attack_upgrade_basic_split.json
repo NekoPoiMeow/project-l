@@ -1,0 +1,48 @@
+{
+  "id": "upgrade_basic_split",
+  "name": "升级：基础弹命中分裂",
+  "description": "基础追踪弹命中后额外爆出四颗小弹",
+  "upgrade_mode": "add_effect_to_attacks",
+  "selector": {
+    "tag": "basic_projectile"
+  },
+  "effect": {
+    "mode": "spawn_attack",
+    "max_depth": 4,
+    "emitter_override": {
+      "mode": "ring",
+      "count": 4
+    },
+    "attack": {
+      "kind": "attack_instance",
+      "origin": {
+        "mode": "target_center"
+      },
+      "motion": {
+        "mode": "linear",
+        "speed": 330,
+        "life_time": 0.75,
+        "max_distance": 230
+      },
+      "hit_shape": {
+        "mode": "circle",
+        "radius": 9
+      },
+      "hit_rule": {
+        "mode": "on_contact",
+        "destroy_on_hit": true,
+        "hit_same_target_delay": 999
+      },
+      "target_filter": {
+        "relation": "enemy",
+        "include_building": true
+      },
+      "effects": [
+        {
+          "mode": "damage",
+          "value": 8
+        }
+      ]
+    }
+  }
+}

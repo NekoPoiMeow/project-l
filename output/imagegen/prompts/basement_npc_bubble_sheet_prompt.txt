@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: game UI sprite sheet for RPG-style NPC interaction bubble icons
+Primary request: Create one polished sprite sheet of many decorative RPG interaction bubble frames for a tentacle x beautiful-girl fantasy game. The sheet must have a pure white background. No text. No emoji. Each bubble is a separate asset with generous spacing for slicing.
+Subject: Beautiful pixel-art / high-end RPGMaker-like speech bubble icons and small UI bubble frames. Each icon sits inside or attached to a decorative bubble frame. Types include heart, teleport, merchant, beautiful-girl dungeon, tentacle altar, personal room, tentacle-girl inspector, normal dialogue, quest hint, danger warning, save point, healing/rest, collectible, story event, mysterious entrance, camp facility, locked/unavailable, affection/intimacy event, and several additional unexpected but useful RPG interaction bubbles.
+Style/medium: refined pixel art game UI, cute but elegant, sensual fantasy without explicit content, tentacle motif integrated as decorative curls and glossy ornamental shapes, premium Japanese indie RPG UI feeling, not childish, not cheap.
+Composition/framing: single large sprite sheet on white background, 5 columns by 4 rows or similar, every bubble separated by wide white margins, consistent approximate size, centered assets, clean edges, no overlapping.
+Lighting/mood: pearlescent, candy-gloss, magical, gentle glow, elegant and mysterious.
+Color palette: white, blush pink, soft purple, pale gold, occasional candy colors, iridescent pearl highlights, subtle rainbow-black accents with a luxury feel.
+Materials/textures: glossy enamel, pearl shine, soft gold trim, pixel dither highlights, small decorative tentacle curls, lace-like fantasy ornament, gem-like sparkles.
+Constraints: no words, no letters, no numbers, no emoji, no watermark, no characters, no explicit nudity, no gore. The area between each bubble frame and its icon must not be plain dead white; use designed decorative fill, glow, pearl gradients, gold lines, or patterned details. Keep the overall background pure white. All bubbles must share a unified style and palette.
+Avoid: generic flat icons, corporate UI icons, neon cyberpunk, dark background, text labels, messy collage, random symbols, realistic rendering, low-effort emoji-like faces.

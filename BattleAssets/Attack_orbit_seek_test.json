@@ -1,0 +1,25 @@
+{
+  "id": "orbit_seek_test",
+  "name": "测试待机弹：环绕后追踪",
+  "description": "先绕着玩家飞，短暂延迟后发现目标并射出追踪",
+  "kind": "attack_instance",
+  "interval": 1.8,
+  "requires_target": false,
+  "origin": {"mode": "self_center"},
+  "aim": {"mode": "random_dir"},
+  "emitter": {"mode": "ring", "count": 3},
+  "motion": {
+    "mode": "orbit_then_homing",
+    "duration": 3.6,
+    "release_after": 0.7,
+    "orbit_radius": 130,
+    "orbit_speed": 5.8,
+    "speed": 560,
+    "max_distance": 900
+  },
+  "hit_shape": {"mode": "circle", "radius": 18},
+  "hit_rule": {"mode": "on_contact", "destroy_on_hit": true, "hit_same_target_delay": 999},
+  "target_filter": {"relation": "enemy", "include_building": true},
+  "effects": [{"mode": "damage", "value": 32}],
+  "visual": {"primary": "ff4f72", "secondary": "ffd36e", "alpha": 0.85, "pixel_count": 10}
+}

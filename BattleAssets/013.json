@@ -1,0 +1,46 @@
+{
+  "id": "013",
+  "name": "BulletTestEnemy",
+  "type": "unit",
+  "faction": "enemy",
+  "tags": ["enemy", "test_dummy"],
+  "visual": {
+    "gif": "res://BattleAssets/002.gif",
+    "scale": 1.0,
+    "size": [72, 92],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 24,
+    "sense_radius": 900
+  },
+  "stats": {
+    "max_hp": 180,
+    "move_speed": 85,
+    "attack": 8,
+    "defense": 0,
+    "hp_regen": 0
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "target_factions": ["player", "tentacle"],
+    "target_priority_order": ["player", "building", "minion", "unit"],
+    "target_distance_mode": "nearest",
+    "repath_interval": 0.25,
+    "close_range": 120,
+    "close_speed_mul": 1.0
+  },
+  "combat": {
+    "damage_multipliers": {
+      "building": 0.35,
+      "player": 0.2,
+      "minion": 1.0
+    }
+  },
+  "reward": {
+    "bio": 25,
+    "xp": 1
+  },
+  "attacks": []
+}

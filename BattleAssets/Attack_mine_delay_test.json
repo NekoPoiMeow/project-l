@@ -1,0 +1,18 @@
+{
+  "id": "mine_delay_test",
+  "name": "测试陷阱：延迟爆炸",
+  "description": "在鼠标方向放置短延迟陷阱，到时间后爆炸",
+  "kind": "attack_instance",
+  "interval": 4.0,
+  "requires_target": false,
+  "origin": {"mode": "self_center"},
+  "aim": {"mode": "mouse"},
+  "emitter": {"mode": "single", "count": 1},
+  "motion": {"mode": "lob", "duration": 1.05, "range": 360, "arc_height": 40},
+  "shape_over_life": {"from": 0.35, "to": 1.0},
+  "hit_shape": {"mode": "circle", "radius": 230},
+  "hit_rule": {"mode": "on_arrive", "hit_same_target_delay": 999},
+  "target_filter": {"relation": "enemy", "include_building": true},
+  "effects": [{"mode": "damage", "value": 95}],
+  "visual": {"primary": "ff9ccf", "secondary": "ffd36e", "alpha": 0.68, "pixel_count": 18}
+}

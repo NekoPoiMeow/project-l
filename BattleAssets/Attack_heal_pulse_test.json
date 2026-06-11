@@ -1,0 +1,37 @@
+{
+  "id": "heal_pulse_test",
+  "name": "测试技能：治疗脉冲",
+  "description": "治疗范围内我方单位和建筑",
+  "kind": "attack_instance",
+  "interval": 8.0,
+  "requires_target": false,
+  "origin": {
+    "mode": "self_center"
+  },
+  "emitter": {
+    "mode": "single",
+    "count": 1
+  },
+  "motion": {
+    "mode": "static",
+    "duration": 0.18
+  },
+  "hit_shape": {
+    "mode": "circle",
+    "radius": 260
+  },
+  "hit_rule": {
+    "mode": "on_spawn_once"
+  },
+  "target_filter": {
+    "relation": "ally",
+    "include_self": true,
+    "include_building": true
+  },
+  "effects": [
+    {
+      "mode": "heal",
+      "value": 80
+    }
+  ]
+}

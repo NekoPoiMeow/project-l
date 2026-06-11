@@ -1,0 +1,58 @@
+{
+  "id": "melee_arc_test",
+  "name": "测试近战：鼠标扇形斩",
+  "description": "持续贴着玩家，默认朝鼠标方向挥击，范围较大",
+  "kind": "attack_instance",
+  "interval": 1.25,
+  "requires_target": false,
+  "origin": {
+    "mode": "self_center"
+  },
+  "aim": {
+    "mode": "mouse"
+  },
+  "emitter": {
+    "mode": "single",
+    "count": 1
+  },
+  "motion": {
+    "mode": "static",
+    "duration": 0.36,
+    "follow_source": true,
+    "track_aim": true
+  },
+  "hit_shape": {
+    "mode": "sector",
+    "radius": 260,
+    "angle": 130
+  },
+  "hit_rule": {
+    "mode": "while_active_tick",
+    "tick_interval": 0.12,
+    "hit_same_target_delay": 0.12
+  },
+  "target_filter": {
+    "relation": "enemy",
+    "include_building": true
+  },
+  "effects": [
+    {
+      "mode": "damage",
+      "value": 34,
+      "scale_over_life": {
+        "curve": "ease_out",
+        "from": 1.0,
+        "to": 0.35
+      },
+      "damage_multipliers": {
+        "building": 0.35
+      }
+    }
+  ]
+  ,
+  "visual": {
+    "primary": "ff4f72",
+    "secondary": "ffd6bf",
+    "alpha": 0.9
+  }
+}

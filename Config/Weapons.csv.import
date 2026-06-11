@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bvfjdrhkx5r4j"
+
+[deps]
+
+files=["res://Config/Weapons.name.translation", "res://Config/Weapons.unlocked.translation", "res://Config/Weapons.attack.translation", "res://Config/Weapons.weapon.translation", "res://Config/Weapons.tags.translation", "res://Config/Weapons.description.translation"]
+
+source_file="res://Config/Weapons.csv"
+dest_files=["res://Config/Weapons.name.translation", "res://Config/Weapons.unlocked.translation", "res://Config/Weapons.attack.translation", "res://Config/Weapons.weapon.translation", "res://Config/Weapons.tags.translation", "res://Config/Weapons.description.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

@@ -1,0 +1,48 @@
+{
+  "id": "bounce_rune_test",
+  "name": "新增：反弹符弹",
+  "description": "在地图边界反弹的持续飞行弹幕",
+  "kind": "attack_instance",
+  "interval": 1.8,
+  "requires_target": false,
+  "origin": {
+    "mode": "self_center"
+  },
+  "aim": {
+    "mode": "random_dir"
+  },
+  "emitter": {
+    "mode": "single",
+    "count": 1
+  },
+  "motion": {
+    "mode": "bounce_wall",
+    "speed": 360,
+    "duration": 5.0
+  },
+  "hit_shape": {
+    "mode": "circle",
+    "radius": 20
+  },
+  "hit_rule": {
+    "mode": "while_active_tick",
+    "tick_interval": 0.08,
+    "hit_same_target_delay": 0.45
+  },
+  "target_filter": {
+    "relation": "enemy",
+    "include_building": true
+  },
+  "effects": [
+    {
+      "mode": "damage",
+      "value": 10
+    }
+  ],
+  "visual": {
+    "primary": "6cffd8",
+    "secondary": "ff4f92",
+    "alpha": 0.8,
+    "pixel_count": 11
+  }
+}

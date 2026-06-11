@@ -1,0 +1,51 @@
+{
+  "id": "basic_projectile_test",
+  "name": "新增：基础追踪弹",
+  "description": "加入一组清晰可见的基础追踪弹",
+  "kind": "attack_instance",
+  "tags": ["basic_projectile"],
+  "interval": 0.75,
+  "requires_target": true,
+  "origin": {
+    "mode": "self_center"
+  },
+  "aim": {
+    "mode": "nearest_enemy"
+  },
+  "emitter": {
+    "mode": "spread",
+    "count": 1,
+    "spread_angle": 8
+  },
+  "motion": {
+    "mode": "homing",
+    "speed": 430,
+    "life_time": 1.8,
+    "max_distance": 760
+  },
+  "hit_shape": {
+    "mode": "circle",
+    "radius": 16
+  },
+  "hit_rule": {
+    "mode": "on_contact",
+    "destroy_on_hit": true,
+    "hit_same_target_delay": 999
+  },
+  "target_filter": {
+    "relation": "enemy",
+    "include_building": true
+  },
+  "effects": [
+    {
+      "mode": "damage",
+      "value": 22
+    }
+  ],
+  "visual": {
+    "primary": "ff4f72",
+    "secondary": "ffe3c4",
+    "alpha": 0.84,
+    "pixel_count": 9
+  }
+}

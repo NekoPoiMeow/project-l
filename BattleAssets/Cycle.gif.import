@@ -1,0 +1,16 @@
+[remap]
+
+importer="texture_gif"
+importer_version=2
+type="GIFTexture"
+uid="uid://cagid1r768l66"
+path="res://.godot/imported/Cycle.gif-ac75fbd239c879df425e3b4cccb84d9d.res"
+
+[deps]
+
+source_file="res://BattleAssets/Cycle.gif"
+dest_files=["res://.godot/imported/Cycle.gif-ac75fbd239c879df425e3b4cccb84d9d.res"]
+
+[params]
+
+storage/compress=true

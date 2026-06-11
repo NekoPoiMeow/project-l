@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bo1vlgfa4i1l4"
+
+[deps]
+
+files=["res://Config/WeaponUpgrades.weapon.translation", "res://Config/WeaponUpgrades.level.translation", "res://Config/WeaponUpgrades.branch.translation", "res://Config/WeaponUpgrades.name.translation", "res://Config/WeaponUpgrades.description.translation", "res://Config/WeaponUpgrades.stat.translation", "res://Config/WeaponUpgrades.mechanic.translation", "res://Config/WeaponUpgrades.en.translation"]
+
+source_file="res://Config/WeaponUpgrades.csv"
+dest_files=["res://Config/WeaponUpgrades.weapon.translation", "res://Config/WeaponUpgrades.level.translation", "res://Config/WeaponUpgrades.branch.translation", "res://Config/WeaponUpgrades.name.translation", "res://Config/WeaponUpgrades.description.translation", "res://Config/WeaponUpgrades.stat.translation", "res://Config/WeaponUpgrades.mechanic.translation", "res://Config/WeaponUpgrades.en.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

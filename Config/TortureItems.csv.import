@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://5dhnbt2ufg2y"
+
+[deps]
+
+files=["res://Config/TortureItems.name.translation", "res://Config/TortureItems.unlocked.translation", "res://Config/TortureItems.en.translation", "res://Config/TortureItems.description.translation", "res://Config/TortureItems.en.translation"]
+
+source_file="res://Config/TortureItems.csv"
+dest_files=["res://Config/TortureItems.name.translation", "res://Config/TortureItems.unlocked.translation", "res://Config/TortureItems.en.translation", "res://Config/TortureItems.description.translation", "res://Config/TortureItems.en.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

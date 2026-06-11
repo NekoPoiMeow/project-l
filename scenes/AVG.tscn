@@ -1,0 +1,88 @@
+[gd_scene format=3 uid="uid://byncqe8lq5ng"]
+
+[ext_resource type="Script" uid="uid://cuvrms4qt1jr8" path="res://Script/AVG/AVG_Player.gd" id="1_ovp63"]
+[ext_resource type="Texture2D" uid="uid://cenbj3c3sg44p" path="res://AVG/AVG_Test/DialogBox.png" id="3_8lv75"]
+
+[node name="Node2D_AVG" type="Node2D" unique_id=1143030545]
+process_mode = 3
+script = ExtResource("1_ovp63")
+
+[node name="CanvasLayer图层AVG" type="CanvasLayer" parent="." unique_id=391605623]
+
+[node name="TextureRect背景AVG" type="TextureRect" parent="CanvasLayer图层AVG" unique_id=804030071]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="GIFPlayer背景AVG" type="GIFPlayer" parent="CanvasLayer图层AVG" unique_id=269445326]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VideoStreamPlayer电影AVG" type="VideoStreamPlayer" parent="CanvasLayer图层AVG" unique_id=1927673792]
+visible = false
+offset_right = 40.0
+offset_bottom = 40.0
+expand = true
+bus = &"SFX"
+
+[node name="TextureRect角色A立绘" type="TextureRect" parent="CanvasLayer图层AVG" unique_id=757774732]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureRect角色B立绘" type="TextureRect" parent="CanvasLayer图层AVG" unique_id=244277747]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureRect角色C立绘" type="TextureRect" parent="CanvasLayer图层AVG" unique_id=804375292]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureRect角色D立绘" type="TextureRect" parent="CanvasLayer图层AVG" unique_id=1203869354]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ColorRect点击推进层" type="ColorRect" parent="CanvasLayer图层AVG" unique_id=1908057960]
+self_modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect对话框" type="TextureRect" parent="CanvasLayer图层AVG" unique_id=130547569]
+offset_left = 176.0
+offset_top = 576.0
+offset_right = 1407.0
+offset_bottom = 909.0
+texture = ExtResource("3_8lv75")
+expand_mode = 1
+
+[node name="Label角色名" type="Label" parent="CanvasLayer图层AVG" unique_id=425839229]
+offset_left = 377.0
+offset_top = 635.0
+offset_right = 506.0
+offset_bottom = 691.0
+theme_override_font_sizes/font_size = 28
+text = "1"
+vertical_alignment = 1
+
+[node name="RichTextLabel对话文本" type="RichTextLabel" parent="CanvasLayer图层AVG" unique_id=1677631049]
+offset_left = 378.0
+offset_top = 701.0
+offset_right = 1228.0
+offset_bottom = 824.0
+theme_override_colors/default_color = Color(0.72023666, 0.21264187, 0.18646413, 1)
+theme_override_font_sizes/normal_font_size = 24
+theme_override_font_sizes/bold_font_size = 24
+theme_override_font_sizes/bold_italics_font_size = 24
+theme_override_font_sizes/italics_font_size = 24
+theme_override_font_sizes/mono_font_size = 24
+text = "123"
+
+[node name="AudioStreamPlayerBGM" type="AudioStreamPlayer" parent="CanvasLayer图层AVG" unique_id=605848516]
+bus = &"Music"
+
+[node name="AudioStreamPlayerSFX" type="AudioStreamPlayer" parent="CanvasLayer图层AVG" unique_id=604342665]
+bus = &"SFX"
+
+[node name="AudioStreamPlayerVoice" type="AudioStreamPlayer" parent="CanvasLayer图层AVG" unique_id=1067380139]
+bus = &"Voice"

@@ -1,0 +1,43 @@
+{
+  "id": "008",
+  "name": "EnemyEliteTest",
+  "type": "enemy",
+  "faction": "enemy",
+  "tags": ["enemy", "elite"],
+  "visual": {
+    "gif": "res://BattleAssets/008.gif",
+    "scale": 1.0,
+    "size": [136, 196],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 34,
+    "sense_radius": 900
+  },
+  "stats": {
+    "max_hp": 360,
+    "move_speed": 80,
+    "attack": 22,
+    "defense": 4
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "target_factions": ["player", "tentacle"]
+  },
+  "attacks": [
+    {
+      "kind": "projectile",
+      "motion": "homing",
+      "fire_point": "center",
+      "target_point": "center",
+      "interval": 1.2,
+      "speed": 280,
+      "damage": 18,
+      "radius": 12,
+      "life_time": 3.0
+    }
+  ],
+  "reward": {
+    "bio": 55
+  }
+}

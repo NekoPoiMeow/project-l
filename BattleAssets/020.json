@@ -1,0 +1,39 @@
+{
+  "id": "020",
+  "name": "工蜂",
+  "type": "worker",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "worker"],
+  "visual": {
+    "gif": "res://BattleAssets/020.gif",
+    "scale": 0.58,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "5dffba", "tint_strength": 0.10, "pulse_strength": 0.04, "pulse_speed": 4.0},
+    "halo": {"color": "5dffba", "alpha": 0.12, "size": [82, 44], "offset": [0, 22], "pulse": 0.18},
+    "orbit_dots": {"color": "fff07a", "alpha": 0.80, "count": 3, "radius": 24, "size": 4, "speed": 2.4}
+  },
+  "body": {
+    "radius": 18,
+    "sense_radius": 860
+  },
+  "stats": {
+    "max_hp": 9999,
+    "move_speed": 145,
+    "attack": 0,
+    "defense": 999,
+    "invincible": true,
+    "bio_cargo_max": 80,
+    "bio_visual_unit": 20,
+    "bio_transfer_chunk": 12,
+    "worker_home_radius": 900
+  },
+  "ai": {
+    "mode": "worker_collect_bio",
+    "objective_fallback": false,
+    "target_factions": []
+  },
+  "attacks": []
+}

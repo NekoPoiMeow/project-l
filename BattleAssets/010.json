@@ -1,0 +1,40 @@
+{
+  "id": "010",
+  "name": "EnemyBaseAltTest",
+  "type": "base",
+  "faction": "enemy",
+  "tags": ["base", "building"],
+  "visual": {
+    "gif": "res://BattleAssets/010.gif",
+    "scale": 1.3,
+    "size": [192, 192],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 145,
+    "block_radius": 145,
+    "sense_radius": 680
+  },
+  "stats": {
+    "max_hp": 2200,
+    "move_speed": 0,
+    "attack": 24,
+    "defense": 5
+  },
+  "ai": {
+    "mode": "idle",
+    "target_factions": ["player", "tentacle"]
+  },
+  "zones": {
+    "alert_radius": 820,
+    "contact_radius": 180,
+    "contact_damage": 30,
+    "contact_cooldown": 0.9,
+    "contact_knockback_min": 120,
+    "contact_knockback_max": 230
+  },
+  "attacks": [],
+  "reward": {
+    "bio": 140
+  }
+}

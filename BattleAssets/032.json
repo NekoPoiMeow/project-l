@@ -1,0 +1,29 @@
+{
+  "id": "032",
+  "name": "美少女头弹",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "mutation", "head_bullet"],
+  "visual": {
+    "gif": "res://BattleAssets/032.gif",
+    "scale": 0.74,
+    "size": [96, 96],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 18,
+    "sense_radius": 0
+  },
+  "stats": {
+    "max_hp": 1,
+    "move_speed": 0,
+    "attack": 0,
+    "defense": 0,
+    "invincible": true
+  },
+  "ai": {
+    "mode": "idle",
+    "target_factions": []
+  },
+  "attacks": []
+}

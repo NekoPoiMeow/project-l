@@ -1,0 +1,123 @@
+[gd_scene format=3 uid="uid://dikrji8csvjnt"]
+
+[ext_resource type="Texture2D" uid="uid://gynup8y7r0j4" path="res://GraphicAssets/02_SettingMenu/01_Setting_BackGround.png" id="1_lpmq0"]
+[ext_resource type="Shader" uid="uid://dwo106pf02pqg" path="res://Shader/SettingMenu/Setting_Menu.gdshader" id="1_qmfdn"]
+[ext_resource type="Texture2D" uid="uid://bx7tkj0hspudn" path="res://GraphicAssets/02_SettingMenu/02_Setting_BackGround_layer.png" id="2_ejoab"]
+[ext_resource type="Script" uid="uid://bokm2f424p4jx" path="res://Script/SettingMenu/texture_rect拦截响应层.gd" id="3_yxpne"]
+[ext_resource type="Texture2D" uid="uid://clkf5x2kicj3e" path="res://GraphicAssets/02_SettingMenu/03_BGM_icon1.png" id="5_il4fk"]
+[ext_resource type="Texture2D" uid="uid://cggmoe3ljbs7s" path="res://GraphicAssets/02_SettingMenu/03_BGM_icon2.png" id="6_w46ip"]
+[ext_resource type="Texture2D" uid="uid://bd0pn6e1nwnyj" path="res://GraphicAssets/02_SettingMenu/03_Icon+.png" id="7_y5atp"]
+[ext_resource type="Script" uid="uid://bwbmn0wdpujhl" path="res://Script/SettingMenu/texture_button音乐bgm调大.gd" id="8_j6hbs"]
+[ext_resource type="Texture2D" uid="uid://bhtn3h2xhonbc" path="res://GraphicAssets/02_SettingMenu/04_Icon-.png" id="8_wpimf"]
+[ext_resource type="Script" uid="uid://hlic7bcfiyhj" path="res://Script/SettingMenu/texture_button音乐bgm调小.gd" id="9_ekety"]
+[ext_resource type="Script" uid="uid://cl2qe1fi77kwp" path="res://Script/SettingMenu/BGM_Volume_Show.gd" id="9_wpimf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hb3k4"]
+shader = ExtResource("1_qmfdn")
+shader_parameter/v_speed = 1.0
+shader_parameter/v_frequency = 15.0
+shader_parameter/v_amplitude = 0.02
+shader_parameter/alpha_flicker_speed = 4.0
+
+[node name="CanvasLayer设置界面" type="CanvasLayer" unique_id=2032722634]
+process_mode = 3
+layer = 66
+
+[node name="Control传递层" type="Control" parent="." unique_id=73019155]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="TextureRect拦截响应层" type="TextureRect" parent="Control传递层" unique_id=1700251718]
+material = SubResource("ShaderMaterial_hb3k4")
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ejoab")
+script = ExtResource("3_yxpne")
+
+[node name="TextureRect背景底图" type="TextureRect" parent="Control传递层" unique_id=162052003]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_lpmq0")
+
+[node name="Control音乐BGM控件" type="Control" parent="Control传递层/TextureRect背景底图" unique_id=1820525679]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 1
+
+[node name="TextureRect音乐BGM文字图标" type="TextureRect" parent="Control传递层/TextureRect背景底图/Control音乐BGM控件" unique_id=456556712]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 2.312
+anchor_bottom = 1.3750001
+offset_left = 211.0
+offset_top = 209.0
+offset_right = 233.51999
+offset_bottom = 221.0
+texture = ExtResource("5_il4fk")
+
+[node name="TextureRect音乐BGM图标icon" type="TextureRect" parent="Control传递层/TextureRect背景底图/Control音乐BGM控件" unique_id=2039509802]
+layout_mode = 0
+offset_left = 109.0
+offset_top = 197.0
+offset_right = 203.0
+offset_bottom = 280.0
+texture = ExtResource("6_w46ip")
+
+[node name="TextureButton音乐BGM调大+图标" type="TextureButton" parent="Control传递层/TextureRect背景底图/Control音乐BGM控件" unique_id=630091570]
+layout_mode = 0
+offset_left = 303.0
+offset_top = 213.0
+offset_right = 367.0
+offset_bottom = 278.0
+keep_pressed_outside = true
+texture_normal = ExtResource("7_y5atp")
+script = ExtResource("8_j6hbs")
+
+[node name="TextureButton音乐BGM调小-图标" type="TextureButton" parent="Control传递层/TextureRect背景底图/Control音乐BGM控件" unique_id=1739388425]
+layout_mode = 0
+offset_left = 454.0
+offset_top = 214.0
+offset_right = 543.0
+offset_bottom = 279.0
+texture_normal = ExtResource("8_wpimf")
+script = ExtResource("9_ekety")
+
+[node name="LineEdit音乐BGM音量数值显示与编辑框" type="LineEdit" parent="Control传递层/TextureRect背景底图/Control音乐BGM控件" unique_id=1127567787]
+layout_mode = 0
+offset_left = 370.0
+offset_top = 220.0
+offset_right = 452.0
+offset_bottom = 274.0
+theme_override_colors/font_color = Color(0.99999994, 0.86810046, 0.36757055, 1)
+theme_override_colors/font_outline_color = Color(0.89184606, 0.6368285, 0.84397817, 1)
+theme_override_constants/minimum_character_width = 2
+theme_override_font_sizes/font_size = 33
+alignment = 1
+script = ExtResource("9_wpimf")

@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://csh0uajlu1btt"]
+
+[ext_resource type="Texture2D" uid="uid://jrd7fl7w7dth" path="res://scenes/Battle/Battle_00/Background.png" id="1_bg"]
+[ext_resource type="Texture2D" uid="uid://depcodtx4ot3v" path="res://scenes/Battle/Battle_00/Collision.png" id="2_mask"]
+[ext_resource type="Script" uid="uid://cm8r3b7o2ir8a" path="res://BattleAssets/ScriptShader/BattleDirector.gd" id="3_director"]
+
+[node name="Node2DBattle" type="Node2D" unique_id=1452011990]
+
+[node name="Sprite2DBackground" type="Sprite2D" parent="." unique_id=279083804]
+texture = ExtResource("1_bg")
+centered = false
+
+[node name="Sprite2DBlockMask" type="Sprite2D" parent="." unique_id=329775578]
+visible = false
+texture = ExtResource("2_mask")
+centered = false
+
+[node name="Node2DWorld" type="Node2D" parent="." unique_id=1585215350]
+
+[node name="Node2DNode2DEntities" type="Node2D" parent="Node2DWorld" unique_id=620964818]
+
+[node name="Node2DProjectiles" type="Node2D" parent="Node2DWorld" unique_id=2006465744]
+
+[node name="Node2DEffects" type="Node2D" parent="Node2DWorld" unique_id=1139574277]
+
+[node name="Node2DSpawnPoints" type="Node2D" parent="." unique_id=54203835]
+
+[node name="Marker2DPlayerSpawn" type="Marker2D" parent="Node2DSpawnPoints" unique_id=1895768601]
+position = Vector2(1556, 1359)
+
+[node name="Marker2DTentacleBaseSpawn" type="Marker2D" parent="Node2DSpawnPoints" unique_id=980462028]
+position = Vector2(1258, 1092)
+
+[node name="Marker2DEnemyBaseSpawn" type="Marker2D" parent="Node2DSpawnPoints" unique_id=355336979]
+position = Vector2(2662, 1223)
+
+[node name="Marker2DEnemySpawnA" type="Marker2D" parent="Node2DSpawnPoints" unique_id=639968661]
+position = Vector2(2061, 1842)
+
+[node name="Marker2DEnemySpawnB" type="Marker2D" parent="Node2DSpawnPoints" unique_id=1020956822]
+position = Vector2(2340, 871)
+
+[node name="Marker2DEnemySpawnC" type="Marker2D" parent="Node2DSpawnPoints" unique_id=298677376]
+position = Vector2(297, 1136)
+
+[node name="Node2DSpecialTriggers" type="Node2D" parent="." unique_id=374874577]
+
+[node name="CanvasLayerUI" type="CanvasLayer" parent="." unique_id=1938612384]
+
+[node name="LabelTimer" type="Label" parent="CanvasLayerUI" unique_id=222788909]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="LabelObjective" type="Label" parent="CanvasLayerUI" unique_id=1159920060]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="TextureProgressBarPlayerBaseHP" type="TextureProgressBar" parent="CanvasLayerUI" unique_id=1962820895]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureProgressBarEnemyBaseHP" type="TextureProgressBar" parent="CanvasLayerUI" unique_id=1939365474]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="AudioStreamPlayerBGM" type="AudioStreamPlayer" parent="." unique_id=817649869]
+bus = &"Music"
+
+[node name="AudioStreamPlayerSFX" type="AudioStreamPlayer" parent="." unique_id=349083774]
+bus = &"SFX"
+
+[node name="NodeBattleDirector" type="Node" parent="." unique_id=1119754001]
+script = ExtResource("3_director")
+stage_config_path = "res://scenes/Battle/Battle_BulletTest.ini"
+
+[node name="Camera2DBattle" type="Camera2D" parent="." unique_id=1266380146]
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0

@@ -1,0 +1,160 @@
+[gd_scene format=3 uid="uid://iksqo23ratvl"]
+
+[ext_resource type="Texture2D" uid="uid://dv4arhlxr5dth" path="res://GraphicAssets/05_Basement/01_Basement.png" id="1_iym5g"]
+[ext_resource type="Texture2D" uid="uid://dbp0qs5yetlky" path="res://GraphicAssets/05_Basement/02_Collision.png" id="2_62ufc"]
+[ext_resource type="Texture2D" uid="uid://cn4iib7auoc2j" path="res://GraphicAssets/Character/Test_Player_1.gif" id="3_62ufc"]
+[ext_resource type="Script" uid="uid://cyhf4my86fw2n" path="res://Script/Basement/sprite_2d_Player_Collison.gd" id="4_jnl0s"]
+[ext_resource type="Texture2D" uid="uid://d33i4b5d6k58t" path="res://GraphicAssets/05_Basement/02_Wrap_Circle.png" id="4_kvs36"]
+[ext_resource type="Texture2D" uid="uid://dyw1mxnhjidtw" path="res://GraphicAssets/05_Basement/02_Wrap_Icon.png" id="5_3fd3q"]
+[ext_resource type="Script" uid="uid://bmv4f5aihtuna" path="res://Script/Basement/Wrap_Area.gd" id="5_fh6f5"]
+[ext_resource type="AudioStream" uid="uid://b8sutddp12tfq" path="res://Sound+BGM/05Basement/02_Wrap_Show.mp3" id="6_emia8"]
+[ext_resource type="Texture2D" uid="uid://d3me28i3nsuhc" path="res://GraphicAssets/05_Basement/01_Label_Box.png" id="7_jef7w"]
+[ext_resource type="Script" uid="uid://daakw251d72st" path="res://Script/Basement/Palace.gd" id="7_v2gnl"]
+[ext_resource type="AudioStream" uid="uid://bwunxe3quwic8" path="res://Sound+BGM/05Basement/01_Basement_BGM.mp3" id="7_w77nl"]
+[ext_resource type="Shader" uid="uid://dbx3jxbqr5m7i" path="res://Shader/Basement/Basement_Label.gdshader" id="8_jef7w"]
+[ext_resource type="Texture2D" uid="uid://dbbaavow14r0p" path="res://GraphicAssets/05_Basement/NPC御所.gif" id="8_rkwqm"]
+[ext_resource type="Texture2D" uid="uid://cui6hewwsdgkj" path="res://GraphicAssets/05_Basement/03_Palace.png" id="8_v2gnl"]
+[ext_resource type="AudioStream" uid="uid://cepujvp8lfrkf" path="res://Sound+BGM/05Basement/03_Palace_NPC.mp3" id="9_3wm7j"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_jnl0s"]
+radius = 113.0
+height = 372.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3fd3q"]
+radius = 92.0
+height = 322.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v2gnl"]
+shader = ExtResource("8_jef7w")
+shader_parameter/top_color = Color(1, 0.96, 1, 1)
+shader_parameter/mid_color = Color(1, 0.42, 0.82, 1)
+shader_parameter/bottom_color = Color(0.62, 0.28, 1, 1)
+shader_parameter/gold_color = Color(1, 0.82, 0.28, 1)
+shader_parameter/wave_speed = 2.2
+shader_parameter/wave_frequency = 16.0
+shader_parameter/wave_amount = 0.008
+shader_parameter/shine_speed = 1.4
+shader_parameter/shine_width = 0.13
+shader_parameter/shine_power = 0.65
+shader_parameter/glow_power = 0.35
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_jnl0s"]
+radius = 70.0
+
+[node name="Node2D营地" type="Node2D" unique_id=110543555]
+
+[node name="Sprite2D营地背景" type="Sprite2D" parent="." unique_id=1097387347]
+position = Vector2(800, 450)
+texture = ExtResource("1_iym5g")
+
+[node name="Sprite2D营地碰撞识别层" type="Sprite2D" parent="." unique_id=1636687714]
+position = Vector2(800, 450)
+texture = ExtResource("2_62ufc")
+
+[node name="Area2D传送阵" type="Area2D" parent="." unique_id=567199314]
+script = ExtResource("5_fh6f5")
+
+[node name="Sprite2D传送阵图" type="Sprite2D" parent="Area2D传送阵" unique_id=1341259319]
+position = Vector2(801.5, 488)
+scale = Vector2(0.81363636, 1.0066224)
+texture = ExtResource("4_kvs36")
+
+[node name="Sprite2D气泡表示" type="Sprite2D" parent="Area2D传送阵" unique_id=1879777160]
+position = Vector2(809, 388)
+scale = Vector2(0.6363637, 0.6)
+texture = ExtResource("5_3fd3q")
+
+[node name="AudioStreamPlayer传送阵气泡音效" type="AudioStreamPlayer" parent="Area2D传送阵" unique_id=1077485322]
+stream = ExtResource("6_emia8")
+bus = &"SFX"
+
+[node name="CollisionShape2D传送阵判定范围" type="CollisionShape2D" parent="Area2D传送阵" unique_id=1099736643]
+position = Vector2(806, 502)
+rotation = -1.5707964
+shape = SubResource("CapsuleShape2D_jnl0s")
+
+[node name="Area2D御所" type="Area2D" parent="." unique_id=1879935646]
+script = ExtResource("7_v2gnl")
+npc_name = null
+default_place_name = null
+target_scene = null
+max_visible_distance = null
+min_alpha_255 = null
+max_alpha_255 = null
+bob_height = null
+bob_speed = null
+squeeze_speed = null
+squeeze_power = null
+
+[node name="GIFPlayer御所图" type="GIFPlayer" parent="Area2D御所" unique_id=1901979877]
+gif = ExtResource("8_rkwqm")
+offset_left = 512.0
+offset_top = 135.0
+offset_right = 640.0
+offset_bottom = 336.117
+scale = Vector2(0.52428997, 0.4723618)
+
+[node name="Sprite2D御所气泡" type="Sprite2D" parent="Area2D御所" unique_id=168757263]
+position = Vector2(544.00006, 98.99999)
+scale = Vector2(0.2372505, 0.19701426)
+texture = ExtResource("8_v2gnl")
+
+[node name="AudioStreamPlayer御所音效" type="AudioStreamPlayer" parent="Area2D御所" unique_id=378331844]
+stream = ExtResource("9_3wm7j")
+bus = &"SFX"
+
+[node name="CollisionShape2D御所判定范围" type="CollisionShape2D" parent="Area2D御所" unique_id=1612453289]
+position = Vector2(548, 186)
+rotation = -1.5707964
+shape = SubResource("CapsuleShape2D_3fd3q")
+
+[node name="CanvasLayer营地UI" type="CanvasLayer" parent="." unique_id=1782210650]
+
+[node name="Control营地地点NPC提示框" type="Control" parent="CanvasLayer营地UI" unique_id=679727522]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="TextureRect文本框" type="TextureRect" parent="CanvasLayer营地UI/Control营地地点NPC提示框" unique_id=1817594888]
+self_modulate = Color(1, 1, 1, 0.78431374)
+layout_mode = 0
+offset_left = 663.0
+offset_top = 30.0
+offset_right = 941.0
+offset_bottom = 111.0
+texture = ExtResource("7_jef7w")
+
+[node name="Label营地事件名" type="Label" parent="CanvasLayer营地UI/Control营地地点NPC提示框" unique_id=1839108936]
+material = SubResource("ShaderMaterial_v2gnl")
+layout_mode = 0
+offset_left = 687.0
+offset_top = 47.0
+offset_right = 909.0
+offset_bottom = 96.0
+theme_override_font_sizes/font_size = 24
+text = "拠点"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="AudioStreamPlayer营地BGM" type="AudioStreamPlayer" parent="." unique_id=1540327941]
+stream = ExtResource("7_w77nl")
+autoplay = true
+bus = &"Music"
+
+[node name="GIFPlayer玩家角色" type="GIFPlayer" parent="." unique_id=172896241]
+gif = ExtResource("3_62ufc")
+speed_scale = 10.0
+offset_left = 729.0
+offset_top = 438.0
+offset_right = 873.0
+offset_bottom = 564.0
+script = ExtResource("4_jnl0s")
+
+[node name="Area2D玩家脚底检测" type="Area2D" parent="GIFPlayer玩家角色" unique_id=1226096245 groups=["PlayerFoot"]]
+
+[node name="CollisionShape2DCollisionShape2D玩家脚底检测" type="CollisionShape2D" parent="GIFPlayer玩家角色/Area2D玩家脚底检测" unique_id=1439830304]
+position = Vector2(77, 68)
+shape = SubResource("CircleShape2D_jnl0s")

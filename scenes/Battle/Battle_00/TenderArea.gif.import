@@ -1,0 +1,16 @@
+[remap]
+
+importer="texture_gif"
+importer_version=2
+type="GIFTexture"
+uid="uid://bjmuk8fpx05ei"
+path="res://.godot/imported/TenderArea.gif-4b8673c259039a620d811c79f3225e67.res"
+
+[deps]
+
+source_file="res://scenes/Battle/Battle_00/TenderArea.gif"
+dest_files=["res://.godot/imported/TenderArea.gif-4b8673c259039a620d811c79f3225e67.res"]
+
+[params]
+
+storage/compress=true

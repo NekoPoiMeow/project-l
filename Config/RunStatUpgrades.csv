@@ -1,0 +1,7 @@
+id,name,description,stat_ops,weight,min_level
+RS001,最大HP提升,本局玩家最大HP提高,max_hp_add=20,10,12
+RS002,基础伤害提升,本局武器基础伤害固定提高,global_damage_add=2,8,12
+RS003,附加伤害提升,本局攻击额外附加固定伤害,global_bonus_damage_add=4,8,12
+RS004,暴击能力提升,本局暴击率和暴击伤害提高,crit_up=0.03|crit_mul_add=0.10,6,12
+RS005,技能蓝回复提升,本局技能蓝回复提高,mana_recovery_mul=1.08,6,12
+RS006,战后淫能基础提升,本局战后淫能基础奖励提高,lust_reward_add=1,6,12

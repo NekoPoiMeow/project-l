@@ -1,0 +1,16 @@
+[remap]
+
+importer="texture_gif"
+importer_version=2
+type="GIFTexture"
+uid="uid://6yk7kod3s8sl"
+path="res://.godot/imported/009.gif-791d1ff7fd10478e3834bf3de17d3662.res"
+
+[deps]
+
+source_file="res://BattleAssets/009.gif"
+dest_files=["res://.godot/imported/009.gif-791d1ff7fd10478e3834bf3de17d3662.res"]
+
+[params]
+
+storage/compress=true

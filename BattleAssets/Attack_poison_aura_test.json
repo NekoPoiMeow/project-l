@@ -1,0 +1,20 @@
+{
+  "id": "poison_aura_test",
+  "name": "测试毒环：持续叠毒",
+  "description": "玩家周围持续判定，命中敌人后附加毒伤状态",
+  "kind": "attack_instance",
+  "interval": 5.5,
+  "requires_target": false,
+  "origin": {"mode": "self_center"},
+  "aim": {"mode": "fixed_angle", "angle": 0},
+  "emitter": {"mode": "single", "count": 1},
+  "motion": {"mode": "static", "duration": 4.2, "follow_source": true},
+  "hit_shape": {"mode": "circle", "radius": 230},
+  "hit_rule": {"mode": "while_active_tick", "tick_interval": 0.75, "hit_same_target_delay": 0.75},
+  "target_filter": {"relation": "enemy", "include_building": false},
+  "effects": [
+    {"mode": "damage", "value": 4},
+    {"mode": "status", "status": "poison", "duration": 2.8, "tick_interval": 0.85, "value": 9}
+  ],
+  "visual": {"primary": "b86cff", "secondary": "ff78c7", "alpha": 0.44, "pixel_count": 24}
+}

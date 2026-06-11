@@ -1,0 +1,73 @@
+{
+  "id": "028",
+  "name": "调试超级兵",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "super_debug"],
+  "visual": {
+    "gif": "res://BattleAssets/010.gif",
+    "scale": 1.05,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "ffd45a", "tint_strength": 0.20, "pulse_strength": 0.10, "pulse_speed": 3.0},
+    "halo": {"color": "ffd45a", "alpha": 0.20, "size": [170, 92], "offset": [0, 28], "pulse": 0.18},
+    "aura_ring": {"color": "78eaff", "alpha": 0.52, "radius": 92, "width": 5, "pulse": 0.24}
+  },
+  "body": {
+    "radius": 42,
+    "sense_radius": 1200
+  },
+  "stats": {
+    "max_hp": 8000,
+    "move_speed": 120,
+    "attack": 120,
+    "defense": 12,
+    "hp_regen": 25
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "objective_fallback": true,
+    "objective_fallback_radius": 0,
+    "objective_fallback_priority_order": ["base", "building"],
+    "target_priority": "base_first",
+    "target_priority_order": ["base", "building", "unit", "minion"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"],
+    "close_range": 160
+  },
+  "combat": {
+    "damage_multipliers": {
+      "building": 1.2
+    }
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "interval": 0.75,
+      "range": 112,
+      "damage": 140,
+      "damage_multipliers": {"building": 1.4},
+      "heal_on_hit": 8
+    },
+    {
+      "kind": "attack_instance",
+      "requires_target": true,
+      "interval": 3.6,
+      "origin": {"mode": "self_center", "point": "center"},
+      "aim": {"mode": "target"},
+      "motion": {"mode": "beam", "duration": 0.35},
+      "hit_shape": {"mode": "beam_rect", "width": 84, "length": 520},
+      "hit_rule": {"mode": "on_spawn_once"},
+      "target_filter": {"relation": "enemy", "include_building": true},
+      "effects": [{"mode": "damage", "value": 220}],
+      "visual": {"primary": "ffd45a", "secondary": "ffffff", "alpha": 0.65}
+    }
+  ],
+  "reward": {
+    "bio": 20,
+    "xp": 8
+  }
+}

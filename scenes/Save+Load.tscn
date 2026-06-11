@@ -1,0 +1,294 @@
+[gd_scene format=3 uid="uid://jbdtwg2ywdps"]
+
+[ext_resource type="Script" uid="uid://dibkmcvgfrm41" path="res://Script/SaveMgr/save_number_chk.gd" id="1_juueu"]
+[ext_resource type="Texture2D" uid="uid://dbklbeep5hobp" path="res://GraphicAssets/04_Save_Select/01_Save Menu.png" id="1_pbypa"]
+[ext_resource type="Texture2D" uid="uid://61lpsqqskhd" path="res://GraphicAssets/04_Save_Select/01_Save_img.png" id="2_f8afa"]
+[ext_resource type="Script" uid="uid://vkw063yd7mys" path="res://Script/SaveMgr/control_back_title.gd" id="2_vhwwo"]
+[ext_resource type="Texture2D" uid="uid://88wqrueywcmq" path="res://GraphicAssets/04_Save_Select/02_Box.png" id="3_abbhg"]
+[ext_resource type="Shader" uid="uid://fnnvkqq76gnm" path="res://Shader/SaveMgr/Box.gdshader" id="3_fry52"]
+[ext_resource type="Script" uid="uid://bb47ddm2g2hau" path="res://Script/SaveMgr/Save1_Foucs.gd" id="5_4honp"]
+[ext_resource type="FontFile" uid="uid://b40iky2mv4l8m" path="res://Fonts/HanaMinA.ttf" id="5_ndowi"]
+[ext_resource type="Texture2D" uid="uid://bebu6n5xjga1j" path="res://GraphicAssets/04_Save_Select/03_Del_Button.png" id="5_oqx71"]
+[ext_resource type="AudioStream" uid="uid://dyye0e0l4m1r0" path="res://Sound+BGM/04SaveMgr/Title.mp3" id="7_j4jl6"]
+[ext_resource type="AudioStream" uid="uid://b5uvembs18ge3" path="res://Sound+BGM/04SaveMgr/Gulp.mp3" id="8_18n1l"]
+[ext_resource type="AudioStream" uid="uid://ckwvdafltckkq" path="res://Sound+BGM/04SaveMgr/Save1.mp3" id="10_18n1l"]
+[ext_resource type="Script" uid="uid://cltwiib3tvp0x" path="res://Script/SaveMgr/SaveAuto_Foucs.gd" id="10_jby47"]
+[ext_resource type="Script" uid="uid://bhavqpgbihtsf" path="res://Script/SaveMgr/save_del_button.gd" id="11_71jbf"]
+[ext_resource type="Script" uid="uid://ciifphhe1sseu" path="res://Script/SaveMgr/SaveAuto2_Foucs.gd" id="13_4ocam"]
+[ext_resource type="Texture2D" uid="uid://mis67at6ve4j" path="res://GraphicAssets/04_Save_Select/04_DelCfmBox.png" id="13_n6ff7"]
+[ext_resource type="Script" uid="uid://eb4y1rgtdkpe" path="res://Script/SaveMgr/Cfm_Del_Save.gd" id="13_qvlfl"]
+[ext_resource type="AudioStream" uid="uid://brfs8mune3ev3" path="res://Sound+BGM/04SaveMgr/AutoSave2.mp3" id="14_4ocam"]
+[ext_resource type="AudioStream" uid="uid://g2rfqigq66nc" path="res://Sound+BGM/04SaveMgr/AutoSave.mp3" id="14_aikt4"]
+[ext_resource type="Texture2D" uid="uid://bbp2la42pprir" path="res://GraphicAssets/04_Save_Select/03_Del_Cfm.png" id="14_qvlfl"]
+[ext_resource type="Script" uid="uid://3jv8363nptft" path="res://Script/SaveMgr/Withdraw_Del.gd" id="15_qvlfl"]
+[ext_resource type="AudioStream" uid="uid://cs0783xe6n6wc" path="res://Sound+BGM/04SaveMgr/The_Winding_Room.mp3" id="17_2r05v"]
+[ext_resource type="AudioStream" uid="uid://bmn8xxu2r5sxu" path="res://Sound+BGM/04SaveMgr/DelSave.mp3" id="17_urbo0"]
+[ext_resource type="AudioStream" uid="uid://drx54htmhl1m0" path="res://Sound+BGM/04SaveMgr/GameStart.mp3" id="18_4ocam"]
+[ext_resource type="Script" uid="uid://dt6geaef6ktib" path="res://Script/SaveMgr/NewGame.gd" id="18_hc2ij"]
+[ext_resource type="AudioStream" uid="uid://bi0tn7hio76lk" path="res://Sound+BGM/04SaveMgr/Really.mp3" id="23_aikt4"]
+[ext_resource type="AudioStream" uid="uid://644atwgipnr" path="res://Sound+BGM/04SaveMgr/Ah.mp3" id="24_urbo0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_abbhg"]
+shader = ExtResource("3_fry52")
+shader_parameter/intensity = 1.0
+shader_parameter/speed = 2.0
+
+[node name="Node2D存档管理" type="Node2D" unique_id=12613430 groups=["SaveID"]]
+script = ExtResource("1_juueu")
+
+[node name="TextureRect背景图" type="TextureRect" parent="." unique_id=1733188451]
+offset_right = 1600.0
+offset_bottom = 900.0
+mouse_filter = 2
+texture = ExtResource("1_pbypa")
+
+[node name="TextureRect存档图" type="TextureRect" parent="." unique_id=1059630657]
+offset_left = 332.0
+offset_top = 151.0
+offset_right = 759.0
+offset_bottom = 681.0
+texture = ExtResource("2_f8afa")
+
+[node name="Control返回标题" type="Control" parent="." unique_id=1983814819]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 89.0
+offset_top = 782.0
+offset_right = 394.0
+offset_bottom = 858.0
+focus_mode = 2
+script = ExtResource("2_vhwwo")
+
+[node name="Sprite2D选项框" type="Sprite2D" parent="Control返回标题" unique_id=102298909]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(129.49998, 41.500008)
+scale = Vector2(0.6012145, 0.31596097)
+texture = ExtResource("3_abbhg")
+
+[node name="AudioStreamPlayer标题" type="AudioStreamPlayer" parent="Control返回标题" unique_id=1856765066]
+stream = ExtResource("7_j4jl6")
+bus = &"Voice"
+
+[node name="Control存档1" type="Control" parent="." unique_id=959764461]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 921.0
+offset_top = 66.0
+offset_right = 1541.0
+offset_bottom = 306.0
+focus_mode = 2
+script = ExtResource("5_4honp")
+
+[node name="Sprite2D选项框" type="Sprite2D" parent="Control存档1" unique_id=1591795800]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(381.00006, 124.00001)
+scale = Vector2(0.75708497, 0.6840391)
+texture = ExtResource("3_abbhg")
+
+[node name="Label存档1" type="Label" parent="Control存档1" unique_id=1905965675]
+layout_mode = 0
+offset_left = 241.0
+offset_top = 56.0
+offset_right = 513.0
+offset_bottom = 182.0
+theme_override_fonts/font = ExtResource("5_ndowi")
+theme_override_font_sizes/font_size = 18
+text = "1
+2
+3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AudioStreamPlayer存档1" type="AudioStreamPlayer" parent="Control存档1" unique_id=1726751557]
+stream = ExtResource("10_18n1l")
+bus = &"Voice"
+
+[node name="Control存档Auto" type="Control" parent="." unique_id=419409015]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 907.0
+offset_top = 343.0
+offset_right = 1537.0
+offset_bottom = 556.0
+focus_mode = 2
+script = ExtResource("10_jby47")
+
+[node name="Sprite2D选项框Auto" type="Sprite2D" parent="Control存档Auto" unique_id=1739884094]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(387.99994, 109.49998)
+scale = Vector2(0.7813768, 0.64169383)
+texture = ExtResource("3_abbhg")
+
+[node name="Label存档Auto" type="Label" parent="Control存档Auto" unique_id=573742575]
+layout_mode = 0
+offset_left = 248.0
+offset_top = 55.0
+offset_right = 520.0
+offset_bottom = 181.0
+theme_override_fonts/font = ExtResource("5_ndowi")
+theme_override_font_sizes/font_size = 18
+text = "1
+2
+3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AudioStreamPlayer存档Auto" type="AudioStreamPlayer" parent="Control存档Auto" unique_id=382405836]
+stream = ExtResource("14_aikt4")
+bus = &"Voice"
+
+[node name="Control存档Auto2" type="Control" parent="." unique_id=325591815]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 889.0
+offset_top = 589.0
+offset_right = 1548.0
+offset_bottom = 785.0
+focus_mode = 2
+script = ExtResource("13_4ocam")
+
+[node name="Sprite2D选项框Auto2" type="Sprite2D" parent="Control存档Auto2" unique_id=938191654]
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(391.5, 97.49999)
+scale = Vector2(0.77125496, 0.55048853)
+texture = ExtResource("3_abbhg")
+
+[node name="Label存档Auto2" type="Label" parent="Control存档Auto2" unique_id=1280106097]
+layout_mode = 0
+offset_left = 275.0
+offset_top = 54.0
+offset_right = 528.0
+offset_bottom = 160.0
+theme_override_fonts/font = ExtResource("5_ndowi")
+theme_override_font_sizes/font_size = 18
+text = "1
+2
+3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AudioStreamPlayer存档Auto2" type="AudioStreamPlayer" parent="Control存档Auto2" unique_id=460776520]
+stream = ExtResource("14_4ocam")
+bus = &"Voice"
+
+[node name="Control删除存档" type="Control" parent="." unique_id=1571847434]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 937.0
+offset_top = 790.0
+offset_right = 1239.0
+offset_bottom = 882.0
+
+[node name="TextureRect删除按钮图片" type="TextureRect" parent="Control删除存档" unique_id=921115973]
+visible = false
+layout_mode = 0
+offset_left = 15.0000305
+offset_top = -6.0
+offset_right = 239.00003
+offset_bottom = 86.0
+scale = Vector2(1.2053574, 1.2173913)
+mouse_filter = 2
+texture = ExtResource("5_oqx71")
+script = ExtResource("11_71jbf")
+
+[node name="Sprite2D选项框删除存档选项框" type="Sprite2D" parent="Control删除存档" unique_id=287571134]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(136.00005, 49.500027)
+scale = Vector2(0.5101217, 0.31596082)
+texture = ExtResource("3_abbhg")
+
+[node name="AudioStreamPlayer存档Del" type="AudioStreamPlayer" parent="Control删除存档" unique_id=1266835704]
+stream = ExtResource("17_urbo0")
+bus = &"Voice"
+
+[node name="Control载入游戏" type="Control" parent="." unique_id=212818086]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1250.0
+offset_top = 798.0
+offset_right = 1562.0
+offset_bottom = 883.0
+focus_mode = 2
+script = ExtResource("18_hc2ij")
+
+[node name="Sprite2D选项框载入游戏" type="Sprite2D" parent="Control载入游戏" unique_id=1289042576]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(148, 33)
+scale = Vector2(0.46153855, 0.1921822)
+texture = ExtResource("3_abbhg")
+
+[node name="AudioStreamPlayer开始游戏" type="AudioStreamPlayer" parent="Control载入游戏" unique_id=1872635305]
+stream = ExtResource("18_4ocam")
+bus = &"Voice"
+
+[node name="CanvasLayer删档确认" type="CanvasLayer" parent="." unique_id=371656928]
+layer = 0
+visible = false
+
+[node name="ColorRect防穿透" type="ColorRect" parent="CanvasLayer删档确认" unique_id=735901124]
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(1, 1, 1, 0)
+
+[node name="Panel删档确认底图" type="TextureRect" parent="CanvasLayer删档确认" unique_id=730715381]
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 0
+texture = ExtResource("14_qvlfl")
+
+[node name="TextureRect确认" type="TextureRect" parent="CanvasLayer删档确认" unique_id=991066384]
+offset_left = 1014.0
+offset_top = 645.0
+offset_right = 1467.0
+offset_bottom = 919.0
+mouse_filter = 0
+texture = ExtResource("13_n6ff7")
+expand_mode = 1
+script = ExtResource("13_qvlfl")
+
+[node name="TextureRect取消" type="TextureRect" parent="CanvasLayer删档确认" unique_id=210818437]
+offset_left = 221.0
+offset_top = 637.0
+offset_right = 661.0
+offset_bottom = 921.0
+texture = ExtResource("13_n6ff7")
+expand_mode = 1
+script = ExtResource("15_qvlfl")
+
+[node name="AudioStreamPlayer真的" type="AudioStreamPlayer" parent="CanvasLayer删档确认" unique_id=2142262727]
+stream = ExtResource("23_aikt4")
+bus = &"Voice"
+
+[node name="AudioStreamPlayer取消" type="AudioStreamPlayer" parent="CanvasLayer删档确认" unique_id=80283931]
+stream = ExtResource("24_urbo0")
+bus = &"Voice"
+
+[node name="AudioStreamPlayer存档管理BGM" type="AudioStreamPlayer" parent="." unique_id=916499336]
+stream = ExtResource("17_2r05v")
+autoplay = true
+bus = &"Music"
+
+[node name="AudioStreamPlayer点击" type="AudioStreamPlayer" parent="." unique_id=1300894295]
+stream = ExtResource("8_18n1l")
+bus = &"SFX"
+
+[connection signal="mouse_entered" from="Control返回标题" to="Control返回标题/AudioStreamPlayer标题" method="play"]
+[connection signal="focus_entered" from="Control存档1" to="Control存档1/AudioStreamPlayer存档1" method="play"]
+[connection signal="mouse_entered" from="Control存档1" to="Control存档1/AudioStreamPlayer存档1" method="play"]
+[connection signal="focus_entered" from="Control存档Auto" to="Control存档Auto/AudioStreamPlayer存档Auto" method="play"]
+[connection signal="mouse_entered" from="Control存档Auto" to="Control存档Auto/AudioStreamPlayer存档Auto" method="play"]
+[connection signal="focus_entered" from="Control存档Auto2" to="Control存档Auto2/AudioStreamPlayer存档Auto2" method="play"]
+[connection signal="mouse_entered" from="Control存档Auto2" to="Control存档Auto2/AudioStreamPlayer存档Auto2" method="play"]
+[connection signal="focus_entered" from="Control删除存档" to="Control删除存档/AudioStreamPlayer存档Del" method="play"]
+[connection signal="mouse_entered" from="Control删除存档" to="Control删除存档/AudioStreamPlayer存档Del" method="play"]
+[connection signal="focus_entered" from="Control载入游戏" to="Control载入游戏/AudioStreamPlayer开始游戏" method="play"]
+[connection signal="mouse_entered" from="Control载入游戏" to="Control载入游戏/AudioStreamPlayer开始游戏" method="play"]
+[connection signal="focus_entered" from="CanvasLayer删档确认/TextureRect确认" to="CanvasLayer删档确认/AudioStreamPlayer真的" method="play"]
+[connection signal="mouse_entered" from="CanvasLayer删档确认/TextureRect确认" to="CanvasLayer删档确认/AudioStreamPlayer真的" method="play"]
+[connection signal="focus_entered" from="CanvasLayer删档确认/TextureRect取消" to="CanvasLayer删档确认/AudioStreamPlayer取消" method="play"]
+[connection signal="mouse_entered" from="CanvasLayer删档确认/TextureRect取消" to="CanvasLayer删档确认/AudioStreamPlayer取消" method="play"]

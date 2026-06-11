@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://biqgb47c52yv5"
+path="res://.godot/imported/mouse-click-153941.mp3-6e5913e72b862c337b3b8f6ee0d31f97.mp3str"
+
+[deps]
+
+source_file="res://Sound+BGM/01 Start Menu/mouse-click-153941.mp3"
+dest_files=["res://.godot/imported/mouse-click-153941.mp3-6e5913e72b862c337b3b8f6ee0d31f97.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,60 @@
+{
+  "id": "011",
+  "name": "BulletTestPlayer",
+  "type": "player",
+  "faction": "player",
+  "tags": ["player"],
+  "visual": {
+    "gif": "res://BattleAssets/000.gif",
+    "scale": 1.0,
+    "size": [88, 184],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 24,
+    "sense_radius": 900
+  },
+  "stats": {
+    "max_hp": 9999,
+    "move_speed": 210,
+    "attack": 40,
+    "defense": 8,
+    "hp_regen": 80,
+    "bio_cargo_max": 999,
+    "bio_visual_unit": 30,
+    "bio_transfer_chunk": 30
+  },
+  "ai": {
+    "mode": "player",
+    "target_factions": ["enemy"]
+  },
+  "combat": {
+    "damage_multipliers": {
+      "building": 0.2,
+      "enemy": 1.0
+    }
+  },
+  "attacks": [
+    {
+      "id": "player_basic_projectile",
+      "kind": "attack_instance",
+      "tags": ["basic_projectile"],
+      "interval": 0.45,
+      "requires_target": true,
+      "origin": {"mode": "self_center"},
+      "aim": {"mode": "nearest_enemy"},
+      "emitter": {"mode": "spread", "count": 2, "spread_angle": 12},
+      "motion": {"mode": "homing", "speed": 500, "life_time": 2.0, "max_distance": 900},
+      "hit_shape": {"mode": "circle", "radius": 16},
+      "hit_rule": {"mode": "on_contact", "destroy_on_hit": true, "hit_same_target_delay": 999},
+      "target_filter": {"relation": "enemy", "include_building": true},
+      "effects": [{"mode": "damage", "value": 40}],
+      "visual": {"primary": "ff4f72", "secondary": "ffe1c8", "alpha": 0.86, "pixel_count": 9}
+    }
+  ],
+  "sfx": {
+    "attack": "res://BattleAssets/000Attack.mp3",
+    "hurt": "res://BattleAssets/000Hurt.mp3",
+    "die": "res://BattleAssets/000Die.mp3"
+  }
+}

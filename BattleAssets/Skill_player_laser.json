@@ -1,0 +1,22 @@
+{
+  "id": "player_laser",
+  "name": "束缚激光",
+  "slot": 2,
+  "mode": "attack",
+  "mana_cost": 34,
+  "cooldown": 5.0,
+  "attack": {
+    "kind": "attack_instance",
+    "requires_target": false,
+    "origin": {"mode": "self_center", "point": "center"},
+    "aim": {"mode": "mouse"},
+    "motion": {"mode": "beam", "duration": 0.48},
+    "hit_shape": {"mode": "beam_rect", "width": 72, "length": 1450},
+    "hit_rule": {"mode": "while_active_tick", "tick_interval": 0.12, "hit_same_target_delay": 0.18},
+    "target_filter": {"relation": "enemy", "include_building": true},
+    "effects": [
+      {"mode": "damage", "value": 72, "damage_multipliers": {"building": 0.45}}
+    ],
+    "visual": {"primary": "78eaff", "secondary": "ffffff", "alpha": 0.72}
+  }
+}

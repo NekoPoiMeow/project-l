@@ -1,0 +1,16 @@
+[remap]
+
+importer="texture_gif"
+importer_version=2
+type="GIFTexture"
+uid="uid://cxibfiarid41y"
+path="res://.godot/imported/GeneralBombing.gif-70750fc5b52b22f60d673aec3e2c6e3c.res"
+
+[deps]
+
+source_file="res://BattleAssets/GeneralBombing.gif"
+dest_files=["res://.godot/imported/GeneralBombing.gif-70750fc5b52b22f60d673aec3e2c6e3c.res"]
+
+[params]
+
+storage/compress=true

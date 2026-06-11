@@ -1,0 +1,40 @@
+{
+  "id": "009",
+  "name": "EnemyBossSmallTest",
+  "type": "enemy",
+  "faction": "enemy",
+  "tags": ["enemy", "boss"],
+  "visual": {
+    "gif": "res://BattleAssets/009.gif",
+    "scale": 1.0,
+    "size": [162, 204],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 42,
+    "sense_radius": 1000
+  },
+  "stats": {
+    "max_hp": 900,
+    "move_speed": 50,
+    "attack": 34,
+    "defense": 6
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "target_factions": ["player", "tentacle"]
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "fire_point": "center",
+      "target_point": "center",
+      "interval": 1.8,
+      "range": 210,
+      "damage": 34
+    }
+  ],
+  "reward": {
+    "bio": 100
+  }
+}

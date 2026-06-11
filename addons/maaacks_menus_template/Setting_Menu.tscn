@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://2rgjv6txyp8x"]
+
+[ext_resource type="Texture2D" uid="uid://gynup8y7r0j4" path="res://GraphicAssets/02_SettingMenu/01_Setting_BackGround.png" id="1_lpmq0"]
+[ext_resource type="Shader" uid="uid://dwo106pf02pqg" path="res://Shader/SettingMenu/Setting_Menu.gdshader" id="1_qmfdn"]
+[ext_resource type="Texture2D" uid="uid://bx7tkj0hspudn" path="res://GraphicAssets/02_SettingMenu/02_Setting_BackGround_layer.png" id="2_ejoab"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hb3k4"]
+shader = ExtResource("1_qmfdn")
+shader_parameter/v_speed = 1.0
+shader_parameter/v_frequency = 15.0
+shader_parameter/v_amplitude = 0.02
+shader_parameter/alpha_flicker_speed = 4.0
+
+[node name="CanvasLayer设置界面" type="CanvasLayer" unique_id=2032722634]
+process_mode = 3
+layer = 66
+
+[node name="Control传递层" type="Control" parent="." unique_id=73019155]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect拦截响应层" type="TextureRect" parent="Control传递层" unique_id=1700251718]
+material = SubResource("ShaderMaterial_hb3k4")
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ejoab")
+
+[node name="TextureRect背景底图" type="TextureRect" parent="Control传递层/TextureRect拦截响应层" unique_id=1295769217]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_lpmq0")

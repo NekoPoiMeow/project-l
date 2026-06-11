@@ -1,0 +1,9 @@
+SaveSlotId=SaveAuto
+SaveRole=autosave
+SaveName=New Game
+SaveTime=2026-06-11 10:27:26
+SaveChapterID=1.0
+SaveChapterName=Chapter 1
+SaveFormatVersion=1
+SaveReason=sortie_prepare
+SaveDataJSON={"dungeon":{"captives":{},"last_processed_battle_id":""},"economy":{"humiliation":0.0,"lust":75.0},"flags":{},"meta":{"autosave_generation":7,"chapter_id":1.0,"chapter_name":"Chapter 1","format_version":1,"is_zero_progress":false,"last_autosave_slot":"SaveAuto","last_scene":"res://scenes/Battle/Battle_00.tscn","play_seconds":0.0,"save_name":"New Game","save_time":"2026-06-11 10:27:26","slot_id":"SaveAuto","slot_role":"autosave"},"progress":{"cleared_levels":["L001"],"last_level_id":"L001","level_bonus_collect":{"L001":1.0},"unlocked_chapters":["1"]},"unlocks":{"characters":["C001"],"codex":[],"equipments":["E001"],"torture_items":[],"weapons":["W001"]},"upgrades":{"building":{},"player":{},"tentacle":{}}}

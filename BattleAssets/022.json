@@ -1,0 +1,50 @@
+{
+  "id": "022",
+  "name": "汲取萃汁触",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "drainer"],
+  "visual": {
+    "gif": "res://BattleAssets/022.gif",
+    "scale": 0.9,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "78ff4d", "tint_strength": 0.15, "pulse_strength": 0.08, "pulse_speed": 3.4},
+    "halo": {"color": "78ff4d", "alpha": 0.14, "size": [100, 52], "offset": [0, 20], "pulse": 0.16},
+    "orbit_dots": {"color": "d8ff69", "alpha": 0.72, "count": 4, "radius": 34, "size": 4, "speed": 1.5}
+  },
+  "body": {
+    "radius": 23,
+    "sense_radius": 760
+  },
+  "stats": {
+    "max_hp": 150,
+    "move_speed": 105,
+    "attack": 18,
+    "defense": 2
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "objective_fallback": true,
+    "objective_fallback_radius": 0,
+    "objective_fallback_priority_order": ["base", "building"],
+    "leash_radius": 0,
+    "target_priority": "minion_first",
+    "target_priority_order": ["minion", "unit", "enemy", "building"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"],
+    "close_range": 90
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "interval": 0.9,
+      "range": 72,
+      "damage": 22,
+      "bio_to_base_on_hit": 10
+    }
+  ]
+}

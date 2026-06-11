@@ -1,0 +1,24 @@
+{
+  "id": "mutation_head_bullets",
+  "name": "突变头弹群",
+  "kind": "attack_instance",
+  "requires_target": false,
+  "origin": {"mode": "self_center", "point": "center"},
+  "aim": {"mode": "fixed_angle", "angle": 0},
+  "emitter": {"mode": "spread", "count": 3, "spread_angle": 10},
+  "motion": {"mode": "linear", "speed": 780, "life_time": 3.0, "max_distance": 1750},
+  "hit_shape": {"mode": "circle", "radius": 24},
+  "hit_rule": {"mode": "on_contact", "destroy_on_hit": false, "hit_same_target_delay": 999},
+  "target_filter": {"relation": "enemy", "include_building": true},
+  "effects": [
+    {"mode": "damage", "value": 32, "damage_multipliers": {"building": 0.55}}
+  ],
+  "visual": {
+    "gif": "res://BattleAssets/032.gif",
+    "primary": "ff8df4",
+    "secondary": "ffffff",
+    "alpha": 0.92,
+    "trail_width": 7,
+    "trail_points": 18
+  }
+}

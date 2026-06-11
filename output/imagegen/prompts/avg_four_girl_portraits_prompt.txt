@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: 2D visual novel / AVG placeholder character portrait sheet
+Primary request: Create one clean character sheet with exactly four different beautiful anime girl full-body standing portraits for AVG testing. Pure white background only. No scenery, no stars, no sparkles in the background, no decorative floating objects. Leave generous white spacing between the four characters for easy cropping.
+Reference style: dark romantic anime game key art, elegant black-purple-pink-gold palette, polished gacha/RPG visual novel standing character art, refined and attractive but not explicit. Similar mood to a gothic purple fantasy game promotional image, but remove all tentacles and remove all background complexity.
+Characters: four distinct beautiful girls with fashionable fantasy/subculture outfits. 1 gothic pink-black noble girl, 2 pale lavender elegant mage-like girl, 3 black-gold queenly girl, 4 white-pink cute idol/lolita girl.
+Pose: simple idle standing portrait pose, full body, front-facing or slight 3/4 front view, no walking, no running, no action pose, no weapon pose.
+Symmetry: keep silhouettes mostly balanced and easy to mirror later; no strongly asymmetrical costume construction.
+Style/medium: high-quality anime character illustration, full-body visual novel sprites, clean readable shapes, fashionable but not over-detailed, suitable to downscale for game use.
+Color palette: dark purple, black lace, blush pink, pale lavender, white, gold trim, pearl highlights, subtle glossy iridescent accents.
+Materials/textures: lace, ribbons, glossy gem accents, satin, black-gold trim, pearl shine. Keep details readable and not too dense.
+Constraints: exactly four full-body girls, pure white background, no text, no watermark, no weapons, no hand-held props, no tentacles, no monsters, no extra characters, no background scenery, no floating decorative effects, no cropped body parts, no overlapping characters. Adult-looking stylized anime fantasy characters, tasteful and non-explicit.
+Avoid: chibi proportions, pixel art, RPG battle sprites, weapons, staffs, books, halos, wings, floating symbols, stars, flowers, scenery, dense clutter, walking animation, multiple frames per character, transparent background.

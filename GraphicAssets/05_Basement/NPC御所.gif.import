@@ -1,0 +1,16 @@
+[remap]
+
+importer="texture_gif"
+importer_version=2
+type="GIFTexture"
+uid="uid://dbbaavow14r0p"
+path="res://.godot/imported/NPC御所.gif-e9aad679809896234c73f61cb5f0c7f3.res"
+
+[deps]
+
+source_file="res://GraphicAssets/05_Basement/NPC御所.gif"
+dest_files=["res://.godot/imported/NPC御所.gif-e9aad679809896234c73f61cb5f0c7f3.res"]
+
+[params]
+
+storage/compress=true

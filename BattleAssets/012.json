@@ -1,0 +1,59 @@
+{
+  "id": "012",
+  "name": "BulletTestBase",
+  "type": "base",
+  "faction": "tentacle",
+  "tags": ["base", "building"],
+  "visual": {
+    "gif": "res://BattleAssets/001.gif",
+    "scale": 1.5,
+    "size": [88, 96],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "78baff", "tint_strength": 0.08, "pulse_strength": 0.04, "pulse_speed": 2.4},
+    "halo": {"color": "78baff", "alpha": 0.10, "size": [260, 150], "offset": [0, 18], "pulse": 0.10},
+    "aura_ring": {"color": "78baff", "alpha": 0.34, "radius": 120, "width": 4, "pulse": 0.16}
+  },
+  "body": {
+    "radius": 92,
+    "block_radius": 92,
+    "sense_radius": 720
+  },
+  "stats": {
+    "max_hp": 20000,
+    "move_speed": 0,
+    "attack": 12,
+    "defense": 12,
+    "hp_regen": 180
+  },
+  "ai": {
+    "mode": "idle",
+    "target_factions": ["enemy"]
+  },
+  "zones": {
+    "alert_radius": 720,
+    "delivery_radius": 128,
+    "delivery_offset": [0, 260],
+    "delivery_texture": "res://scenes/Battle/Battle_00/TenderArea.gif",
+    "contact_radius": 120,
+    "contact_damage": 16,
+    "contact_cooldown": 0.9,
+    "contact_knockback_min": 90,
+    "contact_knockback_max": 170
+  },
+  "base": {
+    "bio_cap": 0,
+    "level": 1,
+    "max_level": 1,
+    "upgrade_thresholds": [60, 120],
+    "upgrade_cd": 2.0,
+    "level_passive_bio_per_second": [0],
+    "can_spawn_level": 99,
+    "spawn_entity_id": "004",
+    "spawn_cost": 40,
+    "spawn_interval": 1.2,
+    "spawn_radius": 260
+  },
+  "attacks": []
+}

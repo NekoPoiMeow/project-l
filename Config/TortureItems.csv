@@ -1,0 +1,3 @@
+id,name,unlocked,icon,description,effect_keys
+T001,Basic Restraint,TRUE,,Basic dungeon item for normal scenes.,
+T002,Confession Needle,FALSE,,Dungeon item for special humiliation scenes.,

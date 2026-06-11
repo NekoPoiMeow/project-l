@@ -1,0 +1,57 @@
+{
+  "id": "027",
+  "name": "触手服美少女",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "assimilated_girl"],
+  "visual": {
+    "gif": "res://BattleAssets/027.gif",
+    "scale": 0.86,
+    "size": [120, 192],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "78eaff", "tint_strength": 0.12, "pulse_strength": 0.06, "pulse_speed": 3.2},
+    "halo": {"color": "ff8de8", "alpha": 0.12, "size": [100, 54], "offset": [0, 28], "pulse": 0.14},
+    "orbit_dots": {"color": "78eaff", "alpha": 0.70, "count": 4, "radius": 42, "size": 4, "speed": 1.8}
+  },
+  "body": {
+    "radius": 22,
+    "sense_radius": 760
+  },
+  "stats": {
+    "max_hp": 190,
+    "move_speed": 105,
+    "attack": 26,
+    "defense": 3
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "objective_fallback": true,
+    "objective_fallback_radius": 0,
+    "objective_fallback_priority_order": ["base", "building"],
+    "leash_radius": 0,
+    "target_priority": "base_first",
+    "target_priority_order": ["base", "building", "unit", "minion"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"],
+    "close_range": 110
+  },
+  "combat": {
+    "damage_multipliers": {
+      "building": 1.45
+    }
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "interval": 0.9,
+      "range": 86,
+      "damage": 30,
+      "damage_multipliers": {
+        "building": 1.35
+      }
+    }
+  ]
+}

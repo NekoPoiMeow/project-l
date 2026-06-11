@@ -1,0 +1,27 @@
+{
+  "id": "030",
+  "name": "裂空噬灭触",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["minion", "rocket_tentacle", "tentacle"],
+  "visual": {"gif": "res://BattleAssets/030.gif", "scale": 1.0, "max_size": [96, 138], "offset": [0, -12]},
+  "visual_fx": {"shader": {"tint": "ff4b68", "tint_strength": 0.10, "pulse_strength": 0.06}, "aura_ring": {"color": "ff4b68", "alpha": 0.18, "radius": 76, "width": 3}},
+  "body": {"radius": 32, "block_radius": 26, "sense_radius": 820},
+  "stats": {"max_hp": 720, "move_speed": 135, "attack": 48, "defense": 3, "hp_regen": 1.2},
+  "ai": {"mode": "attack_building_first", "movement_mode": "strafe_close", "close_range": 210, "target_factions": ["enemy"], "target_priority_order": ["base", "building", "unit", "minion"], "objective_fallback": true, "objective_fallback_priority_order": ["base", "building"]},
+  "attacks": [{
+    "id": "rocket_tentacle_shot",
+    "kind": "attack_instance",
+    "interval": 1.35,
+    "requires_target": true,
+    "origin": {"mode": "self_center"},
+    "aim": {"mode": "nearest_enemy"},
+    "motion": {"mode": "linear", "speed": 520, "life_time": 1.8, "max_distance": 850},
+    "hit_shape": {"mode": "circle", "radius": 42},
+    "hit_rule": {"mode": "on_contact", "destroy_on_hit": true, "hit_same_target_delay": 999},
+    "target_filter": {"relation": "enemy", "include_building": true},
+    "effects": [{"mode": "damage", "value": 54, "damage_multipliers": {"building": 0.8}}, {"mode": "spawn_attack", "attack": {"id": "rocket_tentacle_blast", "kind": "attack_instance", "requires_target": false, "origin": {"mode": "target_center"}, "aim": {"mode": "fixed_angle", "angle": 0}, "motion": {"mode": "static", "duration": 0.16}, "hit_shape": {"mode": "circle", "radius": 92}, "hit_rule": {"mode": "on_spawn_once", "hit_same_target_delay": 999}, "target_filter": {"relation": "enemy", "include_building": true}, "effects": [{"mode": "damage", "value": 22}], "visual": {"gif": "res://BattleAssets/GeneralBombing.gif", "primary": "ff486a", "secondary": "ffe1c8", "alpha": 0.82}}}],
+    "visual": {"texture": "res://BattleAssets/RPG.png", "primary": "ff486a", "secondary": "ffe1c8", "alpha": 0.86}
+  }],
+  "reward": {"xp": 0, "bio": 0}
+}

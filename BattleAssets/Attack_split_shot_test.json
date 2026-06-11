@@ -1,0 +1,88 @@
+{
+  "id": "split_shot_test",
+  "name": "测试嵌套：命中分裂",
+  "description": "命中敌人后生成四颗小分裂弹",
+  "kind": "attack_instance",
+  "interval": 1.2,
+  "requires_target": true,
+  "origin": {
+    "mode": "self_center"
+  },
+  "aim": {
+    "mode": "nearest_enemy"
+  },
+  "emitter": {
+    "mode": "single",
+    "count": 1
+  },
+  "motion": {
+    "mode": "linear",
+    "speed": 440,
+    "life_time": 1.6,
+    "max_distance": 650
+  },
+  "hit_shape": {
+    "mode": "circle",
+    "radius": 14
+  },
+  "hit_rule": {
+    "mode": "on_contact",
+    "destroy_on_hit": true,
+    "hit_same_target_delay": 999
+  },
+  "target_filter": {
+    "relation": "enemy",
+    "include_building": true
+  },
+  "effects": [
+    {
+      "mode": "damage",
+      "value": 18
+    },
+    {
+      "mode": "spawn_attack",
+      "max_depth": 4,
+      "emitter_override": {
+        "mode": "ring",
+        "count": 4
+      },
+      "attack": {
+        "kind": "attack_instance",
+        "origin": {
+          "mode": "target_center"
+        },
+        "motion": {
+          "mode": "linear",
+          "speed": 330,
+          "life_time": 0.9,
+          "max_distance": 260
+        },
+        "hit_shape": {
+          "mode": "circle",
+          "radius": 10
+        },
+        "hit_rule": {
+          "mode": "on_contact",
+          "destroy_on_hit": true,
+          "hit_same_target_delay": 999
+        },
+        "target_filter": {
+          "relation": "enemy",
+          "include_building": true
+        },
+        "effects": [
+          {
+            "mode": "damage",
+            "value": 9
+          }
+        ]
+      }
+    }
+  ],
+  "visual": {
+    "primary": "ff4f72",
+    "secondary": "fff1c0",
+    "alpha": 0.9,
+    "pixel_count": 10
+  }
+}

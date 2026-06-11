@@ -1,0 +1,55 @@
+{
+  "id": "002",
+  "name": "EnemyScout",
+  "type": "enemy",
+  "faction": "enemy",
+  "tags": ["enemy", "girl"],
+  "visual": {
+    "gif": "res://BattleAssets/002.gif",
+    "scale": 1.0,
+    "size": [120, 192],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 22,
+    "sense_radius": 700
+  },
+  "stats": {
+    "max_hp": 80,
+    "move_speed": 95,
+    "attack": 10,
+    "defense": 0
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "target_priority": "building_first",
+    "target_priority_order": ["building", "player", "minion", "unit"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["player", "tentacle"],
+    "repath_interval": 0.35,
+    "close_range": 90,
+    "close_speed_mul": 1.12
+  },
+  "combat": {
+    "damage_multipliers": {
+      "player": 1.0,
+      "minion": 1.15,
+      "building": 1.2
+    }
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "fire_point": "center",
+      "target_point": "center",
+      "interval": 1.0,
+      "range": 180,
+      "damage": 18
+    }
+  ],
+  "reward": {
+    "bio": 20,
+    "xp": 1
+  }
+}

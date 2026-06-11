@@ -1,0 +1,192 @@
+[gd_scene format=3 uid="uid://conp2rg3wxtqo"]
+
+[ext_resource type="Texture2D" uid="uid://bk3t08p2q2mlr" path="res://GraphicAssets/01_StartMenu/StartMenu_Background.png" id="1_0xqkg"]
+[ext_resource type="Script" uid="uid://l6feud7d8knh" path="res://Script/StartMenu/start_menu_焦点获得.gd" id="1_m7pwg"]
+[ext_resource type="Texture2D" uid="uid://bc2brdkm2ewhn" path="res://GraphicAssets/01_StartMenu/Start_Button.png" id="2_h46v2"]
+[ext_resource type="Texture2D" uid="uid://cr0a7pe8lh4to" path="res://GraphicAssets/01_StartMenu/Start_Button - Press.png" id="3_vhx5x"]
+[ext_resource type="Texture2D" uid="uid://bs6l024wspbws" path="res://GraphicAssets/01_StartMenu/Start_Button - Hover.png" id="4_r2tlw"]
+[ext_resource type="Script" uid="uid://3ry6hp62q37m" path="res://Script/StartMenu/texture_button_蠕动.gd" id="5_2kh1x"]
+[ext_resource type="Script" uid="uid://b6yf2arw8pps6" path="res://Script/StartMenu/texture_button_开始.gd" id="6_e45k6"]
+[ext_resource type="Texture2D" uid="uid://cns8suwwdlwmv" path="res://GraphicAssets/01_StartMenu/Option Button.png" id="6_m7pwg"]
+[ext_resource type="Texture2D" uid="uid://c46vh524e34vy" path="res://GraphicAssets/01_StartMenu/Option Button - Press.png" id="7_v501y"]
+[ext_resource type="Texture2D" uid="uid://cfeldicsu46bh" path="res://GraphicAssets/01_StartMenu/Option Button - Hover.png" id="8_r4bv1"]
+[ext_resource type="Texture2D" uid="uid://b2kjll6w1h8mb" path="res://GraphicAssets/01_StartMenu/Info_Button.png" id="9_bmrsy"]
+[ext_resource type="Texture2D" uid="uid://spbrfda55gnl" path="res://GraphicAssets/01_StartMenu/Info_Button Pressed.png" id="10_7621k"]
+[ext_resource type="Script" uid="uid://bvb6fu722frgo" path="res://Script/StartMenu/texture_button_设置切换 - 副本.gd" id="10_e45k6"]
+[ext_resource type="Texture2D" uid="uid://p0kcf306bbwo" path="res://GraphicAssets/01_StartMenu/Info_Button Hover.png" id="11_e45k6"]
+[ext_resource type="Texture2D" uid="uid://bvlw3i5526r6i" path="res://GraphicAssets/01_StartMenu/End Button.png" id="12_cs77w"]
+[ext_resource type="Texture2D" uid="uid://bukit8y2juvf6" path="res://GraphicAssets/01_StartMenu/End Button - Press.png" id="13_43who"]
+[ext_resource type="Texture2D" uid="uid://dsf3of2cq5vwf" path="res://GraphicAssets/01_StartMenu/End Button - Hover.png" id="14_ft1tf"]
+[ext_resource type="Script" uid="uid://pw7tthdp6y46" path="res://Script/StartMenu/texture_button_终了.gd" id="15_p0fh4"]
+[ext_resource type="Shader" uid="uid://bkst6yjujpf26" path="res://Shader/StartMenu/start_menu_开始菜单页面.gdshader" id="16_pf271"]
+[ext_resource type="Texture2D" uid="uid://bg5eo2bhdef44" path="res://GraphicAssets/01_StartMenu/Title.png" id="17_kuuan"]
+[ext_resource type="Script" uid="uid://b2mof3xqab1tq" path="res://Script/StartMenu/标题.gd" id="18_af4a3"]
+[ext_resource type="AudioStream" uid="uid://dnw1x8cc3gdtr" path="res://Sound+BGM/01 Start Menu/气泡.mp3" id="19_2kh1x"]
+[ext_resource type="Script" uid="uid://bs86c3hfdcvye" path="res://Script/StartMenu/任意按键关闭control情报说明弹窗.gd" id="20_bmrsy"]
+[ext_resource type="AudioStream" uid="uid://biqgb47c52yv5" path="res://Sound+BGM/01 Start Menu/mouse-click-153941.mp3" id="20_m7pwg"]
+[ext_resource type="Texture2D" uid="uid://b1w6crv6ganw3" path="res://GraphicAssets/01_StartMenu/About_Info.png" id="20_r4bv1"]
+[ext_resource type="AudioStream" uid="uid://b6wddyn1b7c3u" path="res://Sound+BGM/01 Start Menu/标题页面BGM.mp3" id="21_2kh1x"]
+[ext_resource type="AudioStream" uid="uid://dvb5bssuq5bmi" path="res://Sound+BGM/01 Start Menu/开始游戏.mp3" id="22_m7pwg"]
+[ext_resource type="AudioStream" uid="uid://d383er7y43g7m" path="res://Sound+BGM/01 Start Menu/sweet-young-woman-laugh.mp3" id="24_v501y"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_535le"]
+shader = ExtResource("16_pf271")
+shader_parameter/wave_speed = 3.0
+shader_parameter/wave_freq = 15.0
+shader_parameter/wave_amp = 0.01
+shader_parameter/shine_speed = 1.5
+shader_parameter/shine_width = 0.2
+shader_parameter/shine_interval = 4.0
+
+[node name="2DNote标题页面" type="Node2D" unique_id=191287748]
+script = ExtResource("1_m7pwg")
+
+[node name="StartMenuBackground 背景页面" type="Sprite2D" parent="." unique_id=1345447784]
+position = Vector2(800, 450)
+texture = ExtResource("1_0xqkg")
+
+[node name="CanvasLayer开始菜单" type="CanvasLayer" parent="." unique_id=37955829]
+
+[node name="Control开始菜单" type="Control" parent="CanvasLayer开始菜单" unique_id=2013927339]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer垂直自动排列控制按钮" type="VBoxContainer" parent="CanvasLayer开始菜单/Control开始菜单" unique_id=1490341187]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -110.0
+offset_top = -266.0
+offset_right = 110.0
+offset_bottom = 266.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureButton开始" type="TextureButton" parent="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮" unique_id=1646785782]
+layout_mode = 2
+focus_neighbor_top = NodePath("../TextureButton 终了")
+focus_neighbor_bottom = NodePath("../TextureButton 设定")
+mouse_filter = 1
+texture_normal = ExtResource("2_h46v2")
+texture_pressed = ExtResource("3_vhx5x")
+texture_hover = ExtResource("4_r2tlw")
+texture_focused = ExtResource("4_r2tlw")
+script = ExtResource("6_e45k6")
+
+[node name="TextureButton 设定" type="TextureButton" parent="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮" unique_id=2079312902]
+layout_mode = 2
+focus_neighbor_top = NodePath("../TextureButton开始")
+focus_neighbor_bottom = NodePath("../TextureButton 情报")
+mouse_filter = 1
+texture_normal = ExtResource("6_m7pwg")
+texture_pressed = ExtResource("7_v501y")
+texture_hover = ExtResource("8_r4bv1")
+texture_focused = ExtResource("8_r4bv1")
+script = ExtResource("10_e45k6")
+
+[node name="TextureButton 情报" type="TextureButton" parent="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮" unique_id=1215960568]
+layout_mode = 2
+focus_neighbor_top = NodePath("../TextureButton 设定")
+focus_neighbor_bottom = NodePath("../TextureButton 终了")
+mouse_filter = 1
+texture_normal = ExtResource("9_bmrsy")
+texture_pressed = ExtResource("10_7621k")
+texture_hover = ExtResource("11_e45k6")
+texture_focused = ExtResource("11_e45k6")
+script = ExtResource("5_2kh1x")
+
+[node name="TextureButton 终了" type="TextureButton" parent="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮" unique_id=860161337]
+layout_mode = 2
+focus_neighbor_top = NodePath("../TextureButton 情报")
+focus_neighbor_bottom = NodePath("../TextureButton开始")
+mouse_filter = 1
+texture_normal = ExtResource("12_cs77w")
+texture_pressed = ExtResource("13_43who")
+texture_hover = ExtResource("14_ft1tf")
+texture_focused = ExtResource("14_ft1tf")
+script = ExtResource("15_p0fh4")
+
+[node name="TextureRect 标题" type="TextureRect" parent="CanvasLayer开始菜单" unique_id=890355305]
+material = SubResource("ShaderMaterial_535le")
+offset_left = 571.0
+offset_top = 9.000001
+offset_right = 1141.0
+offset_bottom = 234.0
+scale = Vector2(0.79473686, 0.7088889)
+texture = ExtResource("17_kuuan")
+script = ExtResource("18_af4a3")
+
+[node name="Control情报说明弹窗" type="Control" parent="CanvasLayer开始菜单" unique_id=886470346]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("20_bmrsy")
+
+[node name="TextureRect弹窗说明" type="TextureRect" parent="CanvasLayer开始菜单/Control情报说明弹窗" unique_id=2142923273]
+layout_mode = 0
+offset_left = 156.0
+offset_top = 11.0
+offset_right = 1456.5
+offset_bottom = 878.0
+mouse_filter = 2
+texture = ExtResource("20_r4bv1")
+expand_mode = 3
+
+[node name="AudioStreamPlayer 菜单 焦点 音效" type="AudioStreamPlayer" parent="." unique_id=746814012]
+stream = ExtResource("19_2kh1x")
+mix_target = 1
+bus = &"SFX"
+
+[node name="AudioStreamPlayer 菜单 点击 音效" type="AudioStreamPlayer" parent="." unique_id=1532166209]
+stream = ExtResource("20_m7pwg")
+mix_target = 1
+bus = &"SFX"
+
+[node name="AudioStreamPlayer 标题页面BGM" type="AudioStreamPlayer" parent="." unique_id=750691357]
+process_mode = 3
+stream = ExtResource("21_2kh1x")
+autoplay = true
+mix_target = 1
+bus = &"Music"
+
+[node name="AudioStreamPlayer 开始游戏按钮点击音效" type="AudioStreamPlayer" parent="." unique_id=1847381632]
+stream = ExtResource("22_m7pwg")
+mix_target = 1
+bus = &"SFX"
+
+[node name="AudioStreamPlayer 情报弹窗关闭音效" type="AudioStreamPlayer" parent="." unique_id=2110197962]
+stream = ExtResource("24_v501y")
+bus = &"Voice"
+
+[connection signal="focus_entered" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton开始" to="AudioStreamPlayer 菜单 焦点 音效" method="play"]
+[connection signal="mouse_entered" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton开始" to="AudioStreamPlayer 菜单 焦点 音效" method="play"]
+[connection signal="pressed" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton开始" to="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton开始" method="_on_pressed"]
+[connection signal="pressed" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton开始" to="AudioStreamPlayer 开始游戏按钮点击音效" method="play"]
+[connection signal="focus_entered" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 设定" to="AudioStreamPlayer 菜单 焦点 音效" method="play"]
+[connection signal="mouse_entered" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 设定" to="AudioStreamPlayer 菜单 焦点 音效" method="play"]
+[connection signal="pressed" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 设定" to="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 设定" method="_on_pressed"]
+[connection signal="pressed" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 设定" to="AudioStreamPlayer 菜单 点击 音效" method="play"]
+[connection signal="focus_entered" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 情报" to="AudioStreamPlayer 菜单 焦点 音效" method="play"]
+[connection signal="mouse_entered" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 情报" to="AudioStreamPlayer 菜单 焦点 音效" method="play"]
+[connection signal="pressed" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 情报" to="." method="_on_texture_button_情报_pressed"]
+[connection signal="pressed" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 情报" to="AudioStreamPlayer 情报弹窗关闭音效" method="play"]
+[connection signal="focus_entered" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 终了" to="AudioStreamPlayer 菜单 焦点 音效" method="play"]
+[connection signal="mouse_entered" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 终了" to="AudioStreamPlayer 菜单 焦点 音效" method="play"]
+[connection signal="pressed" from="CanvasLayer开始菜单/Control开始菜单/VBoxContainer垂直自动排列控制按钮/TextureButton 终了" to="AudioStreamPlayer 菜单 点击 音效" method="play"]

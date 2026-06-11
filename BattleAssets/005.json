@@ -1,0 +1,40 @@
+{
+  "id": "005",
+  "name": "EnemyFastTest",
+  "type": "enemy",
+  "faction": "enemy",
+  "tags": ["enemy", "fast"],
+  "visual": {
+    "gif": "res://BattleAssets/005.gif",
+    "scale": 1.0,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 20,
+    "sense_radius": 760
+  },
+  "stats": {
+    "max_hp": 65,
+    "move_speed": 135,
+    "attack": 9,
+    "defense": 0
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "target_factions": ["player", "tentacle"]
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "fire_point": "center",
+      "target_point": "center",
+      "interval": 0.8,
+      "range": 135,
+      "damage": 9
+    }
+  ],
+  "reward": {
+    "bio": 15
+  }
+}

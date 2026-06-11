@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://d072l42t7i4tm"
+
+[deps]
+
+files=["res://Config/RunStatUpgrades.name.translation", "res://Config/RunStatUpgrades.description.translation", "res://Config/RunStatUpgrades.stat.translation", "res://Config/RunStatUpgrades.weight.translation", "res://Config/RunStatUpgrades.min.translation"]
+
+source_file="res://Config/RunStatUpgrades.csv"
+dest_files=["res://Config/RunStatUpgrades.name.translation", "res://Config/RunStatUpgrades.description.translation", "res://Config/RunStatUpgrades.stat.translation", "res://Config/RunStatUpgrades.weight.translation", "res://Config/RunStatUpgrades.min.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

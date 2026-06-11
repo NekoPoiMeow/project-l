@@ -1,0 +1,111 @@
+[gd_scene format=3 uid="uid://r8qx1g24mae"]
+
+[ext_resource type="Script" uid="uid://71hxhtoqbd6b" path="res://Script/LevelSelect/level_select.gd" id="1_hxg0m"]
+[ext_resource type="Texture2D" uid="uid://cnbhvn3ix04qx" path="res://GraphicAssets/06_Level_Select/01_Map.png" id="2_n3wej"]
+[ext_resource type="Texture2D" uid="uid://bcdnujblxjnxq" path="res://GraphicAssets/06_Level_Select/02_Arrow.png" id="3_n3wej"]
+[ext_resource type="Texture2D" uid="uid://ddpdyvc4ifmha" path="res://GraphicAssets/06_Level_Select/03_BackBasement.png" id="4_2rfwa"]
+[ext_resource type="AudioStream" uid="uid://baiy8nexseiqs" path="res://Sound+BGM/06LevelSelect/Strike.mp3" id="5_ebo17"]
+[ext_resource type="AudioStream" uid="uid://sxowhww6ytaf" path="res://Sound+BGM/06LevelSelect/SelectLevel.mp3" id="5_ypgcb"]
+[ext_resource type="AudioStream" uid="uid://diffh3osus75x" path="res://Sound+BGM/06LevelSelect/Cancel.mp3" id="6_ypgcb"]
+
+[node name="Node2DLevelSelect" type="Node2D" unique_id=184639191]
+script = ExtResource("1_hxg0m")
+
+[node name="Node2DMapViewport" type="Node2D" parent="." unique_id=973460822]
+
+[node name="Sprite2DBigMap" type="Sprite2D" parent="Node2DMapViewport" unique_id=275700601]
+texture = ExtResource("2_n3wej")
+centered = false
+
+[node name="Node2DLinesRoot" type="Node2D" parent="Node2DMapViewport" unique_id=987375243]
+
+[node name="Node2D2NodesRoot" type="Node2D" parent="Node2DMapViewport" unique_id=2006989376]
+
+[node name="Sprite2DArrow" type="Sprite2D" parent="Node2DMapViewport" unique_id=439902084]
+visible = false
+texture = ExtResource("3_n3wej")
+
+[node name="CanvasLayerUI" type="CanvasLayer" parent="." unique_id=876446910]
+
+[node name="ControlLevelInfo" type="Control" parent="CanvasLayerUI" unique_id=406074748]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="LabelLevelID" type="Label" parent="CanvasLayerUI/ControlLevelInfo" unique_id=1713596265]
+layout_mode = 0
+offset_left = 730.0
+offset_top = 136.0
+offset_right = 821.0
+offset_bottom = 178.0
+text = "LevelID"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LabelLevelName" type="Label" parent="CanvasLayerUI/ControlLevelInfo" unique_id=1340314069]
+layout_mode = 0
+offset_left = 708.0
+offset_top = 178.0
+offset_right = 844.0
+offset_bottom = 220.0
+text = "LevelName"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LabelLevelDesc" type="Label" parent="CanvasLayerUI/ControlLevelInfo" unique_id=1162091045]
+layout_mode = 0
+offset_left = 680.0
+offset_top = 223.0
+offset_right = 865.0
+offset_bottom = 262.0
+text = "LevelDescription"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="LabelBonus" type="Label" parent="CanvasLayerUI/ControlLevelInfo" unique_id=93434984]
+layout_mode = 0
+offset_left = 717.0
+offset_top = 296.0
+offset_right = 838.0
+offset_bottom = 372.0
+text = "Bonus"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonSortieButton" type="Button" parent="CanvasLayerUI" unique_id=1422645346]
+offset_left = 712.0
+offset_top = 453.0
+offset_right = 851.0
+offset_bottom = 545.0
+disabled = true
+text = "出击"
+
+[node name="ButtonCancelButton" type="Button" parent="CanvasLayerUI" unique_id=846334634]
+offset_left = 714.0
+offset_top = 575.0
+offset_right = 852.0
+offset_bottom = 674.0
+text = "取消"
+
+[node name="TextureRectBackBasement" type="TextureRect" parent="CanvasLayerUI" unique_id=2138737394]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -134.0
+offset_right = 179.0
+grow_vertical = 0
+pivot_offset = Vector2(16, -16)
+texture = ExtResource("4_2rfwa")
+
+[node name="AudioStreamPlayerSelect" type="AudioStreamPlayer" parent="CanvasLayerUI" unique_id=535288394]
+stream = ExtResource("5_ypgcb")
+bus = &"SFX"
+
+[node name="AudioStreamPlayerSortie" type="AudioStreamPlayer" parent="CanvasLayerUI" unique_id=667596046]
+stream = ExtResource("5_ebo17")
+bus = &"SFX"
+
+[node name="AudioStreamPlayerCancel" type="AudioStreamPlayer" parent="CanvasLayerUI" unique_id=791404879]
+stream = ExtResource("6_ypgcb")
+bus = &"SFX"

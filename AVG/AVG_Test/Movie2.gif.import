@@ -1,0 +1,16 @@
+[remap]
+
+importer="texture_gif"
+importer_version=2
+type="GIFTexture"
+uid="uid://bpa7sy6p1a4de"
+path="res://.godot/imported/Movie2.gif-e57a6744538062aad37501f5348603c9.res"
+
+[deps]
+
+source_file="res://AVG/AVG_Test/Movie2.gif"
+dest_files=["res://.godot/imported/Movie2.gif-e57a6744538062aad37501f5348603c9.res"]
+
+[params]
+
+storage/compress=true

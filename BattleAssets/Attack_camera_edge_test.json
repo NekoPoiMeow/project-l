@@ -1,0 +1,50 @@
+{
+  "id": "camera_edge_test",
+  "name": "新增：边缘飞矛",
+  "description": "从摄像机边缘生成并向战场内射入",
+  "kind": "attack_instance",
+  "interval": 3.4,
+  "requires_target": false,
+  "origin": {
+    "mode": "camera_edge"
+  },
+  "aim": {
+    "mode": "player"
+  },
+  "emitter": {
+    "mode": "spread",
+    "count": 5,
+    "spread_angle": 22
+  },
+  "motion": {
+    "mode": "linear",
+    "speed": 520,
+    "life_time": 2.5,
+    "max_distance": 1200
+  },
+  "hit_shape": {
+    "mode": "circle",
+    "radius": 15
+  },
+  "hit_rule": {
+    "mode": "on_contact",
+    "destroy_on_hit": true,
+    "hit_same_target_delay": 999
+  },
+  "target_filter": {
+    "relation": "enemy",
+    "include_building": true
+  },
+  "effects": [
+    {
+      "mode": "damage",
+      "value": 20
+    }
+  ],
+  "visual": {
+    "primary": "ff315d",
+    "secondary": "ffffff",
+    "alpha": 0.88,
+    "pixel_count": 6
+  }
+}

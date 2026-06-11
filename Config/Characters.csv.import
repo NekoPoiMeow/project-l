@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dlgd485nj5848"
+
+[deps]
+
+files=["res://Config/Characters.name.translation", "res://Config/Characters.unlocked.translation", "res://Config/Characters.en.translation", "res://Config/Characters.description.translation", "res://Config/Characters.hp.translation", "res://Config/Characters.regen.translation", "res://Config/Characters.melee.translation", "res://Config/Characters.ranged.translation", "res://Config/Characters.skill.translation"]
+
+source_file="res://Config/Characters.csv"
+dest_files=["res://Config/Characters.name.translation", "res://Config/Characters.unlocked.translation", "res://Config/Characters.en.translation", "res://Config/Characters.description.translation", "res://Config/Characters.hp.translation", "res://Config/Characters.regen.translation", "res://Config/Characters.melee.translation", "res://Config/Characters.ranged.translation", "res://Config/Characters.skill.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

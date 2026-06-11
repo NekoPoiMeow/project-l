@@ -1,0 +1,43 @@
+{
+  "id": "006",
+  "name": "EnemyRangedTest",
+  "type": "enemy",
+  "faction": "enemy",
+  "tags": ["enemy", "ranged"],
+  "visual": {
+    "gif": "res://BattleAssets/006.gif",
+    "scale": 1.0,
+    "size": [124, 136],
+    "offset": [0, 0]
+  },
+  "body": {
+    "radius": 22,
+    "sense_radius": 820
+  },
+  "stats": {
+    "max_hp": 90,
+    "move_speed": 75,
+    "attack": 12,
+    "defense": 0
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "target_factions": ["player", "tentacle"]
+  },
+  "attacks": [
+    {
+      "kind": "projectile",
+      "motion": "linear",
+      "fire_point": "center",
+      "target_point": "center",
+      "interval": 1.4,
+      "speed": 300,
+      "damage": 12,
+      "radius": 10,
+      "life_time": 2.8
+    }
+  ],
+  "reward": {
+    "bio": 20
+  }
+}

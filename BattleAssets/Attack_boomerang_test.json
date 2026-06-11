@@ -1,0 +1,50 @@
+{
+  "id": "boomerang_test",
+  "name": "新增：回旋触刺",
+  "description": "朝鼠标方向飞出，然后返回玩家身边",
+  "kind": "attack_instance",
+  "interval": 2.2,
+  "requires_target": false,
+  "origin": {
+    "mode": "self_center"
+  },
+  "aim": {
+    "mode": "mouse"
+  },
+  "emitter": {
+    "mode": "spread",
+    "count": 2,
+    "spread_angle": 18
+  },
+  "motion": {
+    "mode": "boomerang",
+    "speed": 410,
+    "duration": 2.2,
+    "return_after": 0.72
+  },
+  "hit_shape": {
+    "mode": "circle",
+    "radius": 18
+  },
+  "hit_rule": {
+    "mode": "while_active_tick",
+    "tick_interval": 0.08,
+    "hit_same_target_delay": 0.32
+  },
+  "target_filter": {
+    "relation": "enemy",
+    "include_building": true
+  },
+  "effects": [
+    {
+      "mode": "damage",
+      "value": 12
+    }
+  ],
+  "visual": {
+    "primary": "ff6b4a",
+    "secondary": "ffe0bc",
+    "alpha": 0.86,
+    "pixel_count": 8
+  }
+}

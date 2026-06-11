@@ -1,0 +1,41 @@
+{
+  "id": "chain_lightning_test",
+  "name": "测试闪电链：敌人间跳跃",
+  "description": "命中后寻找附近下一个敌人，连续生成链式小光束",
+  "kind": "attack_instance",
+  "interval": 2.4,
+  "requires_target": true,
+  "origin": {"mode": "self_center"},
+  "aim": {"mode": "nearest_enemy"},
+  "emitter": {"mode": "single", "count": 1},
+  "motion": {"mode": "linear", "speed": 900, "life_time": 0.5, "max_distance": 700},
+  "hit_shape": {"mode": "circle", "radius": 28},
+  "hit_rule": {"mode": "on_contact", "destroy_on_hit": true, "hit_same_target_delay": 999},
+  "target_filter": {"relation": "enemy", "include_building": false},
+  "effects": [
+    {"mode": "damage", "value": 45},
+    {
+      "mode": "chain_attack",
+      "radius": 420,
+      "max_depth": 5,
+      "attack": {
+        "id": "chain_lightning_link",
+        "kind": "attack_instance",
+        "requires_target": false,
+        "origin": {"mode": "target_center"},
+        "aim": {"mode": "target"},
+        "emitter": {"mode": "single", "count": 1},
+        "motion": {"mode": "linear", "speed": 1200, "life_time": 0.25, "max_distance": 460},
+        "hit_shape": {"mode": "circle", "radius": 24},
+        "hit_rule": {"mode": "on_contact", "destroy_on_hit": true, "hit_same_target_delay": 999},
+        "target_filter": {"relation": "enemy", "include_building": false},
+        "effects": [
+          {"mode": "damage", "value": 30},
+          {"mode": "chain_attack", "radius": 420, "max_depth": 5}
+        ],
+        "visual": {"primary": "ffe1c8", "secondary": "ff4fdd", "alpha": 0.86, "pixel_count": 6}
+      }
+    }
+  ],
+  "visual": {"primary": "ffe1c8", "secondary": "ff4fdd", "alpha": 0.88, "pixel_count": 8}
+}

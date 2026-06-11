@@ -1,0 +1,217 @@
+[gd_scene format=3 uid="uid://jbdtwg2ywdps"]
+
+[ext_resource type="Script" uid="uid://dibkmcvgfrm41" path="res://Script/SaveMgr/save_number_chk.gd" id="1_juueu"]
+[ext_resource type="Texture2D" uid="uid://dbklbeep5hobp" path="res://GraphicAssets/04_Save_Select/01_Save Menu.png" id="1_pbypa"]
+[ext_resource type="Texture2D" uid="uid://61lpsqqskhd" path="res://GraphicAssets/04_Save_Select/01_Save_img.png" id="2_f8afa"]
+[ext_resource type="Script" uid="uid://vkw063yd7mys" path="res://Script/SaveMgr/control_back_title.gd" id="2_vhwwo"]
+[ext_resource type="Texture2D" uid="uid://88wqrueywcmq" path="res://GraphicAssets/04_Save_Select/02_Box.png" id="3_abbhg"]
+[ext_resource type="Shader" uid="uid://fnnvkqq76gnm" path="res://Shader/SaveMgr/Box.gdshader" id="3_fry52"]
+[ext_resource type="Script" uid="uid://bb47ddm2g2hau" path="res://Script/SaveMgr/Save1_Foucs.gd" id="5_4honp"]
+[ext_resource type="FontFile" uid="uid://b40iky2mv4l8m" path="res://Fonts/HanaMinA.ttf" id="5_ndowi"]
+[ext_resource type="Texture2D" uid="uid://bebu6n5xjga1j" path="res://GraphicAssets/04_Save_Select/03_Del_Button.png" id="5_oqx71"]
+[ext_resource type="Script" uid="uid://du7dctlp463s7" path="res://Script/SaveMgr/Save2_Foucs.gd" id="9_qvlfl"]
+[ext_resource type="Script" uid="uid://cltwiib3tvp0x" path="res://Script/SaveMgr/SaveAuto_Foucs.gd" id="10_jby47"]
+[ext_resource type="Script" uid="uid://bhavqpgbihtsf" path="res://Script/SaveMgr/save_del_button.gd" id="11_71jbf"]
+[ext_resource type="Texture2D" uid="uid://mis67at6ve4j" path="res://GraphicAssets/04_Save_Select/04_DelCfmBox.png" id="13_n6ff7"]
+[ext_resource type="Script" uid="uid://eb4y1rgtdkpe" path="res://Script/SaveMgr/Cfm_Del_Save.gd" id="13_qvlfl"]
+[ext_resource type="Texture2D" uid="uid://bbp2la42pprir" path="res://GraphicAssets/04_Save_Select/03_Del_Cfm.png" id="14_qvlfl"]
+[ext_resource type="Script" uid="uid://3jv8363nptft" path="res://Script/SaveMgr/Withdraw_Del.gd" id="15_qvlfl"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_abbhg"]
+shader = ExtResource("3_fry52")
+shader_parameter/intensity = 1.0
+shader_parameter/speed = 2.0
+
+[node name="Node2D存档管理" type="Node2D" unique_id=12613430 groups=["SaveID"]]
+script = ExtResource("1_juueu")
+
+[node name="TextureRect背景图" type="TextureRect" parent="." unique_id=1733188451]
+offset_right = 1600.0
+offset_bottom = 900.0
+mouse_filter = 2
+texture = ExtResource("1_pbypa")
+
+[node name="TextureRect存档图" type="TextureRect" parent="." unique_id=1059630657]
+offset_left = 332.0
+offset_top = 151.0
+offset_right = 759.0
+offset_bottom = 681.0
+texture = ExtResource("2_f8afa")
+
+[node name="Control返回标题" type="Control" parent="." unique_id=1983814819]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 89.0
+offset_top = 782.0
+offset_right = 394.0
+offset_bottom = 858.0
+focus_mode = 2
+script = ExtResource("2_vhwwo")
+
+[node name="Sprite2D选项框" type="Sprite2D" parent="Control返回标题" unique_id=102298909]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(129.49998, 41.500008)
+scale = Vector2(0.6012145, 0.31596097)
+texture = ExtResource("3_abbhg")
+
+[node name="Control存档1" type="Control" parent="." unique_id=959764461]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 921.0
+offset_top = 78.0
+offset_right = 1524.0
+offset_bottom = 306.0
+script = ExtResource("5_4honp")
+
+[node name="Sprite2D选项框" type="Sprite2D" parent="Control存档1" unique_id=1591795800]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(370.50003, 106.00001)
+scale = Vector2(0.7995951, 0.80130297)
+texture = ExtResource("3_abbhg")
+
+[node name="Label存档1" type="Label" parent="Control存档1" unique_id=1905965675]
+layout_mode = 0
+offset_left = 241.0
+offset_top = 56.0
+offset_right = 513.0
+offset_bottom = 182.0
+theme_override_fonts/font = ExtResource("5_ndowi")
+theme_override_font_sizes/font_size = 18
+text = "1
+2
+3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Control存档2" type="Control" parent="." unique_id=419409015]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 907.0
+offset_top = 343.0
+offset_right = 1513.0
+offset_bottom = 570.0
+script = ExtResource("9_qvlfl")
+
+[node name="Sprite2D选项框2" type="Sprite2D" parent="Control存档2" unique_id=1739884094]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(385.49994, 106)
+scale = Vector2(0.79149824, 0.7100978)
+texture = ExtResource("3_abbhg")
+
+[node name="Label存档2" type="Label" parent="Control存档2" unique_id=573742575]
+layout_mode = 0
+offset_left = 248.0
+offset_top = 55.0
+offset_right = 520.0
+offset_bottom = 181.0
+theme_override_fonts/font = ExtResource("5_ndowi")
+theme_override_font_sizes/font_size = 18
+text = "1
+2
+3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Control存档Auto" type="Control" parent="." unique_id=325591815]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 889.0
+offset_top = 577.0
+offset_right = 1500.0
+offset_bottom = 776.0
+script = ExtResource("10_jby47")
+
+[node name="Sprite2D选项框Auto" type="Sprite2D" parent="Control存档Auto" unique_id=938191654]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(397.5, 106)
+scale = Vector2(0.8076924, 0.6970685)
+texture = ExtResource("3_abbhg")
+
+[node name="Label存档Auto" type="Label" parent="Control存档Auto" unique_id=1280106097]
+layout_mode = 0
+offset_left = 277.0
+offset_top = 58.0
+offset_right = 528.0
+offset_bottom = 182.0
+mouse_filter = 0
+theme_override_fonts/font = ExtResource("5_ndowi")
+theme_override_font_sizes/font_size = 18
+text = "1
+2
+3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Control删除存档" type="Control" parent="." unique_id=1571847434]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 937.0
+offset_top = 790.0
+offset_right = 1239.0
+offset_bottom = 882.0
+
+[node name="TextureRect删除按钮图片" type="TextureRect" parent="Control删除存档" unique_id=921115973]
+visible = false
+layout_mode = 0
+offset_left = 15.0000305
+offset_top = -6.0
+offset_right = 239.00003
+offset_bottom = 86.0
+scale = Vector2(1.2053574, 1.2173913)
+mouse_filter = 2
+texture = ExtResource("5_oqx71")
+script = ExtResource("11_71jbf")
+
+[node name="Sprite2D选项框" type="Sprite2D" parent="Control删除存档" unique_id=287571134]
+visible = false
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(136.00005, 49.500027)
+scale = Vector2(0.5101217, 0.31596082)
+texture = ExtResource("3_abbhg")
+
+[node name="Control载入游戏" type="Control" parent="." unique_id=212818086]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1250.0
+offset_top = 798.0
+offset_right = 1562.0
+offset_bottom = 883.0
+
+[node name="Sprite2D选项框" type="Sprite2D" parent="Control载入游戏" unique_id=1289042576]
+material = SubResource("ShaderMaterial_abbhg")
+position = Vector2(148, 33)
+scale = Vector2(0.46153855, 0.1921822)
+texture = ExtResource("3_abbhg")
+
+[node name="CanvasLayer删档确认" type="CanvasLayer" parent="." unique_id=371656928]
+layer = 0
+visible = false
+
+[node name="Panel删档确认底图" type="TextureRect" parent="CanvasLayer删档确认" unique_id=730715381]
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("14_qvlfl")
+
+[node name="TextureRect确认" type="TextureRect" parent="CanvasLayer删档确认" unique_id=991066384]
+offset_left = 1000.0
+offset_top = 636.0
+offset_right = 1467.0
+offset_bottom = 926.0
+mouse_filter = 0
+texture = ExtResource("13_n6ff7")
+expand_mode = 1
+script = ExtResource("13_qvlfl")
+
+[node name="TextureRect取消" type="TextureRect" parent="CanvasLayer删档确认" unique_id=210818437]
+offset_left = 206.0
+offset_top = 644.0
+offset_right = 646.0
+offset_bottom = 928.0
+texture = ExtResource("13_n6ff7")
+expand_mode = 1
+script = ExtResource("15_qvlfl")

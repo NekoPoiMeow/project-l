@@ -1,0 +1,18 @@
+{
+  "id": "equipment_liquid_arc",
+  "name": "射液狂抛射",
+  "description": "周期扣除剩余生命并朝前方喷出穿透液弹。",
+  "kind": "attack_instance",
+  "tags": ["equipment", "projectile", "liquid", "pierce"],
+  "interval": 5.0,
+  "requires_target": false,
+  "origin": {"mode": "self_center"},
+  "aim": {"mode": "mouse"},
+  "emitter": {"mode": "spread", "count": 5, "spread_angle": 34},
+  "motion": {"mode": "linear", "speed": 520, "life_time": 1.35, "max_distance": 720},
+  "hit_shape": {"mode": "circle", "radius": 28},
+  "hit_rule": {"mode": "on_contact", "destroy_on_hit": false, "hit_same_target_delay": 999},
+  "target_filter": {"relation": "enemy", "include_building": true},
+  "effects": [{"mode": "damage", "value": 32, "damage_multipliers": {"building": 0.35}}],
+  "visual": {"texture": "res://BattleAssets/CurveBullet.png", "primary": "75ff9c", "secondary": "f3ffd0", "alpha": 0.86, "trail_width": 7}
+}

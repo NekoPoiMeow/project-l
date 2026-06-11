@@ -1,0 +1,16 @@
+[remap]
+
+importer="texture_gif"
+importer_version=2
+type="GIFTexture"
+uid="uid://cn4iib7auoc2j"
+path="res://.godot/imported/Test_Player_1.gif-1c1a9fe1ebdef0abec1e8016d9220ea4.res"
+
+[deps]
+
+source_file="res://GraphicAssets/Character/Test_Player_1.gif"
+dest_files=["res://.godot/imported/Test_Player_1.gif-1c1a9fe1ebdef0abec1e8016d9220ea4.res"]
+
+[params]
+
+storage/compress=true

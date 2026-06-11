@@ -1,0 +1,13 @@
+id,name,unlocked,icon,description,effect_keys
+E001,空装备,TRUE,,不装备任何俘虏装备。,
+E002,马眼罩,TRUE,,敌人血量随机上升且不显示敌人血条，战后淫能结算倍率提高。,hide_enemy_hp|enemy_hp_random_up|lust_reward_up
+E003,乳环导体,TRUE,,Mana 回复速率提高，但暴击率下降。,mana_recovery_up|crit_rate_down
+E004,触手戒指,TRUE,,提供更激进的触手同调接口，但生命恢复速度大幅下降。,player_regen_down
+E005,粘液束带,TRUE,,每分钟固定增加战后淫能，且基地每周期生产的生物质产量提高。,minute_lust_add|base_bio_cycle_yield_up
+E006,魔乳纹章,TRUE,,二技能必须 Mana 满时才能释放；一技能不受该限制。,skill2_full_mana_required
+E007,小皮鞭,TRUE,,连续移动积累最多3层蓄力；停止时释放多段斩，其他常规武器伤害下降。,whip_charge|whip_weapon_penalty
+E008,拘束服,TRUE,,移动速度大幅下降，只保留范围攻击倾向，范围攻击面积与威力提高。,player_speed_down_big|range_weapon_only|bind_area_boost
+E009,射液狂,TRUE,,每5秒扣除剩余生命并朝前方喷出穿透液弹。,liquid_madness
+E010,阴肛塞,TRUE,,无法自然停下，未输入方向时会沿最后方向前冲，移动速度提高。,forced_forward_move|player_speed_up_small
+E011,暴露癖,TRUE,,生命上限大幅下降，但攻击、暴击、爆伤等获得少量提升。,player_hp_down_big|exhibitionist
+E012,近战淫纹,TRUE,,无法获得弹幕武器倾向，近战命中会吸血。当前MVP强化所持武器吸血。,melee_lifesteal

@@ -1,0 +1,60 @@
+{
+  "id": "021",
+  "name": "不稳定造物",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "unstable"],
+  "visual": {
+    "gif": "res://BattleAssets/021.gif",
+    "scale": 0.82,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "ff3b4f", "tint_strength": 0.18, "pulse_strength": 0.12, "pulse_speed": 6.0},
+    "halo": {"color": "ff5a20", "alpha": 0.18, "size": [96, 56], "offset": [0, 18], "pulse": 0.24},
+    "aura_ring": {"color": "ff3b4f", "alpha": 0.44, "radius": 36, "width": 3, "pulse": 0.30}
+  },
+  "body": {
+    "radius": 20,
+    "sense_radius": 740
+  },
+  "stats": {
+    "max_hp": 80,
+    "move_speed": 150,
+    "attack": 28,
+    "defense": 0
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "objective_fallback": true,
+    "objective_fallback_radius": 0,
+    "objective_fallback_priority_order": ["base", "building"],
+    "leash_radius": 0,
+    "target_priority": "minion_first",
+    "target_priority_order": ["minion", "unit", "enemy", "building"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"],
+    "close_range": 80,
+    "close_speed_mul": 1.2
+  },
+  "combat": {
+    "damage_multipliers": {
+      "building": 0.25,
+      "enemy": 1.0
+    }
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "interval": 0.25,
+      "range": 55,
+      "damage": 42,
+      "suicide_on_hit": true
+    }
+  ],
+  "reward": {
+    "bio": 4
+  }
+}

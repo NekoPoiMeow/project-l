@@ -1,0 +1,46 @@
+{
+  "id": "orbit_blade_test",
+  "name": "新增：环绕刃",
+  "description": "围绕玩家旋转，持续碰撞造成伤害",
+  "kind": "attack_instance",
+  "interval": 4.8,
+  "requires_target": false,
+  "origin": {
+    "mode": "self_center"
+  },
+  "emitter": {
+    "mode": "ring",
+    "count": 3
+  },
+  "motion": {
+    "mode": "orbit",
+    "duration": 4.2,
+    "orbit_radius": 155,
+    "orbit_speed": 5.4
+  },
+  "hit_shape": {
+    "mode": "circle",
+    "radius": 28
+  },
+  "hit_rule": {
+    "mode": "while_active_tick",
+    "tick_interval": 0.18,
+    "hit_same_target_delay": 0.28
+  },
+  "target_filter": {
+    "relation": "enemy",
+    "include_building": true
+  },
+  "effects": [
+    {
+      "mode": "damage",
+      "value": 13
+    }
+  ],
+  "visual": {
+    "primary": "ff315d",
+    "secondary": "fff0ca",
+    "alpha": 0.88,
+    "pixel_count": 7
+  }
+}

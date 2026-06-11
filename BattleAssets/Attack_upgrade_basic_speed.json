@@ -1,0 +1,16 @@
+{
+  "id": "upgrade_basic_speed",
+  "name": "升级：基础弹冷却缩短",
+  "description": "基础追踪弹发射间隔减少25%",
+  "upgrade_mode": "modify_attacks",
+  "selector": {
+    "tag": "basic_projectile"
+  },
+  "modifiers": [
+    {
+      "path": "interval",
+      "op": "mul",
+      "value": 0.75
+    }
+  ]
+}

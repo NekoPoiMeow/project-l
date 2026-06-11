@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://bnq0ax1ao3ljt"]
+
+[ext_resource type="Texture2D" uid="uid://jrd7fl7w7dth" path="res://scenes/Battle/Battle_00/Background.png" id="1_yil8y"]
+[ext_resource type="Texture2D" uid="uid://depcodtx4ot3v" path="res://scenes/Battle/Battle_00/Collision.png" id="2_uw1n1"]
+[ext_resource type="Script" uid="uid://cm8r3b7o2ir8a" path="res://BattleAssets/ScriptShader/BattleDirector.gd" id="3_85ihx"]
+
+[node name="Node2DBattle" type="Node2D" unique_id=213753163]
+
+[node name="Sprite2DBackground" type="Sprite2D" parent="." unique_id=1954090046]
+texture = ExtResource("1_yil8y")
+centered = false
+
+[node name="Sprite2DBlockMask" type="Sprite2D" parent="." unique_id=639572417]
+visible = false
+texture = ExtResource("2_uw1n1")
+centered = false
+
+[node name="Node2DWorld" type="Node2D" parent="." unique_id=494873972]
+
+[node name="Node2DNode2DEntities" type="Node2D" parent="Node2DWorld" unique_id=430086789]
+
+[node name="Node2DProjectiles" type="Node2D" parent="Node2DWorld" unique_id=862514695]
+
+[node name="Node2DEffects" type="Node2D" parent="Node2DWorld" unique_id=2132033055]
+
+[node name="Node2DSpawnPoints" type="Node2D" parent="." unique_id=2049208992]
+
+[node name="Marker2DPlayerSpawn" type="Marker2D" parent="Node2DSpawnPoints" unique_id=1693654451]
+position = Vector2(1556, 1359)
+
+[node name="Marker2DTentacleBaseSpawn" type="Marker2D" parent="Node2DSpawnPoints" unique_id=1969994368]
+position = Vector2(1258, 1092)
+
+[node name="Marker2DEnemyBaseSpawn" type="Marker2D" parent="Node2DSpawnPoints" unique_id=1264546680]
+position = Vector2(2662, 1223)
+
+[node name="Marker2DEnemySpawnA" type="Marker2D" parent="Node2DSpawnPoints" unique_id=1886313549]
+position = Vector2(2061, 1842)
+
+[node name="Marker2DEnemySpawnB" type="Marker2D" parent="Node2DSpawnPoints" unique_id=468558075]
+position = Vector2(2340, 871)
+
+[node name="Marker2DEnemySpawnC" type="Marker2D" parent="Node2DSpawnPoints" unique_id=1820051342]
+position = Vector2(297, 1136)
+
+[node name="Marker2DEnemyPatrolA" type="Marker2D" parent="Node2DSpawnPoints" unique_id=1962454784]
+position = Vector2(966, 467)
+
+[node name="Marker2DEnemyPatrolB" type="Marker2D" parent="Node2DSpawnPoints" unique_id=58893282]
+position = Vector2(1138, 1746)
+
+[node name="Node2DSpecialTriggers" type="Node2D" parent="." unique_id=1966719166]
+
+[node name="CanvasLayerUI" type="CanvasLayer" parent="." unique_id=1962438700]
+
+[node name="LabelTimer" type="Label" parent="CanvasLayerUI" unique_id=1393601336]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="LabelObjective" type="Label" parent="CanvasLayerUI" unique_id=344358660]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="TextureProgressBarPlayerBaseHP" type="TextureProgressBar" parent="CanvasLayerUI" unique_id=1078695819]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureProgressBarEnemyBaseHP" type="TextureProgressBar" parent="CanvasLayerUI" unique_id=2056355500]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="AudioStreamPlayerBGM" type="AudioStreamPlayer" parent="." unique_id=237026415]
+bus = &"Music"
+
+[node name="AudioStreamPlayerSFX" type="AudioStreamPlayer" parent="." unique_id=395068933]
+bus = &"SFX"
+
+[node name="NodeBattleDirector" type="Node" parent="." unique_id=2055078856]
+script = ExtResource("3_85ihx")
+
+[node name="Camera2DBattle" type="Camera2D" parent="." unique_id=453541915]
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0

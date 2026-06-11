@@ -1,0 +1,20 @@
+{
+  "id": "lob_grenade_test",
+  "name": "测试抛射：落点爆炸",
+  "description": "朝鼠标方向抛出，抵达射程末端才产生圆形爆炸判定",
+  "kind": "attack_instance",
+  "interval": 2.8,
+  "requires_target": false,
+  "origin": {"mode": "self_center"},
+  "aim": {"mode": "mouse"},
+  "emitter": {"mode": "spread", "count": 1, "spread_angle": 0},
+  "motion": {"mode": "lob", "duration": 0.85, "range": 560, "arc_height": 190},
+  "hit_shape": {"mode": "circle", "radius": 190},
+  "hit_rule": {"mode": "on_arrive", "hit_same_target_delay": 999},
+  "target_filter": {"relation": "enemy", "include_building": true},
+  "effects": [
+    {"mode": "damage", "value": 75, "scale_by_distance": {"from": 1.0, "to": 0.35}, "damage_multipliers": {"building": 0.45}},
+    {"mode": "force", "force_type": "push_from_origin", "strength": 520, "falloff": "distance"}
+  ],
+  "visual": {"primary": "ff4f72", "secondary": "ffe1c8", "alpha": 0.82, "pixel_count": 14}
+}

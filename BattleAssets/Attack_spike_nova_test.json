@@ -1,0 +1,21 @@
+{
+  "id": "spike_nova_test",
+  "name": "测试地刺：扩散圆环",
+  "description": "从玩家身边向外扩散，半径随持续时间变大",
+  "kind": "attack_instance",
+  "interval": 3.6,
+  "requires_target": false,
+  "origin": {"mode": "self_center"},
+  "aim": {"mode": "fixed_angle", "angle": 0},
+  "emitter": {"mode": "single", "count": 1},
+  "motion": {"mode": "static", "duration": 0.65, "follow_source": true},
+  "shape_over_life": {"from": 0.25, "to": 1.25},
+  "hit_shape": {"mode": "circle", "radius": 310},
+  "hit_rule": {"mode": "while_active_tick", "tick_interval": 0.12, "hit_same_target_delay": 0.22},
+  "target_filter": {"relation": "enemy", "include_building": true},
+  "effects": [
+    {"mode": "damage", "value": 24},
+    {"mode": "force", "force_type": "push_from_origin", "strength": 360, "falloff": "distance"}
+  ],
+  "visual": {"primary": "ff4f72", "secondary": "ffe1c8", "alpha": 0.58, "pixel_count": 28}
+}

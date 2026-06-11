@@ -1,0 +1,16 @@
+{
+  "id": "upgrade_basic_count",
+  "name": "升级：基础弹数量+1",
+  "description": "基础追踪弹每次多发射一颗",
+  "upgrade_mode": "modify_attacks",
+  "selector": {
+    "tag": "basic_projectile"
+  },
+  "modifiers": [
+    {
+      "path": "emitter.count",
+      "op": "add",
+      "value": 1
+    }
+  ]
+}

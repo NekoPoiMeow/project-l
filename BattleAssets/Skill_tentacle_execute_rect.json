@@ -1,0 +1,22 @@
+{
+  "id": "tentacle_execute_rect",
+  "name": "前方处刑触手",
+  "slot": 2,
+  "mode": "attack",
+  "mana_cost": 42,
+  "cooldown": 7.5,
+  "attack": {
+    "kind": "attack_instance",
+    "requires_target": false,
+    "origin": {"mode": "self_center", "point": "center"},
+    "aim": {"mode": "mouse"},
+    "motion": {"mode": "beam", "duration": 0.38},
+    "hit_shape": {"mode": "beam_rect", "width": 190, "length": 520},
+    "hit_rule": {"mode": "on_spawn_once"},
+    "target_filter": {"relation": "enemy", "include_building": false},
+    "effects": [
+      {"mode": "damage", "value": 9999, "life_steal": 0.08}
+    ],
+    "visual": {"primary": "ff5fdc", "secondary": "ffb6ef", "alpha": 0.58}
+  }
+}

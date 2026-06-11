@@ -1,0 +1,53 @@
+{
+  "id": "023",
+  "name": "淫能施释触",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "caster"],
+  "visual": {
+    "gif": "res://BattleAssets/023.gif",
+    "scale": 0.88,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "57b7ff", "tint_strength": 0.15, "pulse_strength": 0.10, "pulse_speed": 3.0},
+    "halo": {"color": "57b7ff", "alpha": 0.12, "size": [104, 58], "offset": [0, 18], "pulse": 0.14},
+    "aura_ring": {"color": "57d7ff", "alpha": 0.38, "radius": 44, "width": 3, "pulse": 0.20}
+  },
+  "body": {
+    "radius": 22,
+    "sense_radius": 880
+  },
+  "stats": {
+    "max_hp": 105,
+    "move_speed": 72,
+    "attack": 14,
+    "defense": 1
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "strafe_close",
+    "objective_fallback": true,
+    "objective_fallback_radius": 0,
+    "objective_fallback_priority_order": ["base", "building"],
+    "leash_radius": 0,
+    "target_priority": "minion_first",
+    "target_priority_order": ["minion", "unit", "enemy", "building"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"],
+    "close_range": 360
+  },
+  "attacks": [
+    {
+      "kind": "projectile",
+      "fire_point": "center",
+      "target_point": "center",
+      "interval": 1.35,
+      "range": 620,
+      "damage": 18,
+      "speed": 330,
+      "pierce": 0
+    }
+  ]
+}

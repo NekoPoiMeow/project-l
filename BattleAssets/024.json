@@ -1,0 +1,51 @@
+{
+  "id": "024",
+  "name": "魅惑同化触",
+  "type": "minion",
+  "faction": "tentacle",
+  "tags": ["tentacle", "minion", "charm_assimilator"],
+  "visual": {
+    "gif": "res://BattleAssets/024.gif",
+    "scale": 0.86,
+    "size": [116, 136],
+    "offset": [0, 0]
+  },
+  "visual_fx": {
+    "shader": {"tint": "b35cff", "tint_strength": 0.20, "pulse_strength": 0.12, "pulse_speed": 4.2},
+    "halo": {"color": "b35cff", "alpha": 0.16, "size": [106, 60], "offset": [0, 18], "pulse": 0.18},
+    "orbit_dots": {"color": "ff94f0", "alpha": 0.78, "count": 5, "radius": 38, "size": 4, "speed": 2.0}
+  },
+  "body": {
+    "radius": 24,
+    "sense_radius": 660
+  },
+  "stats": {
+    "max_hp": 240,
+    "move_speed": 118,
+    "attack": 8,
+    "defense": 3
+  },
+  "ai": {
+    "mode": "chase_nearest",
+    "movement_mode": "direct",
+    "objective_fallback": true,
+    "objective_fallback_radius": 0,
+    "objective_fallback_priority_order": ["unit", "minion", "base", "building"],
+    "leash_radius": 0,
+    "target_priority_order": ["unit", "minion", "enemy"],
+    "target_distance_mode": "nearest",
+    "target_factions": ["enemy"],
+    "close_range": 90
+  },
+  "attacks": [
+    {
+      "kind": "melee",
+      "interval": 0.55,
+      "range": 96,
+      "damage": 1,
+      "assimilate_result_entity_id": "027",
+      "assimilate_duration": 0.55,
+      "suicide_on_hit": true
+    }
+  ]
+}
