@@ -96,9 +96,9 @@ var entity_grid_cell_size := 260.0
 # follower trash units can hide their individual Sprite2D and be drawn by one
 # CanvasItem. This restores the render-budget optimization without data_swarm.
 var shared_gif_batch_renderer: Node2D = null
-var shared_gif_batch_entity_threshold := 120
-var shared_gif_batch_enter_distance := 220.0
-var shared_gif_batch_exit_distance := 140.0
+var shared_gif_batch_entity_threshold := 80
+var shared_gif_batch_enter_distance := 120.0
+var shared_gif_batch_exit_distance := 70.0
 var shared_gif_batch_enabled := true
 var battle_loadout: Dictionary = {}
 var battle_won := false
@@ -305,7 +305,7 @@ func setup_shared_gif_batch_renderer() -> void:
 	entities_root.add_child(shared_gif_batch_renderer)
 	if shared_gif_batch_renderer.has_method("setup"):
 		shared_gif_batch_renderer.call("setup", self)
-	debug_log("Battle", "shared_gif_batch_renderer=ON threshold=" + str(shared_gif_batch_entity_threshold))
+	debug_log("Battle", "shared_gif_batch_renderer=ON threshold=" + str(shared_gif_batch_entity_threshold) + " force_all_at=160 draw_budget_dynamic=ON")
 
 func update_shared_gif_batch_renderer() -> void:
 	if shared_gif_batch_renderer != null and is_instance_valid(shared_gif_batch_renderer):
@@ -326,7 +326,7 @@ func should_batch_shared_gif_entity(entity) -> bool:
 		return false
 	if str(entity.get("ai_role")) != "follower":
 		return false
-	if count >= 240:
+	if count >= 160:
 		return true
 	if !bool(entity.get("follower_precision_active")):
 		return true

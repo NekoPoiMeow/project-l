@@ -4,9 +4,12 @@ extends Node
 @export var print_scene_changes: bool = true
 @export var print_save_snapshot_on_scene_change: bool = true
 @export var scene_poll_interval: float = 0.35
+@export var print_battle_runtime_periodic: bool = true
+@export var battle_runtime_interval: float = 2.0
 
 var _last_scene_text: String = ""
 var _poll_timer: float = 0.0
+var _battle_runtime_timer: float = 0.0
 
 func _ready() -> void:
 	if enabled:
@@ -29,6 +32,12 @@ func _process(delta: float) -> void:
 		if print_save_snapshot_on_scene_change:
 			_dump_save_snapshot("scene_changed")
 
+	if print_battle_runtime_periodic:
+		_battle_runtime_timer += scene_poll_interval
+		if _battle_runtime_timer >= battle_runtime_interval:
+			_battle_runtime_timer = 0.0
+			_dump_battle_runtime("periodic")
+
 func log(scope: String, message: String) -> void:
 	if enabled:
 		print("[ProjectDebug][", scope, "] ", message)
@@ -40,6 +49,9 @@ func warn(scope: String, message: String) -> void:
 func dump_save_snapshot(reason: String = "manual") -> void:
 	_dump_save_snapshot(reason)
 
+func dump_battle_runtime(reason: String = "manual") -> void:
+	_dump_battle_runtime(reason)
+
 func dump_next_battle(reason: String = "manual") -> void:
 	var gs: Node = get_node_or_null("/root/GameState")
 	if gs == null:
@@ -49,6 +61,32 @@ func dump_next_battle(reason: String = "manual") -> void:
 		print("[ProjectDebug][NextBattle][", reason, "] ", JSON.stringify(gs.call("get_next_battle_debug_summary")))
 	else:
 		print("[ProjectDebug][NextBattle] GameState has no get_next_battle_debug_summary")
+
+
+func _dump_battle_runtime(reason: String) -> void:
+	var scene: Node = get_tree().current_scene
+	if scene == null:
+		return
+	var director = scene.find_child("BattleDirector", true, false)
+	if director == null:
+		return
+	var parts: PackedStringArray = PackedStringArray()
+	for prop in ["entities", "projectiles", "attack_instances", "drops"]:
+		var v = director.get(prop)
+		if typeof(v) == TYPE_ARRAY:
+			parts.append(prop + "=" + str(v.size()))
+	for prop in ["run_player_attack_mul", "run_player_area_mul", "run_player_attack_frequency_mul", "run_lust_reward_mul", "shared_gif_batch_entity_threshold"]:
+		var prop_value = director.get(prop)
+		if prop_value != null:
+			parts.append(prop + "=" + str(prop_value))
+	var batched := 0
+	if typeof(director.get("entities")) == TYPE_ARRAY:
+		for e in director.get("entities"):
+			if e != null and is_instance_valid(e) and bool(e.get("batch_shared_gif_visual_active")):
+				batched += 1
+		parts.append("batched=" + str(batched))
+	if !parts.is_empty():
+		print("[ProjectDebug][BattleRuntime][", reason, "] ", " | ".join(parts))
 
 func _dump_current_scene(reason: String) -> void:
 	_last_scene_text = _get_scene_text()

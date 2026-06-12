@@ -26,8 +26,6 @@ Pause="*uid://c8okdib6oymkr"
 SceneTransition="*uid://de8wubk5jb1te"
 AVGManager="*uid://cyfaqbmu2jlb3"
 GameState="*res://Script/SaveMgr/GameState.gd"
-AppConfig="*res://Script/AppConfig.gd"
-SceneLoader="*res://Script/SceneLoader.gd"
 
 [display]
 

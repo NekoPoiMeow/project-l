@@ -9,17 +9,17 @@ var max_drawn_per_frame := 2000
 # to stop a 300+ trash mob from submitting 300+ overlapping sprite draws inside
 # the camera when most silhouettes are unreadable anyway.
 var density_cull_enabled := true
-var density_cell_size := 72.0
+var density_cell_size := 88.0
 var density_cell_cap := 2
 var density_far_cell_cap := 1
 var density_far_from_focus := 360.0
-var strict_entity_threshold := 280
-var extreme_entity_threshold := 420
-var ultra_entity_threshold := 620
-var screen_draw_budget_medium := 360
-var screen_draw_budget_strict := 260
-var screen_draw_budget_extreme := 190
-var screen_draw_budget_ultra := 140
+var strict_entity_threshold := 180
+var extreme_entity_threshold := 280
+var ultra_entity_threshold := 380
+var screen_draw_budget_medium := 260
+var screen_draw_budget_strict := 190
+var screen_draw_budget_extreme := 140
+var screen_draw_budget_ultra := 110
 
 func setup(new_director) -> void:
 	director = new_director
@@ -63,17 +63,17 @@ func _draw() -> void:
 	var far_cap: int = density_far_cell_cap
 	var draw_budget: int = screen_draw_budget_medium
 	if entity_count >= ultra_entity_threshold:
-		cell_size = 112.0
+		cell_size = 128.0
 		near_cap = 1
 		far_cap = 1
 		draw_budget = screen_draw_budget_ultra
 	elif entity_count >= extreme_entity_threshold:
-		cell_size = 96.0
+		cell_size = 112.0
 		near_cap = 1
 		far_cap = 1
 		draw_budget = screen_draw_budget_extreme
 	elif entity_count >= strict_entity_threshold:
-		cell_size = 82.0
+		cell_size = 96.0
 		near_cap = 2
 		far_cap = 1
 		draw_budget = screen_draw_budget_strict
