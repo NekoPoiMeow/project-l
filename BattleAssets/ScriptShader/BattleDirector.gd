@@ -175,6 +175,8 @@ var player_skills: Dictionary = {}
 var player_skill_cooldowns: Dictionary = {}
 var player_skill_min_cooldown := 7.0
 var active_channel_skill_id := ""
+var active_channel_skill_elapsed := 0.0
+var active_channel_skill_duration := 0.0
 var base_mana_return_per_bio := 0.0
 var equipment_minute_timer := 0.0
 var player_revives_remaining := 0
@@ -379,6 +381,8 @@ func debug_dump_battle_runtime(reason: String = "") -> void:
 		"modifier_sources": battle_modifier_sources,
 		"modifier_formula": battle_modifier_formula,
 		"equipment_effects": active_equipment_effects,
+		"equipment_effect_descriptions": equipment_effect_descriptions,
+		"equipment_event_counts": equipment_event_counts,
 		"selected_equipment_id": selected_equipment_id,
 	}
 	debug_log("BattleRuntime", JSON.stringify(summary))
@@ -528,6 +532,10 @@ func load_battle_loadout() -> void:
 	active_equipment_effects.clear()
 	var equipment_row: Dictionary = equipment_catalog.get(selected_equipment_id, {})
 	append_unique_effects(parse_string_list(str(equipment_row.get("effect_keys", ""))))
+	# E012 近战淫纹的 CSV 描述是“无法获得弹幕武器倾向，近战命中吸血”。
+	# CSV 保持简洁，只写 melee_lifesteal；运行时补隐式限制，避免升级池继续塞远程弹幕。
+	if active_equipment_effects.has("melee_lifesteal"):
+		append_unique_effects(["melee_weapon_only"])
 
 	# Captive materialization is a next-battle temporary equipment. It reuses Equipments.csv.
 	if GameState.is_loaded and GameState.has_method("get_next_battle_captive_equipment_id"):
@@ -607,9 +615,12 @@ func load_battle_loadout() -> void:
 		equipment_effect_descriptions["player_hp_down_big"] = "生命上限 x0.72"
 	if active_equipment_effects.has("melee_lifesteal"):
 		equipment_effect_descriptions["melee_lifesteal"] = "近战命中吸血 8%"
+	if active_equipment_effects.has("melee_weapon_only"):
+		equipment_effect_descriptions["melee_weapon_only"] = "升级池仅提供近战武器，当前非近战武器会自动切到第一把近战"
 	apply_captive_equipment_effect_keys()
 	apply_generic_equipment_effect_keys()
 	audit_equipment_effect_keys()
+	print_equipment_mechanic_summary()
 	debug_dump_battle_runtime("load_battle_loadout")
 
 func append_unique_effects(effects: Array) -> void:
@@ -825,6 +836,10 @@ func apply_loadout_to_player() -> void:
 		selected_weapon_id = get_first_weapon_id_with_tag("area", selected_weapon_id)
 		weapon_row = weapon_catalog.get(selected_weapon_id, weapon_row)
 		selected_weapon_type = str(weapon_row.get("weapon_type", "area"))
+	elif active_equipment_effects.has("melee_weapon_only"):
+		selected_weapon_id = get_first_weapon_id_with_tag("melee", selected_weapon_id)
+		weapon_row = weapon_catalog.get(selected_weapon_id, weapon_row)
+		selected_weapon_type = str(weapon_row.get("weapon_type", "melee"))
 	var attack_id: String = str(weapon_row.get("attack_id", "")).strip_edges()
 	var attack_data: Dictionary = load_attack_data(attack_id)
 	if attack_data.is_empty():
@@ -918,7 +933,7 @@ func audit_equipment_effect_keys() -> void:
 		"mana_recovery_up": true, "crit_rate_down": true, "player_regen_down": true,
 		"minute_lust_add": true, "base_bio_cycle_yield_up": true, "skill2_full_mana_required": true,
 		"whip_charge": true, "whip_weapon_penalty": true, "player_speed_down_big": true,
-		"range_weapon_only": true, "bind_area_boost": true, "liquid_madness": true,
+		"range_weapon_only": true, "melee_weapon_only": true, "bind_area_boost": true, "liquid_madness": true,
 		"liquid_madness_light": true, "forced_forward_move": true, "player_speed_up_small": true,
 		"player_hp_down_big": true, "exhibitionist": true, "melee_lifesteal": true,
 		"captive_knight_lv0": true, "captive_knight_lv1": true, "captive_knight_lv2": true, "captive_knight_lv3": true,
@@ -937,6 +952,25 @@ func audit_equipment_effect_keys() -> void:
 				print("[EquipmentAudit][OK] equipment=", selected_equipment_id, " effect=", key)
 			continue
 		print("[EquipmentAudit][MissingEffect] effect_key=", key, " equipment=", selected_equipment_id)
+
+func print_equipment_mechanic_summary() -> void:
+	if active_equipment_effects.is_empty():
+		return
+	var summary: Dictionary = {
+		"equipment": selected_equipment_id,
+		"effects": active_equipment_effects,
+		"descriptions": equipment_effect_descriptions,
+		"weapon_id": selected_weapon_id,
+		"weapon_type": selected_weapon_type,
+		"run_lust_reward_add": run_lust_reward_add,
+		"run_lust_reward_mul": run_lust_reward_mul,
+		"run_base_start_bio_add": run_base_start_bio_add,
+		"player_mana_regen": player_mana_regen,
+		"run_mana_recovery_mul": run_mana_recovery_mul,
+		"run_crit_chance_add": run_crit_chance_add,
+		"run_crit_multiplier_add": run_crit_multiplier_add,
+	}
+	print("[EquipmentAudit][Summary] ", JSON.stringify(summary))
 
 func multiply_attack_damage(attack: Dictionary, multiplier: float) -> void:
 	for effect in attack.get("effects", []):
@@ -2614,6 +2648,7 @@ func process_equipment_timers(delta: float) -> void:
 			equipment_minute_timer -= 60.0
 			run_lust_reward_add += 20.0
 			emit_equipment_event("on_minute_tick", {"lust_add": 20.0})
+			print("[Equipment][MinuteLust] +20 battle lust base, total_add=", run_lust_reward_add)
 
 	if active_equipment_effects.has("liquid_madness") or active_equipment_effects.has("liquid_madness_light"):
 		shooter_timer += delta
@@ -3120,7 +3155,7 @@ func is_weapon_allowed_by_equipment(row: Dictionary) -> bool:
 	var tags: Array = parse_string_list(str(row.get("tags", "")))
 	if active_equipment_effects.has("range_weapon_only"):
 		return weapon_type == "area" or tags.has("area")
-	if active_equipment_effects.has("melee_weapon_only"):
+	if active_equipment_effects.has("melee_weapon_only") or active_equipment_effects.has("melee_lifesteal"):
 		return weapon_type == "melee" or tags.has("melee")
 	return true
 
@@ -3894,13 +3929,16 @@ func process_player_skills(delta: float) -> void:
 	if active_channel_skill_id != "":
 		var skill: Dictionary = get_skill_by_id(active_channel_skill_id)
 		if skill.is_empty() or player_mana <= 0.0:
-			stop_channel_skill()
+			stop_channel_skill("mana_or_missing")
 			return
+		active_channel_skill_elapsed += delta
 		var drain: float = float(skill.get("mana_drain_per_second", 0.0)) * delta
 		player_mana = max(0.0, player_mana - drain)
 		apply_channel_skill_tick(skill, delta)
-		if player_mana <= 0.0:
-			stop_channel_skill()
+		if active_channel_skill_duration > 0.0 and active_channel_skill_elapsed >= active_channel_skill_duration:
+			stop_channel_skill("duration")
+		elif player_mana <= 0.0:
+			stop_channel_skill("mana_empty")
 
 func get_skill_by_id(skill_id: String) -> Dictionary:
 	for skill in player_skills.values():
@@ -3920,7 +3958,10 @@ func try_activate_skill_slot(slot: int) -> void:
 	var mode: String = str(skill.get("mode", "attack"))
 	if mode == "channel_buff":
 		if active_channel_skill_id == skill_id:
-			stop_channel_skill()
+			# Channel skills are burst-style in MVP. Pressing the same key while active refreshes
+			# the visible burst instead of silently toggling it off, which made E006 feel like
+			# skill 1 failed after a skill 2 block.
+			refresh_channel_skill(skill)
 		else:
 			if float(player_skill_cooldowns.get(skill_id, 0.0)) > 0.0:
 				spawn_floating_number(player_entity.global_position + Vector2(0.0, -72.0), "CD", Color(0.75, 0.85, 1.0, 1.0))
@@ -3941,11 +3982,26 @@ func start_channel_skill(skill: Dictionary) -> void:
 		return
 	player_mana -= cost
 	active_channel_skill_id = str(skill.get("id", ""))
+	active_channel_skill_elapsed = 0.0
+	# Channel skills are treated as short bursts in MVP. Without this, player_overdrive
+	# could remain active and drain Mana until empty, making E006 look broken.
+	active_channel_skill_duration = float(skill.get("channel_duration", skill.get("duration", 0.90)))
 	player_skill_cooldowns[active_channel_skill_id] = get_skill_cooldown(skill)
 	spawn_skill_cast_fx(skill, player_entity.global_position)
+	print("[SkillChannel][Start] id=", active_channel_skill_id, " duration=", active_channel_skill_duration, " mana=", int(round(player_mana)), "/", int(round(player_mana_max)))
 
-func stop_channel_skill() -> void:
+func refresh_channel_skill(skill: Dictionary) -> void:
+	active_channel_skill_elapsed = 0.0
+	active_channel_skill_duration = float(skill.get("channel_duration", skill.get("duration", max(active_channel_skill_duration, 0.90))))
+	spawn_skill_cast_fx(skill, player_entity.global_position)
+	print("[SkillChannel][Refresh] id=", active_channel_skill_id, " duration=", active_channel_skill_duration, " mana=", int(round(player_mana)), "/", int(round(player_mana_max)))
+
+func stop_channel_skill(reason: String = "manual") -> void:
+	if active_channel_skill_id != "":
+		print("[SkillChannel][Stop] id=", active_channel_skill_id, " reason=", reason, " mana=", int(round(player_mana)), "/", int(round(player_mana_max)))
 	active_channel_skill_id = ""
+	active_channel_skill_elapsed = 0.0
+	active_channel_skill_duration = 0.0
 
 func apply_channel_skill_tick(skill: Dictionary, delta: float) -> void:
 	var heal_per_second: float = float(skill.get("heal_per_second", 0.0)) * selected_character_skill_mul
@@ -3958,6 +4014,8 @@ func apply_channel_skill_tick(skill: Dictionary, delta: float) -> void:
 func cast_attack_skill(skill: Dictionary, slot: int) -> void:
 	if slot == 2 and active_equipment_effects.has("skill2_full_mana_required") and player_mana < player_mana_max - 0.01:
 		spawn_floating_number(player_entity.global_position + Vector2(0.0, -72.0), "Mana未满", Color(0.55, 0.8, 1.0, 1.0))
+		emit_equipment_event("on_skill2_blocked_not_full_mana", {"mana": player_mana, "max": player_mana_max})
+		print("[Equipment][Skill2Blocked] mana=", int(round(player_mana)), "/", int(round(player_mana_max)))
 		return
 	var cost: float = float(skill.get("mana_cost", 0.0))
 	if player_mana < cost:
