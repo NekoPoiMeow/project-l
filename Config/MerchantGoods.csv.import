@@ -6,10 +6,10 @@ uid="uid://ck1v1gdomdskk"
 
 [deps]
 
-files=["res://Config/MerchantGoods.tab.translation", "res://Config/MerchantGoods.name.translation", "res://Config/MerchantGoods.desc.translation", "res://Config/MerchantGoods.cost.translation", "res://Config/MerchantGoods.unlock.translation", "res://Config/MerchantGoods.effect.translation", "res://Config/MerchantGoods.value.translation", "res://Config/MerchantGoods.purchase.translation", "res://Config/MerchantGoods.captive.translation", "res://Config/MerchantGoods.event.translation", "res://Config/MerchantGoods.one.translation"]
+files=["res://Config/MerchantGoods.tab.translation", "res://Config/MerchantGoods.goods.translation", "res://Config/MerchantGoods.ref.translation", "res://Config/MerchantGoods.cost.translation", "res://Config/MerchantGoods.stock.translation", "res://Config/MerchantGoods.unlock.translation", "res://Config/MerchantGoods.one.translation", "res://Config/MerchantGoods.description.translation"]
 
 source_file="res://Config/MerchantGoods.csv"
-dest_files=["res://Config/MerchantGoods.tab.translation", "res://Config/MerchantGoods.name.translation", "res://Config/MerchantGoods.desc.translation", "res://Config/MerchantGoods.cost.translation", "res://Config/MerchantGoods.unlock.translation", "res://Config/MerchantGoods.effect.translation", "res://Config/MerchantGoods.value.translation", "res://Config/MerchantGoods.purchase.translation", "res://Config/MerchantGoods.captive.translation", "res://Config/MerchantGoods.event.translation", "res://Config/MerchantGoods.one.translation"]
+dest_files=["res://Config/MerchantGoods.tab.translation", "res://Config/MerchantGoods.goods.translation", "res://Config/MerchantGoods.ref.translation", "res://Config/MerchantGoods.cost.translation", "res://Config/MerchantGoods.stock.translation", "res://Config/MerchantGoods.unlock.translation", "res://Config/MerchantGoods.one.translation", "res://Config/MerchantGoods.description.translation"]
 
 [params]
 

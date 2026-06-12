@@ -3,6 +3,7 @@ extends Control
 const CHARACTERS_CSV: String = "res://Config/Characters.csv"
 const WEAPONS_CSV: String = "res://Config/Weapons.csv"
 const EQUIPMENTS_CSV: String = "res://Config/Equipments.csv"
+const TEMP_ITEMS_CSV: String = "res://Config/TemporaryItems.csv"
 const BATTLE_SCENE_PATH: String = "res://scenes/Battle/Battle_00.tscn"
 const BASEMENT_SCENE_PATH: String = "res://scenes/Basement.tscn"
 
@@ -18,6 +19,7 @@ const BASEMENT_SCENE_PATH: String = "res://scenes/Basement.tscn"
 var character_rows: Dictionary = {}
 var weapon_rows: Dictionary = {}
 var equipment_rows: Dictionary = {}
+var temp_item_rows: Dictionary = {}
 
 var selected_character_id: String = "C001"
 var selected_weapon_id: String = "W001"
@@ -28,6 +30,7 @@ func _ready() -> void:
 	character_rows = load_csv_by_id(CHARACTERS_CSV)
 	weapon_rows = load_csv_by_id(WEAPONS_CSV)
 	equipment_rows = load_csv_by_id(EQUIPMENTS_CSV)
+	temp_item_rows = load_csv_by_id(TEMP_ITEMS_CSV)
 
 	var saved_loadout: Dictionary = {}
 	if GameState.has_method("get_battle_loadout"):
@@ -143,7 +146,7 @@ func refresh_text() -> void:
 	var weapon_desc: String = get_row_desc(weapon_rows, selected_weapon_id)
 	var equipment_desc: String = get_row_desc(equipment_rows, selected_equipment_id)
 	var attack_id: String = str(get_row(weapon_rows, selected_weapon_id).get("attack_id", ""))
-	detail_label.text = "角色：" + character_desc + "\n武器：" + weapon_desc + "\n攻击ID：" + attack_id + "\n装备：" + equipment_desc
+	detail_label.text = "角色：" + character_desc + "\n武器：" + weapon_desc + "\n攻击ID：" + attack_id + "\n装备：" + equipment_desc + "\n\n" + build_next_battle_status_text()
 
 func get_row(rows: Dictionary, id: String) -> Dictionary:
 	if rows.has(id):
@@ -158,6 +161,35 @@ func get_row_desc(rows: Dictionary, id: String) -> String:
 	var row: Dictionary = get_row(rows, id)
 	return str(row.get("description", ""))
 
+func build_next_battle_status_text() -> String:
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("下局临时状态：")
+	var temp_ids: Array[String] = []
+	if GameState.has_method("get_next_battle_temp_items"):
+		temp_ids = GameState.get_next_battle_temp_items()
+	if temp_ids.is_empty():
+		lines.append("- 商人临时道具：无")
+	else:
+		var seen: Dictionary = {}
+		for temp_id: String in temp_ids:
+			if seen.has(temp_id):
+				continue
+			seen[temp_id] = true
+			var row: Dictionary = get_row(temp_item_rows, temp_id)
+			var name: String = str(row.get("name", temp_id))
+			var effect_key: String = str(row.get("effect_key", ""))
+			var value: String = str(row.get("value", ""))
+			lines.append("- 商人临时道具：" + name + "  " + effect_key + " +" + value)
+	var captive_eq: String = ""
+	if GameState.has_method("get_next_battle_captive_equipment_id"):
+		captive_eq = GameState.get_next_battle_captive_equipment_id()
+	if captive_eq == "":
+		lines.append("- 地窖物化装备：无")
+	else:
+		var eq_row: Dictionary = get_row(equipment_rows, captive_eq)
+		lines.append("- 地窖物化装备：" + str(eq_row.get("name", captive_eq)))
+	return "\n".join(lines)
+
 func build_loadout() -> Dictionary:
 	return {
 		"character_id": selected_character_id,
@@ -167,6 +199,7 @@ func build_loadout() -> Dictionary:
 
 func _on_confirm_pressed() -> void:
 	var loadout: Dictionary = build_loadout()
+	debug_log("confirm " + JSON.stringify(loadout))
 	get_tree().root.set_meta("pending_battle_loadout", loadout)
 	if GameState.has_method("set_battle_loadout"):
 		GameState.set_battle_loadout(loadout, true)
@@ -188,3 +221,9 @@ func _on_back_pressed() -> void:
 func _on_codex_pressed() -> void:
 	# Placeholder. Keep the button harmless until the codex scene is wired.
 	refresh_text()
+
+
+func debug_log(message: String) -> void:
+	var dbg: Node = get_node_or_null("/root/ProjectDebug")
+	if dbg != null and dbg.has_method("log"):
+		dbg.call("Chamber", message)

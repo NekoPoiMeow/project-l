@@ -1,0 +1,5 @@
+id,name,description,equipment_base_id,icon_path,visual_path
+CPT_KNIGHT_001,白蔷薇女骑士,王国近卫骑士。守护公主婚礼，巨乳且不适合传统实战，但拥有祖传剑路。,E_CPT_KNIGHT,res://Art/Captive/CPT_KNIGHT_001_icon.png,res://Art/Captive/CPT_KNIGHT_001.png
+CPT_WITCH_001,狱原实验员,运动系研究员。平时装天真，认真时戴眼镜切换里模式，把别人当样本。,E_CPT_WITCH,res://Art/Captive/CPT_WITCH_001_icon.png,res://Art/Captive/CPT_WITCH_001.png
+CPT_PRINCESS_001,王女书记官,适应力过强的王女，被带回窝后很快变成地窖管理助手。,E_CPT_PRINCESS,res://Art/Captive/CPT_PRINCESS_001_icon.png,res://Art/Captive/CPT_PRINCESS_001.png
+CPT_PRIEST_001,白花修女,修会净化者，擅长压制触手化与异常接口。,E_CPT_PRIEST,res://Art/Captive/CPT_PRIEST_001_icon.png,res://Art/Captive/CPT_PRIEST_001.png

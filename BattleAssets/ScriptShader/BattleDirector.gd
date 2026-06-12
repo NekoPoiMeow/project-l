@@ -1,5 +1,7 @@
 extends Node
 
+const OUTGAME_UPGRADE_SCENE_PATH := "res://scenes/OutGame/OutGameUpgrade.tscn"
+
 const ENTITY_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleEntity.gd")
 const PROJECTILE_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleProjectile.gd")
 const ATTACK_RUNNER_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleAttackRunner.gd")
@@ -8,7 +10,6 @@ const BIO_TRANSFER_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleBioT
 const ATTACK_INSTANCE_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleAttackInstance.gd")
 const FLOATING_NUMBER_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleFloatingNumber.gd")
 const LINE_FX_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleLineFx.gd")
-const SHARED_GIF_BATCH_RENDERER_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleSharedGifBatchRenderer.gd")
 
 @export var stage_config_path := "res://scenes/Battle/Battle_00.ini"
 
@@ -17,8 +18,7 @@ const WEAPONS_CSV := "res://Config/Weapons.csv"
 const EQUIPMENTS_CSV := "res://Config/Equipments.csv"
 const WEAPON_UPGRADES_CSV := "res://Config/WeaponUpgrades.csv"
 const RUN_STAT_UPGRADES_CSV := "res://Config/RunStatUpgrades.csv"
-const OUTGAME_UPGRADES_CSV := "res://Config/OutGameUpgrades.csv"
-const OUTGAME_UPGRADE_SCENE_PATH := "res://scenes/OutGame/OutGameUpgrade.tscn"
+const TEMP_ITEMS_CSV := "res://Config/TemporaryItems.csv"
 
 @onready var battle_camera: Camera2D = $"../Camera2DBattle"
 @onready var root: Node2D = get_parent()
@@ -49,7 +49,6 @@ var attack_instances: Array = []
 var block_mask_image: Image = null
 var block_alpha_limit := 0.1
 var enemy_kill_count := 0
-var battle_lust_score := 0.0
 var player_level := 1
 var player_xp := 0
 var player_xp_cap := 3
@@ -71,11 +70,6 @@ var assimilation_jobs: Array[Dictionary] = []
 var debug_label: Label = null
 var bio_texture_path := "res://scenes/Battle/Battle_00/Bio.png"
 var unit_contact_timers: Dictionary = {}
-# Time-slice expensive unit-vs-unit contact checks. Contacts do not need 60 Hz precision;
-# checking a rotating slice every frame prevents one frame from doing all pair queries.
-var unit_contact_cursor := 0
-var unit_contact_budget_min := 28
-var unit_contact_budget_fraction := 0.28
 var test_mode := false
 var test_attack_ids: Array = []
 var test_spawn_entity_id := "002"
@@ -93,68 +87,13 @@ var test_skill2_index := 0
 var test_source_modes: Array[String] = ["player", "tentacle_base", "friendly_minion", "enemy", "enemy_base"]
 var test_source_index := 0
 var floating_numbers_this_frame := 0
-var floating_number_cap_per_frame := 8
+var floating_number_cap_per_frame := 28
 var entity_grid: Dictionary = {}
 var entity_grid_cell_size := 260.0
-
-# Short-lived spawn reservation points. This prevents large waves/base batches from
-# being born on the same pixel and immediately forcing expensive overlap/contact
-# resolution. It does not reduce count; it only spreads a spawn burst over nearby
-# valid points.
-var recent_spawn_positions: Array[Dictionary] = []
-var recent_spawn_ttl := 1.15
-var spawn_position_min_spacing := 34.0
-
-# Shared-GIF batch rendering. Minor follower units can keep their logic entity,
-# but the visible frame is drawn by one batch node instead of one Sprite2D per unit.
-var shared_gif_batch_renderer: Node2D = null
-var shared_gif_batch_entity_threshold := 120
-var shared_gif_batch_enter_distance := 220.0
-var shared_gif_batch_exit_distance := 140.0
-var shared_gif_batch_enabled := true
-
-# Old-wave pressure control. This is not a hard enemy cap. It prevents weak trash
-# from every previous wave permanently accumulating off-screen or in far corners.
-var old_wave_retire_enabled := true
-var old_wave_retire_timer := 0.0
-var old_wave_retire_interval := 0.75
-var old_wave_retire_entity_threshold := 340
-var old_wave_retire_min_age := 42.0
-var old_wave_retire_far_distance := 1200.0
-var old_wave_retire_per_tick := 18
-
-# Standard mode tempo/balance patch. Keeps the existing systems, but makes the
-# default battle play closer to a roguelite horde: weak trash dies faster,
-# player weapons reach farther, skills are real burst buttons, and wave INI can
-# use stat multipliers without rewriting JSON.
-var standard_mode_balance_enabled := true
-var standard_player_weapon_damage_mul := 1.75
-var standard_player_weapon_interval_mul := 0.72
-var standard_player_weapon_range_mul := 2.10
-var standard_player_weapon_area_mul := 1.35
-var standard_player_projectile_speed_mul := 1.55
-var standard_player_skill_damage_mul := 4.00
-var standard_player_skill_area_mul := 1.90
-var standard_player_skill_cooldown_mul := 0.55
-var standard_player_skill_mana_cost_mul := 0.55
-
-# Swarm flow AI state. Instead of making every trash body run full target logic,
-# waves/base spawns are automatically split into a few leaders plus many cheap followers.
-var swarm_next_group_id := 1
-var swarm_group_states: Dictionary = {}
-var swarm_group_leaders: Dictionary = {}
-var swarm_group_flow_cache: Dictionary = {}
-var swarm_flow_cursor := 0
-var swarm_flow_cache_budget := 16
-var swarm_default_group_size := 10
 var battle_loadout: Dictionary = {}
 var battle_won := false
 var battle_lost := false
-var battle_result_settled := false
-var battle_result_transition_timer := -1.0
-var battle_result_transition_delay := 2.0
-var outgame_upgrade_rows: Array[Dictionary] = []
-var outgame_upgrade_effects: Dictionary = {}
+var result_scene_requested := false
 var win_condition := "destroy_enemy_base"
 var objective_text := "摧毁敌方基地"
 var objective_area_id := ""
@@ -204,6 +143,11 @@ var run_crit_multiplier_add := 0.0
 var run_mana_recovery_mul := 1.0
 var run_lust_reward_add := 0.0
 var run_lust_reward_mul := 1.0
+var run_player_attack_mul := 1.0
+var run_player_area_mul := 1.0
+var run_player_range_mul := 1.0
+var run_player_attack_frequency_mul := 1.0
+var run_base_start_bio_add := 0.0
 var run_mana_recovered := 0.0
 var player_mana_max := 100.0
 var player_mana := 100.0
@@ -307,12 +251,10 @@ func _ready() -> void:
 	load_stage()
 	load_battle_catalogs()
 	load_battle_loadout()
-	load_outgame_upgrade_effects()
 	load_player_skills()
 	setup_block_mask()
 	setup_ui()
 	setup_stage_area_visuals()
-	setup_shared_gif_batch_renderer()
 	spawn_initial_entities()
 	load_waves()
 	setup_camera()
@@ -321,9 +263,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	floating_numbers_this_frame = 0
 	battle_time += delta
-	process_recent_spawn_positions(delta)
 	rebuild_entity_grid()
-	process_swarm_flow_cache(delta)
 	process_assimilations(delta)
 	process_assimilated_periodic_buffs(delta)
 	process_base_contact_auras(delta)
@@ -334,67 +274,11 @@ func _physics_process(delta: float) -> void:
 	process_player_skills(delta)
 	process_equipment_events(delta)
 	process_waves(delta)
-	process_old_wave_retirement(delta)
 	process_stage_objectives(delta)
 	process_stage_events()
 	cleanup_lists()
 	update_camera_position()
-	update_shared_gif_batch_renderer()
 	update_ui()
-	process_battle_result_transition(delta)
-
-func setup_shared_gif_batch_renderer() -> void:
-	if !shared_gif_batch_enabled or entities_root == null:
-		return
-	if shared_gif_batch_renderer != null and is_instance_valid(shared_gif_batch_renderer):
-		return
-	shared_gif_batch_renderer = Node2D.new()
-	shared_gif_batch_renderer.name = "SharedGifBatchRenderer"
-	shared_gif_batch_renderer.set_script(SHARED_GIF_BATCH_RENDERER_SCRIPT)
-	# Added before spawned entities, so it draws behind full-detail entity nodes
-	# but still above the map background.
-	shared_gif_batch_renderer.z_index = 0
-	entities_root.add_child(shared_gif_batch_renderer)
-	if shared_gif_batch_renderer.has_method("setup"):
-		shared_gif_batch_renderer.call("setup", self)
-
-func update_shared_gif_batch_renderer() -> void:
-	if shared_gif_batch_renderer != null and is_instance_valid(shared_gif_batch_renderer):
-		shared_gif_batch_renderer.queue_redraw()
-
-func mark_shared_gif_batch_dirty() -> void:
-	update_shared_gif_batch_renderer()
-
-func should_batch_shared_gif_entity(entity) -> bool:
-	if !shared_gif_batch_enabled:
-		return false
-	if entity == null or !is_instance_valid(entity):
-		return false
-	if entities.size() < shared_gif_batch_entity_threshold:
-		return false
-	if !bool(entity.get("visual_is_shared_gif_sprite")):
-		return false
-	if str(entity.get("ai_role")) != "follower":
-		return false
-	if bool(entity.get("follower_precision_active")):
-		return false
-	# After the previous optimization proved useful, batch more aggressively:
-	# every non-precision follower can be drawn by the shared renderer. Units that
-	# are hit or enter precise combat automatically restore their own Sprite2D.
-	# The distance hysteresis remains as a safety fallback for very near important
-	# objects if you later want to raise the thresholds again.
-	var pos: Vector2 = entity.global_position
-	var min_dist := INF
-	if player_entity != null and is_instance_valid(player_entity):
-		min_dist = min(min_dist, pos.distance_to(player_entity.global_position))
-	if tentacle_base != null and is_instance_valid(tentacle_base):
-		min_dist = min(min_dist, pos.distance_to(tentacle_base.global_position))
-	if enemy_base != null and is_instance_valid(enemy_base):
-		min_dist = min(min_dist, pos.distance_to(enemy_base.global_position))
-	var already_batched: bool = bool(entity.get("batch_shared_gif_visual_active"))
-	if already_batched:
-		return min_dist > shared_gif_batch_exit_distance
-	return min_dist > shared_gif_batch_enter_distance
 
 func setup_camera() -> void:
 	if battle_camera == null:
@@ -525,32 +409,35 @@ func load_battle_catalogs() -> void:
 	run_stat_upgrade_rows = load_catalog_rows(RUN_STAT_UPGRADES_CSV)
 
 func load_battle_loadout() -> void:
+	# Start from saved loadout, then allow scene meta to override for one launch.
+	if GameState.is_loaded and GameState.has_method("get_battle_loadout"):
+		battle_loadout = GameState.get_battle_loadout()
 	var tree_root := get_tree().root
-	var got_pending: bool = false
 	if tree_root.has_meta("pending_battle_loadout"):
 		var payload = tree_root.get_meta("pending_battle_loadout")
 		if typeof(payload) == TYPE_DICTIONARY:
 			battle_loadout = payload
-			got_pending = true
-		tree_root.remove_meta("pending_battle_loadout")
-	if !got_pending and typeof(GameState) != TYPE_NIL and GameState.has_method("get_battle_loadout"):
-		battle_loadout = GameState.get_battle_loadout()
 
 	selected_character_id = str(battle_loadout.get("character_id", selected_character_id))
 	selected_weapon_id = str(battle_loadout.get("weapon_id", selected_weapon_id))
 	selected_equipment_id = str(battle_loadout.get("equipment_id", selected_equipment_id))
-	if !character_catalog.has(selected_character_id):
-		selected_character_id = "C001"
-	if !weapon_catalog.has(selected_weapon_id):
-		selected_weapon_id = "W001"
-	if !equipment_catalog.has(selected_equipment_id):
-		selected_equipment_id = "E001"
-	battle_loadout = {"character_id": selected_character_id, "weapon_id": selected_weapon_id, "equipment_id": selected_equipment_id}
-	if typeof(GameState) != TYPE_NIL and GameState.has_method("set_battle_loadout"):
-		GameState.set_battle_loadout(battle_loadout, false)
 
+	active_equipment_effects.clear()
 	var equipment_row: Dictionary = equipment_catalog.get(selected_equipment_id, {})
-	active_equipment_effects = parse_string_list(str(equipment_row.get("effect_keys", "")))
+	append_unique_effects(parse_string_list(str(equipment_row.get("effect_keys", ""))))
+
+	# Captive materialization is a next-battle temporary equipment. It reuses Equipments.csv.
+	if GameState.is_loaded and GameState.has_method("get_next_battle_captive_equipment_id"):
+		var captive_equipment_id: String = GameState.get_next_battle_captive_equipment_id()
+		if captive_equipment_id != "":
+			var captive_equipment_row: Dictionary = equipment_catalog.get(captive_equipment_id, {})
+			append_unique_effects(parse_string_list(str(captive_equipment_row.get("effect_keys", ""))))
+
+	if GameState.is_loaded and GameState.has_method("get_merchant_next_battle_effects"):
+		var temp_effects: Dictionary = GameState.get_merchant_next_battle_effects()
+		for raw_key in temp_effects.keys():
+			apply_runtime_battle_modifier(str(raw_key), float(temp_effects[raw_key]))
+
 	equipment_event_counts.clear()
 	hide_enemy_health_bars = active_equipment_effects.has("hide_enemy_hp")
 	if active_equipment_effects.has("mana_recovery_up"):
@@ -565,6 +452,74 @@ func load_battle_loadout() -> void:
 		run_crit_multiplier_add += 0.18
 	if active_equipment_effects.has("slime_belt"):
 		run_lust_reward_add += 20.0
+	apply_captive_equipment_effect_keys()
+
+func append_unique_effects(effects: Array) -> void:
+	for effect in effects:
+		var effect_key: String = str(effect).strip_edges()
+		if effect_key != "" and !active_equipment_effects.has(effect_key):
+			active_equipment_effects.append(effect_key)
+
+func apply_runtime_battle_modifier(effect_key: String, value: float) -> void:
+	var key: String = effect_key.strip_edges()
+	if key == "player_attack_mul":
+		run_player_attack_mul *= 1.0 + value
+	elif key == "player_attack_frequency_mul":
+		run_player_attack_frequency_mul *= 1.0 + value
+	elif key == "player_area_mul":
+		run_player_area_mul *= 1.0 + value
+	elif key == "player_range_mul":
+		run_player_range_mul *= 1.0 + value
+	elif key == "battle_lust_reward_mul":
+		run_lust_reward_mul *= 1.0 + value
+	elif key == "base_start_bio_add":
+		run_base_start_bio_add += value
+	elif key == "player_mana_regen_add":
+		player_mana_regen += value
+	elif key == "minion_attack_mul":
+		# Applied through captive equipment effect keys for now; keep hook name accepted.
+		pass
+
+func apply_captive_equipment_effect_keys() -> void:
+	if active_equipment_effects.has("captive_knight_lv0"):
+		run_player_attack_mul *= 1.08
+	if active_equipment_effects.has("captive_knight_lv1"):
+		run_player_attack_mul *= 1.14
+	if active_equipment_effects.has("captive_knight_lv2"):
+		run_player_attack_mul *= 1.18
+		run_player_area_mul *= 1.10
+	if active_equipment_effects.has("captive_knight_lv3"):
+		run_player_attack_mul *= 1.28
+		player_mana_regen *= 0.85
+	if active_equipment_effects.has("captive_witch_lv0"):
+		player_mana_regen += 1.0
+	if active_equipment_effects.has("captive_witch_lv1"):
+		player_mana_regen += 2.0
+	if active_equipment_effects.has("captive_witch_lv2"):
+		player_mana_regen += 2.5
+		run_player_attack_frequency_mul *= 1.12
+	if active_equipment_effects.has("captive_witch_lv3"):
+		player_mana_regen += 3.0
+		run_player_attack_frequency_mul *= 1.22
+	if active_equipment_effects.has("captive_princess_lv0"):
+		run_base_start_bio_add += 30.0
+	if active_equipment_effects.has("captive_princess_lv1"):
+		run_base_start_bio_add += 60.0
+	if active_equipment_effects.has("captive_princess_lv2"):
+		run_base_start_bio_add += 90.0
+		run_lust_reward_mul *= 1.08
+	if active_equipment_effects.has("captive_princess_lv3"):
+		run_base_start_bio_add += 140.0
+		run_lust_reward_mul *= 1.18
+	if active_equipment_effects.has("captive_priest_lv0"):
+		run_lust_reward_mul *= 1.05
+	if active_equipment_effects.has("captive_priest_lv1"):
+		run_lust_reward_mul *= 1.10
+	if active_equipment_effects.has("captive_priest_lv2"):
+		run_lust_reward_mul *= 1.14
+		run_player_area_mul *= 1.08
+	if active_equipment_effects.has("captive_priest_lv3"):
+		run_lust_reward_mul *= 1.25
 
 func load_player_skills() -> void:
 	player_skills.clear()
@@ -629,161 +584,6 @@ func load_catalog_rows(path: String) -> Array[Dictionary]:
 	file.close()
 	return result
 
-func load_outgame_upgrade_effects() -> void:
-	outgame_upgrade_rows = load_catalog_rows(OUTGAME_UPGRADES_CSV)
-	outgame_upgrade_effects.clear()
-	if outgame_upgrade_rows.is_empty():
-		return
-	if !GameState.is_loaded:
-		return
-
-	for row in outgame_upgrade_rows:
-		var id: String = str(row.get("id", "")).strip_edges()
-		if id == "":
-			continue
-		var group_name: String = str(row.get("group", row.get("tab", "player"))).strip_edges()
-		if group_name == "base":
-			group_name = "building"
-		var level: int = GameState.get_upgrade_level(group_name, id)
-		if level <= 0:
-			continue
-		var max_level: int = int(row.get("max_level", 1))
-		level = clamp(level, 0, max_level)
-		var effect_keys: Array = parse_string_list(str(row.get("effect_key", row.get("effect_keys", ""))))
-		if effect_keys.is_empty():
-			continue
-		var values: Array[float] = parse_float_list(str(row.get("values", row.get("value", "0"))))
-		var value := 0.0
-		if values.size() > 0:
-			value = values[int(clamp(level - 1, 0, values.size() - 1))]
-		for key in effect_keys:
-			var effect_key: String = str(key).strip_edges()
-			if effect_key == "":
-				continue
-			outgame_upgrade_effects[effect_key] = float(outgame_upgrade_effects.get(effect_key, 0.0)) + value
-
-
-	if GameState.is_loaded and GameState.has_method("get_merchant_next_battle_effects"):
-		var merchant_effects: Dictionary = GameState.get_merchant_next_battle_effects()
-		for raw_key in merchant_effects.keys():
-			var merchant_key: String = str(raw_key).strip_edges()
-			if merchant_key == "":
-				continue
-			outgame_upgrade_effects[merchant_key] = float(outgame_upgrade_effects.get(merchant_key, 0.0)) + float(merchant_effects[raw_key])
-
-func get_outgame_upgrade_effect(key: String, fallback: float = 0.0) -> float:
-	return float(outgame_upgrade_effects.get(key, fallback))
-
-func parse_float_list(text: String) -> Array[float]:
-	var result: Array[float] = []
-	var clean := text.strip_edges()
-	if clean == "":
-		return result
-	var parts: PackedStringArray = clean.split("|", false)
-	for part in parts:
-		var value_text := part.strip_edges()
-		if value_text == "":
-			continue
-		result.append(float(value_text))
-	return result
-
-func apply_outgame_upgrades_to_player_entity() -> void:
-	if player_entity == null or !is_instance_valid(player_entity):
-		return
-	var hp_mul := 1.0 + get_outgame_upgrade_effect("player_hp_mul", 0.0)
-	if hp_mul != 1.0:
-		player_entity.multiply_max_hp(hp_mul)
-		player_entity.hp = player_entity.max_hp
-	var regen_mul := 1.0 + get_outgame_upgrade_effect("player_regen_mul", 0.0)
-	if regen_mul != 1.0:
-		player_entity.multiply_regen(regen_mul)
-	var speed_mul := 1.0 + get_outgame_upgrade_effect("player_move_speed_mul", 0.0)
-	if speed_mul != 1.0:
-		player_entity.move_speed *= speed_mul
-	var defense_add := get_outgame_upgrade_effect("player_defense_add", 0.0)
-	if defense_add != 0.0 and player_entity.has_method("add_defense"):
-		player_entity.call("add_defense", defense_add)
-	elif defense_add != 0.0:
-		var current_defense = player_entity.get("defense")
-		if current_defense != null:
-			player_entity.set("defense", float(current_defense) + defense_add)
-	var mana_add := get_outgame_upgrade_effect("player_mana_max_add", 0.0)
-	if mana_add != 0.0:
-		player_mana_max += mana_add
-		player_mana = player_mana_max
-	var mana_regen_add := get_outgame_upgrade_effect("player_mana_regen_add", 0.0)
-	if mana_regen_add != 0.0:
-		player_mana_regen += mana_regen_add
-
-func apply_outgame_upgrades_to_attack(attack: Dictionary) -> void:
-	if attack.is_empty() or attack.get("_outgame_upgrade_applied", false) == true:
-		return
-	var damage_mul := 1.0 + get_outgame_upgrade_effect("player_attack_mul", 0.0)
-	if damage_mul != 1.0:
-		multiply_attack_damage(attack, damage_mul)
-	var range_mul := 1.0 + get_outgame_upgrade_effect("player_range_mul", 0.0)
-	var area_mul := 1.0 + get_outgame_upgrade_effect("player_area_mul", 0.0)
-	var speed_mul := 1.0 + get_outgame_upgrade_effect("player_projectile_speed_mul", 0.0)
-	if range_mul != 1.0 or area_mul != 1.0 or speed_mul != 1.0:
-		multiply_attack_geometry(attack, area_mul, range_mul, speed_mul)
-	var count_add: int = int(round(get_outgame_upgrade_effect("player_projectile_count_add", 0.0)))
-	if count_add != 0:
-		add_nested_number(attack, "emitter", "count", count_add, true)
-		add_nested_number(attack, "pattern", "count", count_add, true)
-	var fire_rate_bonus: float = get_outgame_upgrade_effect("player_attack_frequency_mul", 0.0)
-	if fire_rate_bonus != 0.0:
-		var interval_mul: float = 1.0 / max(0.15, 1.0 + fire_rate_bonus)
-		if attack.has("interval"):
-			attack["interval"] = max(0.05, float(attack.get("interval", 1.0)) * interval_mul)
-		if attack.has("cooldown"):
-			attack["cooldown"] = max(0.05, float(attack.get("cooldown", 1.0)) * interval_mul)
-	attack["_outgame_upgrade_applied"] = true
-
-func apply_outgame_upgrades_to_spawned_entity(entity) -> void:
-	if entity == null or !is_instance_valid(entity):
-		return
-	if entity == player_entity:
-		return
-	if entity == tentacle_base or (entity.faction == "tentacle" and entity.tags.has("base")):
-		var base_hp_mul := 1.0 + get_outgame_upgrade_effect("base_hp_mul", get_outgame_upgrade_effect("building_hp_mul", 0.0))
-		if base_hp_mul != 1.0:
-			entity.multiply_max_hp(base_hp_mul)
-		var base_regen_mul := 1.0 + get_outgame_upgrade_effect("base_regen_mul", get_outgame_upgrade_effect("building_regen_mul", 0.0))
-		if base_regen_mul != 1.0:
-			entity.multiply_regen(base_regen_mul)
-		var bio_gain_mul := 1.0 + get_outgame_upgrade_effect("base_bio_gain_mul", 0.0)
-		if bio_gain_mul != 1.0:
-			var amounts = entity.get("base_bio_cycle_amounts")
-			if typeof(amounts) == TYPE_ARRAY:
-				for i in range(amounts.size()):
-					amounts[i] = float(amounts[i]) * bio_gain_mul
-				entity.set("base_bio_cycle_amounts", amounts)
-		var start_bio_add := get_outgame_upgrade_effect("base_start_bio_add", 0.0)
-		if start_bio_add != 0.0:
-			var current_bio = entity.get("base_bio")
-			if current_bio != null:
-				entity.set("base_bio", float(current_bio) + start_bio_add)
-		return
-
-	if entity.faction == "tentacle" and (entity.tags.has("minion") or entity.tags.has("unit") or entity.tags.has("worker")):
-		var minion_hp_mul := 1.0 + get_outgame_upgrade_effect("minion_hp_mul", 0.0)
-		if minion_hp_mul != 1.0:
-			entity.multiply_max_hp(minion_hp_mul)
-		var minion_regen_mul := 1.0 + get_outgame_upgrade_effect("minion_regen_mul", 0.0)
-		if minion_regen_mul != 1.0:
-			entity.multiply_regen(minion_regen_mul)
-		var minion_speed_mul := 1.0 + get_outgame_upgrade_effect("minion_move_speed_mul", 0.0)
-		if minion_speed_mul != 1.0:
-			entity.move_speed *= minion_speed_mul
-		var minion_attack_mul := 1.0 + get_outgame_upgrade_effect("minion_attack_mul", 0.0)
-		if minion_attack_mul != 1.0:
-			var attacks = entity.get("attacks")
-			if typeof(attacks) == TYPE_ARRAY:
-				for attack in attacks:
-					if typeof(attack) == TYPE_DICTIONARY:
-						multiply_attack_damage(attack, minion_attack_mul)
-
-
 func apply_loadout_to_player() -> void:
 	if player_entity == null or !is_instance_valid(player_entity):
 		return
@@ -807,8 +607,6 @@ func apply_loadout_to_player() -> void:
 		player_entity.move_speed *= 0.34
 	if active_equipment_effects.has("player_speed_up_small"):
 		player_entity.move_speed *= 1.15
-
-	apply_outgame_upgrades_to_player_entity()
 
 	var weapon_row: Dictionary = weapon_catalog.get(selected_weapon_id, {})
 	if weapon_row.is_empty():
@@ -883,6 +681,22 @@ func multiply_attack_damage(attack: Dictionary, multiplier: float) -> void:
 			multiply_attack_damage(effect["attack"], multiplier)
 
 func apply_run_stats_to_attack(attack: Dictionary) -> void:
+	if run_player_attack_mul != 1.0:
+		multiply_attack_damage(attack, run_player_attack_mul)
+	if run_player_area_mul != 1.0:
+		multiply_nested_number(attack, "hit_shape", "radius", run_player_area_mul, true)
+		multiply_nested_number(attack, "hit_shape", "width", run_player_area_mul, true)
+		multiply_nested_number(attack, "pattern", "radius", run_player_area_mul, true)
+	if run_player_range_mul != 1.0:
+		multiply_nested_number(attack, "emitter", "range", run_player_range_mul, true)
+		multiply_nested_number(attack, "motion", "distance", run_player_range_mul, true)
+		multiply_nested_number(attack, "motion", "life_time", run_player_range_mul, true)
+	if run_player_attack_frequency_mul != 1.0:
+		var interval_mul: float = 1.0 / max(0.15, run_player_attack_frequency_mul)
+		if attack.has("interval"):
+			attack["interval"] = max(0.05, float(attack.get("interval", 1.0)) * interval_mul)
+		if attack.has("cooldown"):
+			attack["cooldown"] = max(0.05, float(attack.get("cooldown", 1.0)) * interval_mul)
 	if run_damage_add != 0.0:
 		add_attack_damage(attack, run_damage_add)
 	if run_bonus_damage_add != 0.0:
@@ -891,9 +705,6 @@ func apply_run_stats_to_attack(attack: Dictionary) -> void:
 		attack["crit_chance"] = float(attack.get("crit_chance", 0.0)) + run_crit_chance_add
 	if run_crit_multiplier_add != 0.0:
 		attack["crit_multiplier"] = float(attack.get("crit_multiplier", 1.5)) + run_crit_multiplier_add
-	if standard_mode_balance_enabled:
-		apply_standard_player_weapon_tuning(attack)
-	apply_outgame_upgrades_to_attack(attack)
 
 func add_attack_damage(attack: Dictionary, amount: float) -> void:
 	for effect in attack.get("effects", []):
@@ -903,65 +714,6 @@ func add_attack_damage(attack: Dictionary, amount: float) -> void:
 			effect["value"] = float(effect["value"]) + amount
 		if effect.has("attack") and typeof(effect["attack"]) == TYPE_DICTIONARY:
 			add_attack_damage(effect["attack"], amount)
-
-func apply_standard_player_weapon_tuning(attack: Dictionary) -> void:
-	if bool(attack.get("_standard_weapon_tuned", false)):
-		return
-	attack["_standard_weapon_tuned"] = true
-	multiply_attack_damage(attack, standard_player_weapon_damage_mul)
-	multiply_attack_geometry(attack, standard_player_weapon_area_mul, standard_player_weapon_range_mul, standard_player_projectile_speed_mul)
-	if attack.has("interval"):
-		attack["interval"] = max(0.10, float(attack.get("interval", 1.0)) * standard_player_weapon_interval_mul)
-	if attack.has("cooldown"):
-		attack["cooldown"] = max(0.10, float(attack.get("cooldown", 1.0)) * standard_player_weapon_interval_mul)
-
-func apply_standard_player_skill_tuning(attack: Dictionary) -> void:
-	if bool(attack.get("_standard_skill_tuned", false)):
-		return
-	attack["_standard_skill_tuned"] = true
-	multiply_attack_geometry(attack, standard_player_skill_area_mul, standard_player_skill_area_mul, standard_player_projectile_speed_mul)
-
-func multiply_attack_geometry(attack: Dictionary, area_mul: float, range_mul: float, speed_mul: float) -> void:
-	if attack.has("range"):
-		attack["range"] = float(attack.get("range", 0.0)) * range_mul
-	if attack.has("radius"):
-		attack["radius"] = float(attack.get("radius", 0.0)) * area_mul
-	if attack.has("speed"):
-		attack["speed"] = float(attack.get("speed", 0.0)) * speed_mul
-	if attack.has("life_time"):
-		attack["life_time"] = float(attack.get("life_time", 0.0)) * max(1.0, range_mul * 0.85)
-
-	var motion: Dictionary = attack.get("motion", {})
-	if !motion.is_empty():
-		if motion.has("speed"):
-			motion["speed"] = float(motion.get("speed", 0.0)) * speed_mul
-		if motion.has("max_distance"):
-			motion["max_distance"] = float(motion.get("max_distance", 0.0)) * range_mul
-		if motion.has("range"):
-			motion["range"] = float(motion.get("range", 0.0)) * range_mul
-		if motion.has("duration"):
-			motion["duration"] = float(motion.get("duration", 0.0)) * max(1.0, range_mul * 0.72)
-		if motion.has("life_time"):
-			motion["life_time"] = float(motion.get("life_time", 0.0)) * max(1.0, range_mul * 0.72)
-		attack["motion"] = motion
-
-	var hit_shape: Dictionary = attack.get("hit_shape", {})
-	if !hit_shape.is_empty():
-		if hit_shape.has("radius"):
-			hit_shape["radius"] = float(hit_shape.get("radius", 0.0)) * area_mul
-		if hit_shape.has("width"):
-			hit_shape["width"] = float(hit_shape.get("width", 0.0)) * area_mul
-		if hit_shape.has("length"):
-			hit_shape["length"] = float(hit_shape.get("length", 0.0)) * range_mul
-		if hit_shape.has("angle"):
-			hit_shape["angle"] = min(360.0, float(hit_shape.get("angle", 0.0)) + 6.0)
-		attack["hit_shape"] = hit_shape
-
-	for effect in attack.get("effects", []):
-		if typeof(effect) != TYPE_DICTIONARY:
-			continue
-		if effect.has("attack") and typeof(effect["attack"]) == TYPE_DICTIONARY:
-			multiply_attack_geometry(effect["attack"], area_mul, range_mul, speed_mul)
 
 func apply_equipment_to_entity_data(data: Dictionary) -> void:
 	if active_equipment_effects.is_empty():
@@ -976,8 +728,16 @@ func apply_equipment_to_spawned_entity(entity) -> void:
 	if entity == null or !is_instance_valid(entity):
 		return
 
-	if hide_enemy_health_bars and entity.faction == "enemy":
+	var entity_tags: Array = []
+	var raw_tags: Variant = entity.get("tags")
+	if typeof(raw_tags) == TYPE_ARRAY:
+		entity_tags = raw_tags
+	var enemy_base_id_cfg: String = str(config.get_value("enemy_base", "entity_id", "003"))
+	var is_enemy_base_entity: bool = entity.faction == "enemy" and (str(entity.entity_id) == enemy_base_id_cfg or entity_tags.has("base"))
+	if hide_enemy_health_bars and entity.faction == "enemy" and !is_enemy_base_entity:
 		entity.set_health_bar_hidden(true)
+	elif is_enemy_base_entity and entity.has_method("set_health_bar_hidden"):
+		entity.set_health_bar_hidden(false)
 
 func setup_block_mask() -> void:
 	if block_mask_sprite == null:
@@ -1249,6 +1009,11 @@ func spawn_initial_entities() -> void:
 func apply_equipment_to_tentacle_base() -> void:
 	if tentacle_base == null or !is_instance_valid(tentacle_base):
 		return
+
+	if run_base_start_bio_add != 0.0:
+		var current_bio = tentacle_base.get("base_bio")
+		if current_bio != null:
+			tentacle_base.set("base_bio", float(current_bio) + run_base_start_bio_add)
 
 	if active_equipment_effects.has("base_bio_cycle_yield_up") and tentacle_base.base_bio_cycle_amounts.size() > 0:
 		for i in range(tentacle_base.base_bio_cycle_amounts.size()):
@@ -1654,16 +1419,6 @@ func load_waves() -> void:
 			"target_priority": str(config.get_value(section, "target_priority", "")),
 			"target_priority_order": str(config.get_value(section, "target_priority_order", "")),
 			"target_distance_mode": str(config.get_value(section, "target_distance_mode", "")),
-			"ai_role": str(config.get_value(section, "ai_role", "")),
-			"role": str(config.get_value(section, "role", "")),
-			"swarm_group_size": int(config.get_value(section, "swarm_group_size", swarm_default_group_size)),
-			"swarm_flow": bool(config.get_value(section, "swarm_flow", true)),
-			"max_hp_mul": float(config.get_value(section, "max_hp_mul", 1.0)),
-			"move_speed_mul": float(config.get_value(section, "move_speed_mul", 1.0)),
-			"attack_mul": float(config.get_value(section, "attack_mul", 1.0)),
-			"defense_mul": float(config.get_value(section, "defense_mul", 1.0)),
-			"xp_mul": float(config.get_value(section, "xp_mul", 1.0)),
-			"bio_mul": float(config.get_value(section, "bio_mul", 1.0)),
 			"started": false,
 			"spawned": 0,
 			"timer": 0.0
@@ -1688,6 +1443,10 @@ func process_waves(delta: float) -> void:
 		if wave["timer"] > 0.0:
 			continue
 
+		if entities.size() >= max_active_entities_soft:
+			wave["timer"] = max(float(wave["interval"]), 0.6)
+			continue
+
 		var pos: Vector2 = get_spawn_position(str(wave["spawn"]), wave)
 		spawn_entity(str(wave["entity_id"]), pos, wave)
 		wave["spawned"] += 1
@@ -1705,6 +1464,12 @@ func process_stage_objectives(delta: float) -> void:
 		return
 
 	if win_condition == "destroy_enemy_base" or win_condition == "test":
+		if enemy_base == null or !is_instance_valid(enemy_base):
+			record_battle_win(null)
+			return
+		if bool(enemy_base.get("is_dead")) or float(enemy_base.get("hp")) <= 0.0:
+			record_battle_win(enemy_base)
+			return
 		return
 
 	if win_condition == "survive_time":
@@ -1901,7 +1666,6 @@ func spawn_entity(entity_id: String, pos: Vector2, overrides: Dictionary = {}):
 
 	apply_entity_overrides(data, overrides)
 	apply_equipment_to_entity_data(data)
-	var swarm_key: String = prepare_swarm_ai_role(entity_id, data, overrides)
 
 	var entity: Node2D = Node2D.new()
 	entity.name = "BattleEntity" + entity_id
@@ -1909,195 +1673,9 @@ func spawn_entity(entity_id: String, pos: Vector2, overrides: Dictionary = {}):
 	entities_root.add_child(entity)
 	entity.global_position = pos
 	entity.setup(self, data)
-	apply_outgame_upgrades_to_spawned_entity(entity)
-	entity.set_meta("spawn_time", battle_time)
-	entity.set_meta("spawn_section", str(overrides.get("section", overrides.get("wave_id", ""))))
-	register_swarm_spawned_entity(entity, swarm_key)
 	apply_equipment_to_spawned_entity(entity)
 	entities.append(entity)
-	reserve_spawn_position(pos, entity.radius)
 	return entity
-
-func prepare_swarm_ai_role(entity_id: String, data: Dictionary, overrides: Dictionary) -> String:
-	var ai: Dictionary = data.get("ai", {})
-	if !is_swarm_ai_eligible(data, overrides):
-		data["ai"] = ai
-		return ""
-
-	# Explicit role in JSON/INI wins. Use this for bosses, elites, scripted units, etc.
-	if ai.has("role") or ai.has("ai_role") or overrides.has("ai_role") or overrides.has("role"):
-		var explicit_role: String = str(overrides.get("ai_role", overrides.get("role", ai.get("role", ai.get("ai_role", "leader")))))
-		ai["role"] = explicit_role
-		var explicit_group: int = int(overrides.get("ai_group_id", overrides.get("group_id", ai.get("group_id", -1))))
-		if explicit_group < 0:
-			explicit_group = allocate_swarm_group_id()
-		ai["group_id"] = explicit_group
-		data["ai"] = ai
-		return str(overrides.get("section", overrides.get("swarm_group_key", ai.get("group_key", "explicit_" + str(explicit_group)))))
-
-	var swarm_key: String = get_swarm_group_key(entity_id, data, overrides)
-	var group_size: int = max(2, int(overrides.get("swarm_group_size", ai.get("swarm_group_size", swarm_default_group_size))))
-	var state: Dictionary = swarm_group_states.get(swarm_key, {"count": 0, "group_id": 0})
-	var count: int = int(state.get("count", 0))
-	var group_id: int = int(state.get("group_id", 0))
-	var role := "follower"
-	if group_id <= 0 or count % group_size == 0:
-		group_id = allocate_swarm_group_id()
-		role = "leader"
-
-	state["count"] = count + 1
-	state["group_id"] = group_id
-	swarm_group_states[swarm_key] = state
-
-	ai["role"] = role
-	ai["group_id"] = group_id
-	ai["group_key"] = swarm_key
-	# Leaders keep existing intervals. Followers are intentionally lazier; they inherit
-	# the leader's intent and only do near-range target pickup.
-	if role == "follower":
-		ai["follower_recheck_interval"] = float(ai.get("follower_recheck_interval", randf_range(0.40, 0.75)))
-		ai["follower_attack_scan_interval"] = float(ai.get("follower_attack_scan_interval", randf_range(0.32, 0.62)))
-		ai["follower_precision_interval"] = float(ai.get("follower_precision_interval", randf_range(0.22, 0.42)))
-		ai["follower_precision_radius"] = float(ai.get("follower_precision_radius", 260.0))
-		ai["steer_interval"] = max(float(ai.get("steer_interval", 0.22)), 0.28)
-	data["ai"] = ai
-	return swarm_key
-
-func is_swarm_ai_eligible(data: Dictionary, overrides: Dictionary) -> bool:
-	if bool(overrides.get("swarm_flow", true)) == false:
-		return false
-	var entity_type: String = str(data.get("type", "unit"))
-	var tags: Array = data.get("tags", [])
-	if entity_type == "player" or entity_type == "base" or tags.has("building") or tags.has("base") or tags.has("worker"):
-		return false
-	var stats: Dictionary = data.get("stats", {})
-	if float(stats.get("move_speed", 0.0)) <= 0.0:
-		return false
-	var ai: Dictionary = data.get("ai", {})
-	var mode: String = str(ai.get("mode", overrides.get("ai_mode", "")))
-	if mode == "":
-		mode = str(overrides.get("ai_mode", ""))
-	return mode == "chase_nearest" or mode == "attack_building_first"
-
-func get_swarm_group_key(entity_id: String, data: Dictionary, overrides: Dictionary) -> String:
-	if overrides.has("swarm_group_key"):
-		return str(overrides["swarm_group_key"])
-	if overrides.has("section"):
-		return str(overrides["section"])
-	return str(data.get("faction", "neutral")) + "_" + entity_id
-
-func allocate_swarm_group_id() -> int:
-	var id := swarm_next_group_id
-	swarm_next_group_id += 1
-	return id
-
-func register_swarm_spawned_entity(entity, swarm_key: String = "") -> void:
-	if entity == null or !is_instance_valid(entity):
-		return
-	if !entity.has_method("promote_to_swarm_leader"):
-		return
-	var group_id: int = int(entity.ai_group_id)
-	if group_id < 0:
-		return
-	if entity.ai_role == "leader":
-		register_swarm_leader(entity)
-	elif entity.ai_role == "follower":
-		entity.ai_leader = find_swarm_leader_for(entity)
-
-func register_swarm_leader(entity) -> void:
-	if entity == null or !is_instance_valid(entity):
-		return
-	var group_id: int = int(entity.ai_group_id)
-	if group_id < 0:
-		return
-	swarm_group_leaders[group_id] = entity
-
-func find_swarm_leader_for(entity):
-	if entity == null or !is_instance_valid(entity):
-		return null
-	var group_id: int = int(entity.ai_group_id)
-	if group_id < 0:
-		return null
-	var leader = swarm_group_leaders.get(group_id, null)
-	if leader != null and is_instance_valid(leader) and !leader.is_dead:
-		return leader
-
-	# Repair stale references lazily. This only scans the current entity list when a
-	# follower actually loses its leader, not every frame for every follower.
-	for candidate in entities:
-		if candidate == null or !is_instance_valid(candidate):
-			continue
-		if candidate.is_dead:
-			continue
-		if int(candidate.ai_group_id) == group_id and candidate.ai_role == "leader":
-			swarm_group_leaders[group_id] = candidate
-			return candidate
-	return null
-
-func process_swarm_flow_cache(_delta: float) -> void:
-	# Precompute one flow direction per swarm group. Followers read this cached value
-	# instead of touching leader target/steering state and recomputing intent separately.
-	var group_ids: Array = swarm_group_leaders.keys()
-	if group_ids.is_empty():
-		return
-
-	var budget: int = min(swarm_flow_cache_budget, group_ids.size())
-	for i in range(budget):
-		if swarm_flow_cursor >= group_ids.size():
-			swarm_flow_cursor = 0
-		var group_id = group_ids[swarm_flow_cursor]
-		swarm_flow_cursor += 1
-		var leader = swarm_group_leaders.get(group_id, null)
-		if leader == null or !is_instance_valid(leader) or leader.is_dead:
-			swarm_group_flow_cache.erase(int(group_id))
-			continue
-		update_swarm_flow_cache_for_leader(leader)
-
-func update_swarm_flow_cache_for_leader(leader) -> void:
-	if leader == null or !is_instance_valid(leader):
-		return
-	var group_id: int = int(leader.ai_group_id)
-	if group_id < 0:
-		return
-
-	var flow_dir: Vector2 = leader.cached_ai_move_dir
-	if flow_dir.length() <= 0.01 and leader.target != null and is_instance_valid(leader.target) and !leader.target.is_dead:
-		flow_dir = (leader.target.global_position - leader.global_position).normalized()
-	if flow_dir.length() <= 0.01:
-		flow_dir = Vector2.RIGHT if leader.facing_right else Vector2.LEFT
-
-	var target_pos: Vector2 = leader.global_position + flow_dir.normalized() * 240.0
-	if leader.target != null and is_instance_valid(leader.target) and !leader.target.is_dead:
-		target_pos = leader.target.global_position
-
-	swarm_group_flow_cache[group_id] = {
-		"dir": flow_dir.normalized(),
-		"target_pos": target_pos,
-		"leader_pos": leader.global_position,
-		"time": battle_time
-	}
-
-func get_swarm_flow_dir_for(entity) -> Vector2:
-	if entity == null or !is_instance_valid(entity):
-		return Vector2.ZERO
-	var group_id: int = int(entity.ai_group_id)
-	if group_id < 0:
-		return Vector2.ZERO
-	var cached = swarm_group_flow_cache.get(group_id, null)
-	if typeof(cached) == TYPE_DICTIONARY:
-		var dir: Vector2 = cached.get("dir", Vector2.ZERO)
-		if dir.length() > 0.01:
-			return dir.normalized()
-	return Vector2.ZERO
-
-func is_entity_precise_combat_active(entity) -> bool:
-	if entity == null or !is_instance_valid(entity):
-		return false
-	if !entity.has_method("promote_to_swarm_leader"):
-		return true
-	if str(entity.ai_role) != "follower":
-		return true
-	return bool(entity.follower_precision_active)
 
 func apply_entity_overrides(data: Dictionary, overrides: Dictionary) -> void:
 	if overrides.is_empty():
@@ -2147,42 +1725,9 @@ func apply_entity_overrides(data: Dictionary, overrides: Dictionary) -> void:
 	if target_factions_text != "":
 		ai["target_factions"] = parse_string_list(target_factions_text)
 
-	var ai_role_text: String = str(overrides.get("ai_role", overrides.get("role", "")))
-	if ai_role_text != "":
-		ai["role"] = ai_role_text
-	if overrides.has("ai_group_id"):
-		ai["group_id"] = int(overrides["ai_group_id"])
-	elif overrides.has("group_id"):
-		ai["group_id"] = int(overrides["group_id"])
-	if overrides.has("swarm_group_size"):
-		ai["swarm_group_size"] = int(overrides["swarm_group_size"])
-
 	for stat_key in ["max_hp", "move_speed", "attack", "defense", "hp_regen"]:
 		if overrides.has(stat_key):
 			stats[stat_key] = float(overrides[stat_key])
-
-	var stat_mul_keys: Dictionary = {
-		"max_hp_mul": "max_hp",
-		"move_speed_mul": "move_speed",
-		"attack_mul": "attack",
-		"defense_mul": "defense"
-	}
-	for mul_key in stat_mul_keys.keys():
-		if overrides.has(mul_key):
-			var target_key: String = str(stat_mul_keys[mul_key])
-			stats[target_key] = float(stats.get(target_key, 0.0)) * float(overrides[mul_key])
-
-	var reward: Dictionary = data.get("reward", {})
-	if overrides.has("xp_mul"):
-		var default_xp: float = 5.0 if str(data.get("type", "")) == "base" or data.get("tags", []).has("building") else 1.0
-		var base_xp: float = float(reward.get("xp", default_xp))
-		var xp_mul: float = float(overrides["xp_mul"])
-		var scaled_xp: int = int(round(base_xp * xp_mul))
-		reward["xp"] = max(1 if base_xp > 0.0 and xp_mul > 0.0 else 0, scaled_xp)
-	if overrides.has("bio_mul"):
-		reward["bio"] = max(0, int(round(float(reward.get("bio", 0)) * float(overrides["bio_mul"]))))
-	if !reward.is_empty():
-		data["reward"] = reward
 
 	data["ai"] = ai
 	data["stats"] = stats
@@ -2313,160 +1858,7 @@ func load_attack_data(attack_id: String) -> Dictionary:
 		push_error("Invalid attack json: " + path)
 		return {}
 
-	return normalize_attack_data(attack_id, parsed)
-
-func normalize_attack_data(attack_id: String, raw_data: Dictionary) -> Dictionary:
-	var data: Dictionary = raw_data.duplicate(true)
-	var key: String = (attack_id + " " + str(data.get("id", "")) + " " + str(data.get("name", ""))).to_lower()
-	if !data.has("id") or str(data.get("id", "")) == "":
-		data["id"] = attack_id
-
-	# Do not overwrite explicit art, but fill missing placeholder visuals from the known BattleAssets.
-	var visual: Dictionary = data.get("visual", {})
-	var has_asset: bool = visual.has("texture") or visual.has("gif")
-	var asset_path: String = ""
-	var visual_size: Array = []
-	var visual_anchor: String = str(visual.get("anchor", "center"))
-
-	if key.contains("strong") and key.contains("melee"):
-		asset_path = "res://BattleAssets/StrongMelee.png"
-		visual_size = [190, 90]
-		visual_anchor = "left_center"
-	elif (key.contains("mid") or key.contains("normal")) and key.contains("melee"):
-		asset_path = "res://BattleAssets/NormalMelle.png"
-		visual_size = [158, 76]
-		visual_anchor = "left_center"
-	elif key.contains("weak") and key.contains("melee"):
-		asset_path = "res://BattleAssets/WeakMelle.png"
-		visual_size = [130, 62]
-		visual_anchor = "left_center"
-	elif key.contains("tracer"):
-		asset_path = "res://BattleAssets/TracerBullet.png"
-		visual_size = [56, 20]
-	elif key.contains("sniper"):
-		asset_path = "res://BattleAssets/Sniper.png"
-		visual_size = [92, 22]
-	elif key.contains("boomerang"):
-		asset_path = "res://BattleAssets/Boomerang.png"
-		visual_size = [78, 78]
-	elif key.contains("shotgun"):
-		asset_path = "res://BattleAssets/Shotgun.png"
-		visual_size = [42, 16]
-	elif key.contains("beam") or key.contains("laser"):
-		asset_path = "res://BattleAssets/Beam.png"
-		visual_anchor = "left_center"
-	elif key.contains("poison"):
-		asset_path = "res://BattleAssets/Poison.png"
-	elif key.contains("thunder") or key.contains("落雷"):
-		asset_path = "res://BattleAssets/Thunder.png"
-		visual_size = [130, 260]
-	elif key.contains("spike"):
-		asset_path = "res://BattleAssets/Spike.png"
-	elif key.contains("charm"):
-		asset_path = "res://BattleAssets/Charm.png"
-		visual_size = [58, 58]
-	elif key.contains("lighting") or key.contains("lightning") or key.contains("chain"):
-		asset_path = "res://BattleAssets/Lighting.png"
-		visual_size = [180, 34]
-		visual_anchor = "left_center"
-	elif key.contains("curve"):
-		asset_path = "res://BattleAssets/CurveBullet.png"
-		visual_size = [54, 22]
-	elif key.contains("flame") or key.contains("fire") or key.contains("喷"):
-		asset_path = "res://BattleAssets/Flame.png"
-		visual_size = [300, 104]
-		visual_anchor = "left_center"
-		var flame_shape: Dictionary = data.get("hit_shape", {})
-		flame_shape["mode"] = "beam_rect"
-		flame_shape["length"] = max(float(flame_shape.get("length", 0.0)), 300.0)
-		flame_shape["width"] = max(float(flame_shape.get("width", 0.0)), 104.0)
-		data["hit_shape"] = flame_shape
-		var flame_origin: Dictionary = data.get("origin", {})
-		if !flame_origin.has("point"):
-			flame_origin["point"] = "right"
-		data["origin"] = flame_origin
-	elif key.contains("rpg") or key.contains("rocket"):
-		asset_path = "res://BattleAssets/RPG.png"
-		visual_size = [74, 28]
-	elif key.contains("strong") and key.contains("strafe"):
-		asset_path = "res://BattleAssets/StrongStrafe.png"
-		visual_size = [360, 190]
-	elif key.contains("weak") and key.contains("strafe"):
-		asset_path = "res://BattleAssets/WeakStrafe.png"
-		visual_size = [300, 168]
-	elif key.contains("strafe") or key.contains("bombing") or key.contains("轰"):
-		asset_path = "res://BattleAssets/GeneralBombing.gif"
-		visual_size = [320, 180]
-	elif key.contains("bullet"):
-		asset_path = "res://BattleAssets/Bullet.png"
-		visual_size = [46, 16]
-
-	if asset_path != "":
-		if !has_asset:
-			if asset_path.get_extension().to_lower() == "gif":
-				visual["gif"] = asset_path
-			else:
-				visual["texture"] = asset_path
-		if !visual_size.is_empty() and !visual.has("size"):
-			visual["size"] = visual_size
-		if visual_anchor != "center" and !visual.has("anchor"):
-			visual["anchor"] = visual_anchor
-		data["visual"] = visual
-
-	if key.contains("strafe") or key.contains("bombing") or key.contains("轰"):
-		var strafe_visual: Dictionary = data.get("visual", {})
-		strafe_visual["indicator_texture"] = "res://BattleAssets/StrafeBox.png"
-		strafe_visual["indicator_alpha"] = 0.72
-		if !strafe_visual.has("size"):
-			strafe_visual["size"] = [340, 180]
-		data["visual"] = strafe_visual
-		var shape: Dictionary = data.get("hit_shape", {})
-		shape["mode"] = "rect"
-		shape["length"] = max(float(shape.get("length", 0.0)), float(strafe_visual.get("size", [340, 180])[0]))
-		shape["width"] = max(float(shape.get("width", 0.0)), float(strafe_visual.get("size", [340, 180])[1]))
-		data["hit_shape"] = shape
-		var origin: Dictionary = data.get("origin", {})
-		origin["mode"] = "aim_offset"
-		origin["distance"] = float(origin.get("distance", 360.0))
-		data["origin"] = origin
-		var aim: Dictionary = data.get("aim", {})
-		aim["mode"] = "mouse"
-		data["aim"] = aim
-		data["duration"] = max(float(data.get("duration", data.get("life_time", 0.55))), 0.55)
-
-	# Baseline player projectiles should reach beyond the visible play area, not die just inside the camera.
-	if key.contains("bullet") or key.contains("sniper") or key.contains("tracer") or key.contains("charm") or key.contains("curve"):
-		var motion: Dictionary = data.get("motion", {})
-		motion["max_distance"] = max(float(motion.get("max_distance", data.get("range", 0.0))), 1250.0)
-		if motion.has("speed"):
-			motion["speed"] = max(float(motion.get("speed", 0.0)), 720.0)
-		data["motion"] = motion
-
-	return data
-
-func spawn_textured_line_fx(start_pos: Vector2, end_pos: Vector2, texture_path: String = "res://BattleAssets/Lighting.png", width: float = 42.0, lifetime: float = 0.16, color: Color = Color(1.0, 1.0, 1.0, 0.92)) -> void:
-	var tex = load(texture_path)
-	if tex == null:
-		spawn_line_fx(start_pos, end_pos, color, width * 0.35, lifetime)
-		return
-	var delta: Vector2 = end_pos - start_pos
-	var dist: float = delta.length()
-	if dist <= 1.0:
-		return
-	var sprite := Sprite2D.new()
-	sprite.name = "TexturedLineFx"
-	sprite.texture = tex
-	sprite.centered = true
-	sprite.global_position = start_pos.lerp(end_pos, 0.5)
-	sprite.rotation = delta.angle()
-	sprite.modulate = color
-	sprite.z_index = 95
-	var tex_size: Vector2 = tex.get_size()
-	sprite.scale = Vector2(dist / max(tex_size.x, 1.0), width / max(tex_size.y, 1.0))
-	effects_root.add_child(sprite)
-	var tween := create_tween()
-	tween.tween_property(sprite, "modulate:a", 0.0, lifetime)
-	tween.tween_callback(sprite.queue_free)
+	return parsed
 
 func spawn_bio_drop(pos: Vector2, value: int) -> void:
 	if value <= 0:
@@ -2662,6 +2054,8 @@ func notify_attack_hit(source, target, dealt: float, context: Dictionary = {}) -
 			"damage": dealt,
 			"attack_id": str(context.get("attack", {}).get("id", ""))
 		})
+		if player_entity != null and is_instance_valid(player_entity):
+			spawn_floating_number(player_entity.global_position + Vector2(0.0, -player_entity.radius - 70.0), "淫能 +20", Color(1.0, 0.46, 0.86, 1.0))
 
 func spawn_bio_transfer(start_pos: Vector2, target_base, value: int) -> void:
 	if value <= 0:
@@ -3138,10 +2532,8 @@ func multiply_nested_number(attack: Dictionary, section_name: String, key: Strin
 	section[key] = float(section.get(key, 0.0)) * value
 	attack[section_name] = section
 
-func add_nested_number(attack: Dictionary, section_name: String, key: String, value: float, require_existing: bool = false) -> void:
+func add_nested_number(attack: Dictionary, section_name: String, key: String, value: float) -> void:
 	var section: Dictionary = attack.get(section_name, {})
-	if require_existing and !section.has(key):
-		return
 	section[key] = float(section.get(key, 0.0)) + value
 	attack[section_name] = section
 
@@ -3360,14 +2752,8 @@ func find_target_for(source, target_factions: Array, sense_radius: float):
 	var best = null
 	var best_rank: int = 999999
 	var best_dist: float = INF
-	if source == null or !is_instance_valid(source):
-		return null
 
-	var candidates: Array = entities
-	if sense_radius > 0.0:
-		candidates = query_entities_near(source.global_position, sense_radius + 96.0)
-
-	for entity in candidates:
+	for entity in entities:
 		if entity == null or !is_instance_valid(entity):
 			continue
 
@@ -3381,7 +2767,7 @@ func find_target_for(source, target_factions: Array, sense_radius: float):
 			continue
 
 		var dist: float = source.global_position.distance_to(entity.global_position)
-		if sense_radius > 0.0 and dist > sense_radius:
+		if dist > sense_radius:
 			continue
 
 		var rank: int = source.get_target_rank(entity)
@@ -3401,19 +2787,13 @@ func find_objective_target_for(source, target_factions: Array, max_radius: float
 	var best = null
 	var best_rank: int = 999999
 	var best_dist: float = INF
-	if source == null or !is_instance_valid(source):
-		return null
 	var original_priority_order: Array = []
 	var use_override_priority: bool = !priority_order.is_empty() and source != null and is_instance_valid(source)
 	if use_override_priority:
 		original_priority_order = source.target_priority_order.duplicate()
 		source.target_priority_order = priority_order
 
-	var candidates: Array = entities
-	if max_radius > 0.0:
-		candidates = query_entities_near(source.global_position, max_radius + 128.0)
-
-	for entity in candidates:
+	for entity in entities:
 		if entity == null or !is_instance_valid(entity):
 			continue
 
@@ -3458,8 +2838,7 @@ func get_building_avoid_direction(entity, direct: Vector2, target_pos: Vector2, 
 	var best_building = null
 	var best_score: float = INF
 
-	var candidates: Array = query_entities_near(entity.global_position, entity.radius + 360.0)
-	for other in candidates:
+	for other in entities:
 		if other == null or !is_instance_valid(other):
 			continue
 
@@ -3557,8 +2936,7 @@ func process_base_aura_buffs(delta: float) -> void:
 	if tentacle_base.base_aura_speed_mul <= 1.0 and tentacle_base.base_aura_regen_add <= 0.0:
 		return
 
-	var candidates: Array = query_entities_near(tentacle_base.global_position, tentacle_base.alert_radius + 96.0)
-	for entity in candidates:
+	for entity in entities:
 		if entity == null or !is_instance_valid(entity):
 			continue
 		if entity.is_dead or entity.is_building:
@@ -3581,40 +2959,22 @@ func process_unit_contacts(delta: float) -> void:
 	for key in unit_contact_timers.keys():
 		unit_contact_timers[key] = max(0.0, float(unit_contact_timers[key]) - delta)
 
-	var total: int = entities.size()
-	if total <= 0:
-		return
-
-	# Broadphase + time slicing. Each frame checks only a rotating slice of mobile units.
-	# This trades a few frames of contact latency for much flatter frame time under swarms.
-	var budget: int = clamp(int(ceil(float(total) * unit_contact_budget_fraction)), unit_contact_budget_min, total)
-	var checked: int = 0
-	while checked < budget and checked < total:
-		if unit_contact_cursor >= total:
-			unit_contact_cursor = 0
-		var a = entities[unit_contact_cursor]
-		unit_contact_cursor += 1
-		checked += 1
-
+	for i in range(entities.size()):
+		var a = entities[i]
 		if a == null or !is_instance_valid(a):
 			continue
+
 		if a.is_dead or a.is_building or a.entity_type == "player":
 			continue
-		if !is_entity_precise_combat_active(a):
-			continue
 
-		var candidates: Array = query_entities_near(a.global_position, a.radius + 220.0)
-		for b in candidates:
+		for j in range(i + 1, entities.size()):
+			var b = entities[j]
 			if b == null or !is_instance_valid(b):
 				continue
-			if b == a:
-				continue
-			if b.get_instance_id() <= a.get_instance_id():
-				continue
+
 			if b.is_dead or b.is_building or b.entity_type == "player":
 				continue
-			if !is_entity_precise_combat_active(b):
-				continue
+
 			if are_factions_allied(a.faction, b.faction):
 				continue
 
@@ -3653,81 +3013,6 @@ func make_contact_key(a, b) -> String:
 	if a_id < b_id:
 		return str(a_id) + "_" + str(b_id)
 	return str(b_id) + "_" + str(a_id)
-
-func process_old_wave_retirement(delta: float) -> void:
-	if !old_wave_retire_enabled:
-		return
-	old_wave_retire_timer -= delta
-	if old_wave_retire_timer > 0.0:
-		return
-	old_wave_retire_timer = old_wave_retire_interval
-
-	if entities.size() < old_wave_retire_entity_threshold:
-		return
-	if player_entity == null or !is_instance_valid(player_entity):
-		return
-
-	var retired := 0
-	for entity in entities.duplicate():
-		if retired >= old_wave_retire_per_tick:
-			break
-		if entity == null or !is_instance_valid(entity):
-			continue
-		if !can_retire_old_trash_entity(entity):
-			continue
-		retire_old_trash_entity(entity)
-		retired += 1
-
-func can_retire_old_trash_entity(entity) -> bool:
-	if entity.is_dead or entity.is_building:
-		return false
-	if entity.entity_type == "player" or entity.entity_type == "base" or entity.entity_type == "worker":
-		return false
-	if entity.tags.has("boss") or entity.tags.has("elite") or entity.tags.has("building") or entity.tags.has("base") or entity.tags.has("worker"):
-		return false
-	if str(entity.get("ai_role")) == "leader":
-		return false
-	# Do not retire friendly minions around the mother base; this is mostly for old
-	# enemy wave trash.
-	if are_factions_allied(entity.faction, "tentacle"):
-		return false
-	var age: float = battle_time - float(entity.get_meta("spawn_time", battle_time))
-	if age < old_wave_retire_min_age:
-		return false
-	var pos: Vector2 = entity.global_position
-	var min_core_dist: float = pos.distance_to(player_entity.global_position)
-	if tentacle_base != null and is_instance_valid(tentacle_base):
-		min_core_dist = min(min_core_dist, pos.distance_to(tentacle_base.global_position))
-	if enemy_base != null and is_instance_valid(enemy_base):
-		min_core_dist = min(min_core_dist, pos.distance_to(enemy_base.global_position))
-	if min_core_dist < old_wave_retire_far_distance:
-		return false
-	# If the unit is visible, let normal play handle it. Retire far historical trash only.
-	if battle_camera != null and is_position_near_camera(pos, 260.0):
-		return false
-	return true
-
-func retire_old_trash_entity(entity) -> void:
-	# Remove without rewards. This is wave lifecycle cleanup, not a player kill.
-	if entity == null or !is_instance_valid(entity):
-		return
-	entity.is_dead = true
-	entities.erase(entity)
-	if entity.has_method("set_shared_gif_sprite_in_batch_tree"):
-		entity.set_shared_gif_sprite_in_batch_tree(false)
-	entity.queue_free()
-	mark_shared_gif_batch_dirty()
-
-func is_position_near_camera(pos: Vector2, extra_margin: float = 0.0) -> bool:
-	if battle_camera == null:
-		return false
-	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	var zoom: Vector2 = battle_camera.zoom
-	if zoom.x <= 0.0 or zoom.y <= 0.0:
-		zoom = Vector2.ONE
-	var half_size: Vector2 = viewport_size * 0.5 / zoom + Vector2.ONE * extra_margin
-	var center: Vector2 = battle_camera.global_position
-	return abs(pos.x - center.x) <= half_size.x and abs(pos.y - center.y) <= half_size.y
 
 func process_base_delivery_and_production(delta: float) -> void:
 	if tentacle_base != null and is_instance_valid(tentacle_base):
@@ -3828,8 +3113,6 @@ func cast_attack_skill(skill: Dictionary, slot: int) -> void:
 		spawn_floating_number(player_entity.global_position + Vector2(0.0, -72.0), "Mana未满", Color(0.55, 0.8, 1.0, 1.0))
 		return
 	var cost: float = float(skill.get("mana_cost", 0.0))
-	if standard_mode_balance_enabled:
-		cost *= standard_player_skill_mana_cost_mul
 	if player_mana < cost:
 		spawn_floating_number(player_entity.global_position + Vector2(0.0, -72.0), "Mana不足", Color(0.55, 0.8, 1.0, 1.0))
 		return
@@ -3838,13 +3121,9 @@ func cast_attack_skill(skill: Dictionary, slot: int) -> void:
 	player_skill_cooldowns[skill_id] = get_skill_cooldown(skill)
 	var attack: Dictionary = skill.get("attack", {}).duplicate(true)
 	var skill_multiplier: float = selected_character_skill_mul
-	if standard_mode_balance_enabled:
-		skill_multiplier *= standard_player_skill_damage_mul
 	if player_entity.has_method("get_status_skill_damage_multiplier"):
 		skill_multiplier *= player_entity.get_status_skill_damage_multiplier()
 	scale_skill_attack(attack, skill_multiplier)
-	if standard_mode_balance_enabled:
-		apply_standard_player_skill_tuning(attack)
 	var dir: Vector2 = player_entity.get_global_mouse_position() - player_entity.global_position
 	if dir.length() <= 0.01:
 		dir = Vector2.RIGHT
@@ -3852,10 +3131,7 @@ func cast_attack_skill(skill: Dictionary, slot: int) -> void:
 	spawn_skill_cast_fx(skill, player_entity.global_position)
 
 func get_skill_cooldown(skill: Dictionary) -> float:
-	var cd: float = float(skill.get("cooldown", 1.0))
-	if standard_mode_balance_enabled:
-		cd *= standard_player_skill_cooldown_mul
-	return max(player_skill_min_cooldown * 0.62, cd)
+	return max(player_skill_min_cooldown, float(skill.get("cooldown", 1.0)))
 
 func scale_skill_attack(attack: Dictionary, multiplier: float) -> void:
 	if multiplier == 1.0:
@@ -3867,8 +3143,6 @@ func scale_skill_attack(attack: Dictionary, multiplier: float) -> void:
 			effect["value"] = float(effect["value"]) * multiplier
 		if str(effect.get("mode", "")) == "heal" and effect.has("value"):
 			effect["value"] = float(effect["value"]) * multiplier
-		if effect.has("attack") and typeof(effect["attack"]) == TYPE_DICTIONARY:
-			scale_skill_attack(effect["attack"], multiplier)
 
 func spawn_skill_cast_fx(skill: Dictionary, pos: Vector2) -> void:
 	var visual: Dictionary = skill.get("visual", {})
@@ -3887,31 +3161,6 @@ func are_factions_allied(a: String, b: String) -> bool:
 		return true
 
 	return false
-
-func process_recent_spawn_positions(delta: float) -> void:
-	for i in range(recent_spawn_positions.size() - 1, -1, -1):
-		var item: Dictionary = recent_spawn_positions[i]
-		item["ttl"] = float(item.get("ttl", 0.0)) - delta
-		if float(item["ttl"]) <= 0.0:
-			recent_spawn_positions.remove_at(i)
-		else:
-			recent_spawn_positions[i] = item
-
-func reserve_spawn_position(pos: Vector2, unit_radius: float) -> void:
-	recent_spawn_positions.append({
-		"pos": pos,
-		"radius": max(spawn_position_min_spacing, unit_radius * 1.45),
-		"ttl": recent_spawn_ttl
-	})
-
-func is_clear_of_recent_spawn_reservations(pos: Vector2, unit_radius: float) -> bool:
-	var required: float = max(spawn_position_min_spacing, unit_radius * 1.45)
-	for item in recent_spawn_positions:
-		var other_pos: Vector2 = item.get("pos", Vector2.ZERO)
-		var other_radius: float = float(item.get("radius", spawn_position_min_spacing))
-		if pos.distance_to(other_pos) < required + other_radius:
-			return false
-	return true
 
 func get_spawn_position(spawn_rule: String, wave: Dictionary) -> Vector2:
 	if spawn_rule == "":
@@ -3986,11 +3235,7 @@ func is_spawn_position_clear(pos: Vector2, entity_id: String) -> bool:
 		var body: Dictionary = entity_data.get("body", {})
 		unit_radius = float(body.get("radius", unit_radius))
 
-	if !is_clear_of_recent_spawn_reservations(pos, unit_radius):
-		return false
-
-	var candidates: Array = query_entities_near(pos, unit_radius + 420.0)
-	for other in candidates:
+	for other in entities:
 		if other == null or !is_instance_valid(other):
 			continue
 
@@ -4051,8 +3296,7 @@ func can_entity_stand_at(entity, pos: Vector2, ignored_building = null) -> bool:
 	if entity.is_building:
 		return true
 
-	var candidates: Array = query_entities_near(pos, entity.radius + 420.0)
-	for other in candidates:
+	for other in entities:
 		if other == null or !is_instance_valid(other):
 			continue
 
@@ -4114,12 +3358,8 @@ func register_entity_death(entity, _source = null) -> void:
 		record_battle_loss("base_dead")
 		return
 
-	if int(entity.ai_group_id) >= 0 and swarm_group_leaders.get(int(entity.ai_group_id), null) == entity:
-		swarm_group_leaders.erase(int(entity.ai_group_id))
-
 	if entity.faction == "enemy":
 		enemy_kill_count += 1
-		battle_lust_score += get_lust_value_for_entity(entity)
 		emit_equipment_event("on_enemy_killed", {"entity_id": entity.entity_id, "is_building": entity.is_building})
 		if win_condition == "kill_entity_id" and objective_target_entity_id != "" and entity.entity_id == objective_target_entity_id:
 			objective_progress_count += 1
@@ -4137,33 +3377,39 @@ func register_entity_death(entity, _source = null) -> void:
 	if bio_value > 0:
 		spawn_bio_drop(entity.global_position, bio_value)
 
-func get_lust_value_for_entity(entity) -> float:
-	if entity == null or !is_instance_valid(entity):
-		return 0.0
-	var reward: Dictionary = entity.data.get("reward", {})
-	if reward.has("lust"):
-		return max(0.0, float(reward.get("lust", 0.0)))
-	if entity == enemy_base or entity.tags.has("base"):
-		return 100.0
-	if entity.tags.has("boss") or entity.tags.has("elite"):
-		return 10.0
-	if entity.is_building:
-		return 25.0
-	return 1.0
-
 func record_battle_win(_dead_base) -> void:
 	if battle_won or battle_lost:
 		return
 
 	battle_won = true
 	trigger_stage_result_events("win")
-	settle_battle_result(true, "enemy_base_destroyed")
+	var level_id: String = str(battle_loadout.get("level_id", ""))
+	if level_id == "":
+		level_id = str(config.get_value("stage", "id", ""))
+
+	if GameState.is_loaded:
+		if level_id != "":
+			GameState.record_level_clear(level_id, 1, false)
+		var lust_reward: int = calculate_battle_lust_reward(true)
+		if lust_reward > 0:
+			GameState.add_lust(lust_reward, false)
+		if GameState.has_method("clear_next_battle_consumables"):
+			GameState.clear_next_battle_consumables(false)
+		GameState.autosave("battle_win")
+	go_to_outgame_after_result("win")
 
 func record_battle_loss(reason: String) -> void:
 	if battle_won or battle_lost:
 		return
 	battle_lost = true
 	trigger_stage_result_events("loss")
+	if GameState.is_loaded:
+		var lust_reward: int = calculate_battle_lust_reward(false)
+		if lust_reward > 0:
+			GameState.add_lust(lust_reward, false)
+		if GameState.has_method("clear_next_battle_consumables"):
+			GameState.clear_next_battle_consumables(false)
+		GameState.autosave("battle_loss")
 	if objective_label:
 		if reason == "base_dead":
 			objective_label.text = "失败：基地被摧毁"
@@ -4171,58 +3417,30 @@ func record_battle_loss(reason: String) -> void:
 			objective_label.text = "失败：玩家倒下"
 		else:
 			objective_label.text = "失败"
-	settle_battle_result(false, reason)
+	go_to_outgame_after_result(reason)
 
-func settle_battle_result(is_win: bool, reason: String) -> void:
-	if battle_result_settled:
-		return
-	battle_result_settled = true
-	var level_id: String = str(battle_loadout.get("level_id", ""))
-	if level_id == "":
-		level_id = str(config.get_value("stage", "id", ""))
-	var base_lust: float = max(0.0, battle_lust_score + run_lust_reward_add)
-	var result_mul := 1.0 if is_win else 0.55
-	var outgame_lust_mul := 1.0 + get_outgame_upgrade_effect("battle_lust_reward_mul", 0.0)
-	var lust_reward: int = max(0, int(round(base_lust * run_lust_reward_mul * result_mul * outgame_lust_mul)))
-	var captive_id := ""
-	var first_clear := false
-	if GameState.is_loaded:
-		if is_win and level_id != "":
-			first_clear = !GameState.data.get("progress", {}).get("cleared_levels", []).has(level_id)
-			GameState.record_level_clear(level_id, 1, false)
-		if lust_reward > 0:
-			GameState.add_lust(lust_reward, false)
-		if is_win and first_clear and level_id != "":
-			captive_id = "CAP_" + level_id + "_CLEAR"
-			GameState.add_captive(captive_id, level_id, false)
-		if GameState.has_method("clear_merchant_next_battle_effects"):
-			GameState.clear_merchant_next_battle_effects(false)
-		GameState.set_last_battle_result({
-			"level_id": level_id,
-			"win": is_win,
-			"reason": reason,
-			"lust_reward": lust_reward,
-			"kill_count": enemy_kill_count,
-			"lust_base_score": int(round(battle_lust_score)),
-			"battle_time": battle_time,
-			"captive_id": captive_id,
-			"first_clear": first_clear,
-		}, false)
-		if GameState.has_method("save_progress_now"):
-			GameState.save_progress_now("battle_result")
-		else:
-			GameState.autosave("battle_result")
-	battle_result_transition_timer = battle_result_transition_delay
+func calculate_battle_lust_reward(is_win: bool) -> int:
+	var raw_value: float = float(enemy_kill_count + int(round(run_lust_reward_add))) * run_lust_reward_mul
+	if !is_win:
+		# MVP：失败也结算当前击杀与临时加成的一部分，避免一次测试全空转。
+		raw_value *= 0.45
+	return max(0, int(round(raw_value)))
 
-func process_battle_result_transition(delta: float) -> void:
-	if battle_result_transition_timer < 0.0:
+func go_to_outgame_after_result(reason: String = "") -> void:
+	if result_scene_requested:
 		return
-	battle_result_transition_timer -= delta
-	if battle_result_transition_timer > 0.0:
-		return
-	battle_result_transition_timer = -1.0
-	get_tree().change_scene_to_file(OUTGAME_UPGRADE_SCENE_PATH)
+	result_scene_requested = true
+	get_tree().paused = false
+	call_deferred("_deferred_go_to_outgame", reason)
 
+func _deferred_go_to_outgame(reason: String = "") -> void:
+	if !is_inside_tree():
+		return
+	get_tree().paused = false
+	if ResourceLoader.exists(OUTGAME_UPGRADE_SCENE_PATH):
+		get_tree().change_scene_to_file(OUTGAME_UPGRADE_SCENE_PATH)
+	else:
+		push_warning("OutGameUpgrade scene missing after battle result: " + OUTGAME_UPGRADE_SCENE_PATH + " reason=" + reason)
 
 func try_consume_player_revive(dead_player) -> bool:
 	if player_revives_remaining <= 0:
@@ -4358,7 +3576,7 @@ func get_entity_grid_cell(pos: Vector2) -> Vector2i:
 	return Vector2i(int(floor(pos.x / entity_grid_cell_size)), int(floor(pos.y / entity_grid_cell_size)))
 
 func query_entities_near(pos: Vector2, radius: float) -> Array:
-	if radius <= 0.0 or entity_grid.is_empty():
+	if radius <= 0.0:
 		return entities
 
 	var min_cell: Vector2i = get_entity_grid_cell(pos - Vector2(radius, radius))
@@ -4396,9 +3614,11 @@ func update_ui() -> void:
 		player_base_bar.max_value = tentacle_base.max_hp
 		player_base_bar.value = tentacle_base.hp
 
-	if enemy_base_bar and enemy_base != null and is_instance_valid(enemy_base):
-		enemy_base_bar.max_value = enemy_base.max_hp
-		enemy_base_bar.value = enemy_base.hp
+	if enemy_base_bar:
+		enemy_base_bar.visible = enemy_base != null and is_instance_valid(enemy_base)
+		if enemy_base != null and is_instance_valid(enemy_base):
+			enemy_base_bar.max_value = enemy_base.max_hp
+			enemy_base_bar.value = enemy_base.hp
 	update_base_queue_ui()
 
 func update_mana_ui() -> void:
@@ -4456,11 +3676,7 @@ func update_base_queue_ui() -> void:
 	base_queue_box.add_child(title)
 
 	unlocked.sort_custom(func(a, b):
-		var la: int = int(a.get("level", 0))
-		var lb: int = int(b.get("level", 0))
-		if la != lb:
-			return la < lb
-		return str(a.get("entity_id", a.get("id", ""))) < str(b.get("entity_id", b.get("id", "")))
+		return int(a.get("level", 0)) < int(b.get("level", 0))
 	)
 	for queue in unlocked:
 		add_base_queue_ui_row(queue)

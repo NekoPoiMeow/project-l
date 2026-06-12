@@ -11,14 +11,14 @@ P_SPD_001,player,player,柔体疾行,玩家移动速度提升,4,35|80|160|300,pl
 P_MANA_001,player,player,魔力回路,玩家Mana上限提升,4,45|100|200|360,player_mana_max_add,20|45|75|110,,0|3
 P_MREG_001,player,player,回蓝腺体,玩家Mana回复提升,4,55|120|240|420,player_mana_regen_add,1.5|3|5|8,P_MANA_001:1,1|3
 P_LUST_001,player,player,战斗本能,战后淫能获得提升,4,70|150|300|520,battle_lust_reward_mul,0.08|0.18|0.32|0.50,P_ATK_001:1,2|3
-B_HP_001,building,building,母巢甲壳,基地最大生命提升,5,30|70|140|260|430,base_hp_mul,0.12|0.26|0.42|0.60|0.82,,0|0
-B_REG_001,building,building,母巢再生,基地生命恢复提升,4,45|100|210|380,base_regen_mul,0.12|0.25|0.42|0.65,B_HP_001:1,1|0
-B_BIO_001,building,building,生物质循环,基地周期生物质产量提升,5,40|90|180|340|560,base_bio_gain_mul,0.10|0.22|0.36|0.52|0.75,,0|1
-B_START_001,building,building,开局营养囊,基地开局获得少量生物质,4,55|120|240|420,base_start_bio_add,30|70|130|220,B_BIO_001:1,1|1
-B_QUEUE_001,building,building,孵化加速,母巢生产队列速度提升,4,70|150|300|520,base_queue_speed_mul,0.08|0.18|0.32|0.50,B_BIO_001:2,2|1
-B_CONTACT_001,building,building,触须防线,基地接触伤害提升,4,60|130|260|460,base_contact_damage_mul,0.15|0.32|0.55|0.85,B_HP_001:2,2|0
-B_CAP_001,building,building,营养储备,基地生物质上限提升,4,50|110|220|400,base_bio_cap_mul,0.12|0.26|0.42|0.65,B_BIO_001:1,0|2
-B_REVIVE_001,building,building,母巢复苏,玩家复活消耗降低,3,100|240|480,base_revive_efficiency,0.12|0.26|0.45,B_REG_001:2,1|2
+B_HP_001,base,base,母巢甲壳,基地最大生命提升,5,30|70|140|260|430,base_hp_mul,0.12|0.26|0.42|0.60|0.82,,0|0
+B_REG_001,base,base,母巢再生,基地生命恢复提升,4,45|100|210|380,base_regen_mul,0.12|0.25|0.42|0.65,B_HP_001:1,1|0
+B_BIO_001,base,base,生物质循环,基地周期生物质产量提升,5,40|90|180|340|560,base_bio_gain_mul,0.10|0.22|0.36|0.52|0.75,,0|1
+B_START_001,base,base,开局营养囊,基地开局获得少量生物质,4,55|120|240|420,base_start_bio_add,30|70|130|220,B_BIO_001:1,1|1
+B_QUEUE_001,base,base,孵化加速,母巢生产队列速度提升,4,70|150|300|520,base_queue_speed_mul,0.08|0.18|0.32|0.50,B_BIO_001:2,2|1
+B_CONTACT_001,base,base,触须防线,基地接触伤害提升,4,60|130|260|460,base_contact_damage_mul,0.15|0.32|0.55|0.85,B_HP_001:2,2|0
+B_CAP_001,base,base,营养储备,基地生物质上限提升,4,50|110|220|400,base_bio_cap_mul,0.12|0.26|0.42|0.65,B_BIO_001:1,0|2
+B_REVIVE_001,base,base,母巢复苏,玩家复活消耗降低,3,100|240|480,base_revive_efficiency,0.12|0.26|0.45,B_REG_001:2,1|2
 M_ATK_001,minion,minion,眷属利爪,我方小兵攻击提升,5,30|70|140|260|430,minion_attack_mul,0.10|0.22|0.36|0.52|0.72,,0|0
 M_HP_001,minion,minion,眷属硬化,我方小兵生命提升,5,30|70|140|260|430,minion_hp_mul,0.12|0.26|0.42|0.62|0.85,,0|1
 M_SPD_001,minion,minion,虫潮推进,我方小兵移动速度提升,4,45|100|210|380,minion_move_speed_mul,0.06|0.12|0.20|0.30,M_ATK_001:1,1|0
@@ -33,6 +33,12 @@ D_EQUIP_001,dungeon,dungeon,装备调教,地窖装备解锁效率提升,4,70|150
 D_REWARD_001,dungeon,dungeon,战后榨取,胜利后额外淫能,4,60|130|260|460,battle_win_lust_add,20|50|100|180,D_LUST_001:1,0|1
 D_START_001,dungeon,dungeon,出征前戏,开局获得少量临时淫能,3,90|210|420,start_lust_add,20|45|80,D_REWARD_001:1,1|1
 D_SPECIAL_001,dungeon,dungeon,特殊俘虏链,预留关卡特殊俘虏事件强化,3,120|280|560,special_captive_event_mul,0.12|0.28|0.50,D_CAP_001:2,2|1
-D_ITEM_001,dungeon,dungeon,基础拘束具,解锁地窖基础调教道具,1,60,unlock_torture_item,T001,D_LUST_001:1,3|0
-D_ITEM_002,dungeon,dungeon,告白针,解锁中级调教道具 需要俘虏屈辱Lv1,1,180,unlock_torture_item,T002,D_ITEM_001:1|D_CAP_001:1,3|1
-D_ITEM_003,dungeon,dungeon,深层刻印器,解锁高级调教道具 需要俘虏屈辱Lv2,1,420,unlock_torture_item,T003,D_ITEM_002:1|D_CAP_001:2,3|2
+DUN_ITEM_001,dungeon,dungeon,双头龙解锁,解锁地窖调教道具：双头龙,1,120,unlock_torture_item,T_DRAGONHEAD_001,D_LUST_001:1,3|0
+DUN_ITEM_002,dungeon,dungeon,伞鞭解锁,解锁地窖调教道具：伞鞭,1,160,unlock_torture_item,T_UMBRELLA_WHIP_001,DUN_ITEM_001:1,3|1
+DUN_ITEM_003,dungeon,dungeon,告白针筒,解锁地窖调教道具：告白针筒,1,220,unlock_torture_item,T_SYRINGE_001,DUN_ITEM_001:1,4|0
+DUN_ITEM_004,dungeon,dungeon,触手服试衣架,解锁地窖调教道具：触手服试衣架,1,260,unlock_torture_item,T_SUITFRAME_001,DUN_ITEM_002:1,4|1
+DUN_ITEM_005,dungeon,dungeon,深层刻印笔,解锁地窖调教道具：深层刻印笔,1,420,unlock_torture_item,T_MARKER_001,DUN_ITEM_003:1,5|1
+MER_STOCK_001,merchant,merchant,商人进货,增加商人临时强化种类,3,80|180|360,merchant_stock_level,1|2|3,,0|0
+MER_DISC_001,merchant,merchant,熟客折扣,商人商品价格降低,5,60|130|250|420|680,merchant_discount_mul,0.05|0.10|0.16|0.23|0.30,MER_STOCK_001:1,1|0
+MER_CAP_001,merchant,merchant,俘虏渠道,解锁商人俘虏贩卖等级,3,120|280|560,merchant_captive_level,1|2|3,MER_STOCK_001:1,1|1
+MER_DATE_001,merchant,merchant,逛街许可,解锁商人逛街事件,1,150,unlock_event,EVT_SLIME_DATE_001,MER_STOCK_001:1,2|1

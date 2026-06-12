@@ -6,10 +6,10 @@ uid="uid://5dhnbt2ufg2y"
 
 [deps]
 
-files=["res://Config/TortureItems.name.translation", "res://Config/TortureItems.unlocked.translation", "res://Config/TortureItems.en.translation", "res://Config/TortureItems.description.translation", "res://Config/TortureItems.en.translation", "res://Config/TortureItems.min.translation", "res://Config/TortureItems.scene.translation"]
+files=["res://Config/TortureItems.name.translation", "res://Config/TortureItems.unlocked.translation", "res://Config/TortureItems.unlock.translation", "res://Config/TortureItems.min.translation", "res://Config/TortureItems.humiliation.translation", "res://Config/TortureItems.lust.translation", "res://Config/TortureItems.icon.translation", "res://Config/TortureItems.sfx.translation", "res://Config/TortureItems.description.translation"]
 
 source_file="res://Config/TortureItems.csv"
-dest_files=["res://Config/TortureItems.name.translation", "res://Config/TortureItems.unlocked.translation", "res://Config/TortureItems.en.translation", "res://Config/TortureItems.description.translation", "res://Config/TortureItems.en.translation", "res://Config/TortureItems.min.translation", "res://Config/TortureItems.scene.translation"]
+dest_files=["res://Config/TortureItems.name.translation", "res://Config/TortureItems.unlocked.translation", "res://Config/TortureItems.unlock.translation", "res://Config/TortureItems.min.translation", "res://Config/TortureItems.humiliation.translation", "res://Config/TortureItems.lust.translation", "res://Config/TortureItems.icon.translation", "res://Config/TortureItems.sfx.translation", "res://Config/TortureItems.description.translation"]
 
 [params]
 

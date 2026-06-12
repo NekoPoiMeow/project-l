@@ -122,9 +122,10 @@ func build_ui() -> void:
 	tab_box.add_theme_constant_override("separation", 8)
 	left.add_child(tab_box)
 	add_tab_button("player", "玩家")
-	add_tab_button("building", "基地")
+	add_tab_button("base", "基地")
 	add_tab_button("minion", "小兵")
 	add_tab_button("dungeon", "地窖")
+	add_tab_button("merchant", "商人")
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -361,6 +362,10 @@ func apply_unlock_side_effect(row: Dictionary, new_level: int) -> void:
 			var item_id: String = str(parts[index]).strip_edges()
 			if item_id != "":
 				GameState.unlock_item("torture_items", item_id, false)
+	elif effect_key == "unlock_event":
+		var event_id: String = str(row.get("values", "")).strip_edges()
+		if event_id != "":
+			GameState.unlock_story_event(event_id, false)
 
 func _on_return_basement_pressed() -> void:
 	GameState.set_last_scene(BASEMENT_SCENE_PATH, false)
@@ -368,16 +373,10 @@ func _on_return_basement_pressed() -> void:
 	get_tree().change_scene_to_file(BASEMENT_SCENE_PATH)
 
 func get_tab(row: Dictionary) -> String:
-	var tab := str(row.get("tab", row.get("group", "player"))).strip_edges()
-	if tab == "base":
-		return "building"
-	return tab
+	return str(row.get("tab", row.get("group", "player"))).strip_edges()
 
 func get_group(row: Dictionary) -> String:
-	var group_name := str(row.get("group", get_tab(row))).strip_edges()
-	if group_name == "base":
-		return "building"
-	return group_name
+	return str(row.get("group", get_tab(row))).strip_edges()
 
 func get_level(row: Dictionary) -> int:
 	return GameState.get_upgrade_level(get_group(row), str(row.get("id", "")))

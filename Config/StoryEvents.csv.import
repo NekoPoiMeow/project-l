@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://b053368lrme2g"
+
+[deps]
+
+files=["res://Config/StoryEvents.name.translation", "res://Config/StoryEvents.kind.translation", "res://Config/StoryEvents.description.translation", "res://Config/StoryEvents.cg.translation", "res://Config/StoryEvents.avg.translation", "res://Config/StoryEvents.placeholder.translation"]
+
+source_file="res://Config/StoryEvents.csv"
+dest_files=["res://Config/StoryEvents.name.translation", "res://Config/StoryEvents.kind.translation", "res://Config/StoryEvents.description.translation", "res://Config/StoryEvents.cg.translation", "res://Config/StoryEvents.avg.translation", "res://Config/StoryEvents.placeholder.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

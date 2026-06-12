@@ -1,0 +1,7 @@
+id,name,kind,description,cg_path,avg_scene_path,placeholder_text
+EVT_SLIME_DATE_001,和商人逛街,merchant,和史莱姆娘商人外出采购。,res://CG/Merchant/slime_date_01.png,res://AVG/Merchant/slime_date_01.tres,商人逛街事件占位。
+CG_DUN_KNIGHT_DRAGON_GENERIC,女骑士双头龙普通,dungeon,女骑士与双头龙道具的普通调教事件。,res://CG/Dungeon/knight_dragon_generic.png,res://AVG/Dungeon/knight_dragon_generic.tres,女骑士双头龙普通调教CG占位。
+CG_DUN_PRINCESS_KNIGHT_DRAGON_SPECIAL,王女与女骑士特别百合,dungeon,王女作为入替角色时触发的一次性特别事件。,res://CG/Dungeon/princess_knight_dragon_special.png,res://AVG/Dungeon/princess_knight_dragon_special.tres,王女与女骑士的特别百合CG占位。
+CG_DUN_PRINCESS_DRAGON_GENERIC,王女双头龙普通,dungeon,王女与双头龙道具的普通调教事件。,res://CG/Dungeon/princess_dragon_generic.png,res://AVG/Dungeon/princess_dragon_generic.tres,王女双头龙普通调教CG占位。
+CG_DUN_WITCH_SYRINGE_GENERIC,实验员针筒普通,dungeon,狱原实验员针筒普通事件。,res://CG/Dungeon/witch_syringe_generic.png,res://AVG/Dungeon/witch_syringe_generic.tres,狱原实验员针筒普通CG占位。
+CG_DUN_WITCH_SYRINGE_SPECIAL,实验员里模式针筒,dungeon,狱原实验员戴眼镜进入里模式的一次性特别事件。,res://CG/Dungeon/witch_syringe_special.png,res://AVG/Dungeon/witch_syringe_special.tres,实验员戴上眼镜，把自己也当成样本。

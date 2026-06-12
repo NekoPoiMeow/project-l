@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://d1xuadgm3arx0"
+
+[deps]
+
+files=["res://Config/TemporaryItems.name.translation", "res://Config/TemporaryItems.description.translation", "res://Config/TemporaryItems.cost.translation", "res://Config/TemporaryItems.effect.translation", "res://Config/TemporaryItems.value.translation", "res://Config/TemporaryItems.icon.translation", "res://Config/TemporaryItems.sfx.translation"]
+
+source_file="res://Config/TemporaryItems.csv"
+dest_files=["res://Config/TemporaryItems.name.translation", "res://Config/TemporaryItems.description.translation", "res://Config/TemporaryItems.cost.translation", "res://Config/TemporaryItems.effect.translation", "res://Config/TemporaryItems.value.translation", "res://Config/TemporaryItems.icon.translation", "res://Config/TemporaryItems.sfx.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

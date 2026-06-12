@@ -1,0 +1,4 @@
+id,name,description,requires_actor,requires_item,requires_captive,lust_gain,humiliation_xp,level_xp_curve
+passive,放置,母巢自动处理俘虏，淫能收益高，屈辱增长低。,FALSE,FALSE,TRUE,80,10,0|100|260|520
+train,调教,必须选择角色、调教道具、俘虏，三者不可缺一。,TRUE,TRUE,TRUE,25,35,0|100|260|520
+materialize,物化,将俘虏谱系片段变成下次战斗装备，无淫能收益，屈辱增长高。,FALSE,FALSE,TRUE,0,70,0|100|260|520

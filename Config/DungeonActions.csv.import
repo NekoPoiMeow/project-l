@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dk61ve2yx43vt"
+
+[deps]
+
+files=["res://Config/DungeonActions.name.translation", "res://Config/DungeonActions.description.translation", "res://Config/DungeonActions.requires.translation", "res://Config/DungeonActions.requires.translation", "res://Config/DungeonActions.requires.translation", "res://Config/DungeonActions.lust.translation", "res://Config/DungeonActions.humiliation.translation", "res://Config/DungeonActions.level.translation"]
+
+source_file="res://Config/DungeonActions.csv"
+dest_files=["res://Config/DungeonActions.name.translation", "res://Config/DungeonActions.description.translation", "res://Config/DungeonActions.requires.translation", "res://Config/DungeonActions.requires.translation", "res://Config/DungeonActions.requires.translation", "res://Config/DungeonActions.lust.translation", "res://Config/DungeonActions.humiliation.translation", "res://Config/DungeonActions.level.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://cojdcfnvw83yq"
+
+[deps]
+
+files=["res://Config/DungeonEvents.actor.translation", "res://Config/DungeonEvents.item.translation", "res://Config/DungeonEvents.captive.translation", "res://Config/DungeonEvents.min.translation", "res://Config/DungeonEvents.flag.translation", "res://Config/DungeonEvents.special.translation", "res://Config/DungeonEvents.generic.translation", "res://Config/DungeonEvents.locked.translation", "res://Config/DungeonEvents.unlocked.translation"]
+
+source_file="res://Config/DungeonEvents.csv"
+dest_files=["res://Config/DungeonEvents.actor.translation", "res://Config/DungeonEvents.item.translation", "res://Config/DungeonEvents.captive.translation", "res://Config/DungeonEvents.min.translation", "res://Config/DungeonEvents.flag.translation", "res://Config/DungeonEvents.special.translation", "res://Config/DungeonEvents.generic.translation", "res://Config/DungeonEvents.locked.translation", "res://Config/DungeonEvents.unlocked.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

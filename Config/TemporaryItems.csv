@@ -1,0 +1,7 @@
+id,name,description,cost,effect_key,value,icon_path,sfx_path
+TMP_ATK_001,触须兴奋剂,下次战斗玩家伤害提高。,60,player_attack_mul,0.18,res://Art/Merchant/TMP_ATK_001.png,res://Audio/SFX/buy.wav
+TMP_RATE_001,神经加速液,下次战斗攻击频度提高。,70,player_attack_frequency_mul,0.18,res://Art/Merchant/TMP_RATE_001.png,res://Audio/SFX/buy.wav
+TMP_AREA_001,扩散黏液,下次战斗攻击范围提高。,70,player_area_mul,0.20,res://Art/Merchant/TMP_AREA_001.png,res://Audio/SFX/buy.wav
+TMP_RANGE_001,追猎眼膜,下次战斗射程提高。,55,player_range_mul,0.18,res://Art/Merchant/TMP_RANGE_001.png,res://Audio/SFX/buy.wav
+TMP_LUST_001,淫能香料,下次战斗淫能结算提高。,90,battle_lust_reward_mul,0.35,res://Art/Merchant/TMP_LUST_001.png,res://Audio/SFX/buy.wav
+TMP_BIO_001,母巢营养膏,下次战斗初始生物质提高。,80,base_start_bio_add,100,res://Art/Merchant/TMP_BIO_001.png,res://Audio/SFX/buy.wav

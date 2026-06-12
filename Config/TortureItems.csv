@@ -1,4 +1,7 @@
-id,name,unlocked,icon,description,effect_keys,min_humiliation_level,scene_tag
-T001,基础拘束具,TRUE,,基础地窖道具 可触发普通调教CG,,0,basic_restraint
-T002,告白针,FALSE,,中级地窖道具 需要俘虏屈辱Lv1,,1,confession_needle
-T003,深层刻印器,FALSE,,高级地窖道具 需要俘虏屈辱Lv2,,2,deep_mark
+id,name,unlocked,unlock_key,min_humiliation_level,humiliation_xp_mul,lust_gain_mul,icon_path,sfx_path,description
+T_RIDINGCROP_001,马拍,TRUE,START,0,1.00,1.00,res://Art/Dungeon/T_RIDINGCROP_001.png,res://Audio/SFX/dungeon_crop.wav,基础调教道具，适合高自尊或骑士系俘虏。
+T_DRAGONHEAD_001,双头龙,FALSE,UPG_DUN_ITEM_001,0,1.15,0.85,res://Art/Dungeon/T_DRAGONHEAD_001.png,res://Audio/SFX/dungeon_dragonhead.wav,用于高压同步的占位道具。可与特定角色和俘虏触发特别CG。
+T_UMBRELLA_WHIP_001,伞鞭,FALSE,UPG_DUN_ITEM_002,1,1.20,0.85,res://Art/Dungeon/T_UMBRELLA_WHIP_001.png,res://Audio/SFX/dungeon_umbrella_whip.wav,外观像礼仪伞的鞭具，适合王族、修会、礼仪角色。
+T_SYRINGE_001,告白针筒,FALSE,UPG_DUN_ITEM_003,1,1.25,0.75,res://Art/Dungeon/T_SYRINGE_001.png,res://Audio/SFX/dungeon_syringe.wav,让俘虏在强压下吐露真实反应，适合研究员与魔女系。
+T_SUITFRAME_001,触手服试衣架,FALSE,UPG_DUN_ITEM_004,1,1.35,0.60,res://Art/Dungeon/T_SUITFRAME_001.png,res://Audio/SFX/dungeon_suitframe.wav,用于触手服同调和物化适配。
+T_MARKER_001,深层刻印笔,FALSE,UPG_DUN_ITEM_005,2,1.60,0.50,res://Art/Dungeon/T_MARKER_001.png,res://Audio/SFX/dungeon_marker.wav,用于深层接口标记的高风险道具。

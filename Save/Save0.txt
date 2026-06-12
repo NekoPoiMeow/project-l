@@ -1,9 +1,9 @@
-﻿SaveSlotId=Save0
+SaveSlotId=Save0
 SaveRole=template
 SaveName=进度0
 SaveTime=未开始
 SaveChapterID=0
 SaveChapterName=未开始
-SaveFormatVersion=1
-SaveReason=zero_progress
-SaveDataJSON={"flags":{},"unlocks":{"equipments":["E001"],"torture_items":[],"characters":["C001"],"weapons":["W001"],"codex":[]},"meta":{"autosave_generation":0,"is_zero_progress":true,"slot_role":"template","save_name":"进度0","chapter_name":"未开始","last_scene":"res://scenes/Basement.tscn","format_version":1,"play_seconds":0,"slot_id":"Save0","save_time":"未开始","last_autosave_slot":"SaveAuto2","chapter_id":0},"economy":{"humiliation":0,"lust":0},"upgrades":{"building":{},"player":{},"tentacle":{}},"dungeon":{"last_processed_battle_id":"","captives":{}},"progress":{"cleared_levels":[],"last_level_id":"","unlocked_chapters":[],"level_bonus_collect":{}}}
+SaveFormatVersion=2
+SaveReason=clean_zero_progress_no_captives
+SaveDataJSON={"flags":{},"unlocks":{"characters":["C001"],"weapons":["W001"],"equipments":["E001"],"torture_items":[],"cg_events":[],"story_events":[],"narrative_events":[],"temporary_items_seen":[],"codex":[]},"meta":{"format_version":2,"slot_id":"Save0","slot_role":"template","save_name":"进度0","save_time":"未开始","chapter_id":0,"chapter_name":"未开始","last_scene":"res://scenes/Basement.tscn","play_seconds":0,"is_zero_progress":true,"autosave_generation":0,"last_autosave_slot":"SaveAuto2"},"economy":{"lust":0,"humiliation":0},"battle_loadout":{"character_id":"C001","weapon_id":"W001","equipment_id":"E001"},"progress":{"unlocked_chapters":[],"unlocked_levels":[],"cleared_levels":[],"last_level_id":"","level_bonus_collect":{}},"upgrades":{"player":{},"base":{},"minion":{},"dungeon":{},"merchant":{}},"dungeon":{"last_processed_battle_id":"","captives":{},"next_battle_captive_equipment_id":"","events_seen":{},"last_event_id":"","last_story_event_id":"","last_action_result":{}},"merchant":{"next_battle_effects":{},"next_battle_temp_items":[],"purchases":{},"events_seen":{},"last_purchase_id":""},"story":{"current_event_id":"","pending_event_id":"","seen_events":{}},"runtime":{"last_battle_result":{},"pending_rewards":{},"last_loaded_slot":"Save0"}}
