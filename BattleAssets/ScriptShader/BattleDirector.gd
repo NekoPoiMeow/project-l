@@ -130,14 +130,19 @@ var selected_equipment_id := "E001"
 var selected_weapon_type := "ranged"
 var selected_character_skill_mul := 1.0
 var active_equipment_effects: Array = []
+var equipment_effect_descriptions: Dictionary = {}
 var equipment_event_counts: Dictionary = {}
 var equipment_last_event_payloads: Dictionary = {}
 var equipment_last_player_pos := Vector2.ZERO
 var equipment_move_distance := 0.0
 var equipment_stop_timer := 0.0
 var equipment_was_moving := false
+var equipment_last_move_direction := Vector2.RIGHT
 var whip_charge_layers := 0
-var whip_distance_per_layer := 260.0
+# E007 小皮鞭：改成输入蓄力，不再依赖实际位移。避免换方向/碰撞/帧率导致蓄力被打断。
+var whip_charge_progress := 0.0
+var whip_charge_seconds_per_layer := 0.42
+var whip_release_cooldown := 0.0
 var whip_max_layers := 3
 var shooter_timer := 0.0
 var plug_forced_direction := Vector2.RIGHT
@@ -281,6 +286,7 @@ func _physics_process(delta: float) -> void:
 	process_assimilations(delta)
 	process_assimilated_periodic_buffs(delta)
 	process_base_contact_auras(delta)
+	process_base_contact_damage(delta)
 	process_base_aura_buffs(delta)
 	process_unit_contacts(delta)
 	process_base_delivery_and_production(delta)
@@ -544,30 +550,63 @@ func load_battle_loadout() -> void:
 			apply_runtime_battle_modifier(str(raw_key), float(battle_modifiers[raw_key]))
 
 	equipment_event_counts.clear()
+	equipment_effect_descriptions.clear()
 	hide_enemy_health_bars = active_equipment_effects.has("hide_enemy_hp")
+	if active_equipment_effects.has("hide_enemy_hp"):
+		equipment_effect_descriptions["hide_enemy_hp"] = "隐藏普通敌人血条；敌方基地血条保留"
+	if active_equipment_effects.has("enemy_hp_random_up"):
+		equipment_effect_descriptions["enemy_hp_random_up"] = "普通敌人生成时最大生命随机提高 5%-35%"
 	if active_equipment_effects.has("mana_recovery_up"):
 		run_mana_recovery_mul *= 1.35
+		equipment_effect_descriptions["mana_recovery_up"] = "Mana 回复倍率 x1.35"
 	if active_equipment_effects.has("crit_rate_down"):
 		run_crit_chance_add -= 0.08
+		equipment_effect_descriptions["crit_rate_down"] = "暴击率 -8%"
 	if active_equipment_effects.has("lust_reward_up"):
 		run_lust_reward_mul *= 1.5
+		equipment_effect_descriptions["lust_reward_up"] = "战后淫能结算倍率 x1.5"
+	if active_equipment_effects.has("minute_lust_add"):
+		equipment_effect_descriptions["minute_lust_add"] = "每 60 秒战后淫能基数 +20"
+	if active_equipment_effects.has("skill2_full_mana_required"):
+		equipment_effect_descriptions["skill2_full_mana_required"] = "二技能必须满 Mana 才能释放"
+	if active_equipment_effects.has("whip_charge"):
+		equipment_effect_descriptions["whip_charge"] = "移动蓄鞭；停下释放最多 3 层多段斩"
+	if active_equipment_effects.has("whip_weapon_penalty"):
+		equipment_effect_descriptions["whip_weapon_penalty"] = "常规武器伤害 x0.5"
+	if active_equipment_effects.has("range_weapon_only"):
+		equipment_effect_descriptions["range_weapon_only"] = "强制切换为范围类武器倾向"
+	if active_equipment_effects.has("bind_area_boost"):
+		equipment_effect_descriptions["bind_area_boost"] = "范围攻击伤害和面积提高"
+	if active_equipment_effects.has("liquid_madness") or active_equipment_effects.has("liquid_madness_light"):
+		equipment_effect_descriptions["liquid_madness" if active_equipment_effects.has("liquid_madness") else "liquid_madness_light"] = "每 5 秒扣血并朝前方喷出穿透液弹"
+	if active_equipment_effects.has("forced_forward_move"):
+		equipment_effect_descriptions["forced_forward_move"] = "无输入时沿最后方向自动前冲"
+	if active_equipment_effects.has("player_speed_up_small"):
+		equipment_effect_descriptions["player_speed_up_small"] = "移动速度小幅提高"
 	if active_equipment_effects.has("exhibitionist"):
 		run_damage_add += 2.0
 		run_crit_chance_add += 0.06
 		run_crit_multiplier_add += 0.18
+		equipment_effect_descriptions["exhibitionist"] = "伤害 +2，暴击率 +6%，爆伤 +0.18"
 	if active_equipment_effects.has("slime_belt"):
 		run_lust_reward_add += 20.0
 	if active_equipment_effects.has("player_regen_down") and player_entity != null and is_instance_valid(player_entity):
 		player_entity.hp_regen_per_second *= 0.45
+		equipment_effect_descriptions["player_regen_down"] = "生命恢复倍率 x0.45"
 	if active_equipment_effects.has("base_bio_cycle_yield_up"):
 		run_base_start_bio_add += 40.0
+		equipment_effect_descriptions["base_bio_cycle_yield_up"] = "开局生物质 +40，基地周期产出 +5"
 	if active_equipment_effects.has("player_speed_down_big") and player_entity != null and is_instance_valid(player_entity):
 		player_entity.move_speed *= 0.72
+		equipment_effect_descriptions["player_speed_down_big"] = "移动速度 x0.72"
 	if active_equipment_effects.has("player_speed_up_small") and player_entity != null and is_instance_valid(player_entity):
 		player_entity.move_speed *= 1.16
 	if active_equipment_effects.has("player_hp_down_big") and player_entity != null and is_instance_valid(player_entity):
 		player_entity.max_hp *= 0.72
 		player_entity.hp = min(player_entity.hp, player_entity.max_hp)
+		equipment_effect_descriptions["player_hp_down_big"] = "生命上限 x0.72"
+	if active_equipment_effects.has("melee_lifesteal"):
+		equipment_effect_descriptions["melee_lifesteal"] = "近战命中吸血 8%"
 	apply_captive_equipment_effect_keys()
 	apply_generic_equipment_effect_keys()
 	audit_equipment_effect_keys()
@@ -625,6 +664,10 @@ func apply_runtime_battle_modifier(effect_key: String, value: float) -> void:
 		assimilated_stat_mul[key] = 1.0 + value
 
 func apply_captive_equipment_effect_keys() -> void:
+	for key in active_equipment_effects:
+		var ek := str(key)
+		if ek.begins_with("captive_"):
+			equipment_effect_descriptions[ek] = "俘虏物化装备效果已应用"
 	if active_equipment_effects.has("captive_knight_lv0"):
 		run_player_attack_mul *= 1.08
 	if active_equipment_effects.has("captive_knight_lv1"):
@@ -837,16 +880,37 @@ func apply_equipment_to_player_attack(attack: Dictionary) -> void:
 	attack["_equipment_applied"] = true
 
 func apply_generic_equipment_effect_keys() -> void:
-	# Lightweight parser for CSV effect_keys that encode numeric hooks, e.g. minion_attack_mul_18.
-	# This prevents equipment rows from being pure names when the effect_key is already data-like.
+	# Lightweight parser for CSV effect_keys that encode numeric hooks.
 	for raw_effect in active_equipment_effects:
 		var key: String = str(raw_effect).strip_edges()
 		if key.begins_with("minion_attack_mul_"):
-			assimilated_stat_mul["minion_attack_mul"] = 1.0 + float(key.get_slice("_", 3)) / 100.0
+			var v := parse_suffix_percent(key, "minion_attack_mul_")
+			assimilated_stat_mul["minion_attack_mul"] = max(float(assimilated_stat_mul.get("minion_attack_mul", 1.0)), 1.0 + v)
+			equipment_effect_descriptions[key] = "友方眷属/小兵攻击倍率 +" + str(int(round(v * 100.0))) + "%"
 		elif key.begins_with("base_queue_speed_mul_"):
-			assimilated_stat_mul["base_queue_speed_mul"] = 1.0 + float(key.get_slice("_", 4)) / 100.0
+			var q := parse_suffix_percent(key, "base_queue_speed_mul_")
+			assimilated_stat_mul["base_queue_speed_mul"] = max(float(assimilated_stat_mul.get("base_queue_speed_mul", 1.0)), 1.0 + q)
+			equipment_effect_descriptions[key] = "基地生产/队列速度 +" + str(int(round(q * 100.0))) + "%"
 		elif key.begins_with("player_defense_add_") and player_entity != null and is_instance_valid(player_entity):
-			player_entity.defense += float(key.get_slice("_", 3))
+			var add := parse_suffix_number(key, "player_defense_add_")
+			player_entity.defense += add
+			equipment_effect_descriptions[key] = "玩家防御 +" + str(add)
+
+func parse_suffix_percent(key: String, prefix: String) -> float:
+	if !key.begins_with(prefix):
+		return 0.0
+	var suffix: String = key.substr(prefix.length())
+	if suffix == "":
+		return 0.0
+	return float(suffix) / 100.0
+
+func parse_suffix_number(key: String, prefix: String) -> float:
+	if !key.begins_with(prefix):
+		return 0.0
+	var suffix: String = key.substr(prefix.length())
+	if suffix == "":
+		return 0.0
+	return float(suffix)
 
 func audit_equipment_effect_keys() -> void:
 	var known := {
@@ -855,12 +919,22 @@ func audit_equipment_effect_keys() -> void:
 		"minute_lust_add": true, "base_bio_cycle_yield_up": true, "skill2_full_mana_required": true,
 		"whip_charge": true, "whip_weapon_penalty": true, "player_speed_down_big": true,
 		"range_weapon_only": true, "bind_area_boost": true, "liquid_madness": true,
-		"forced_forward_move": true, "player_speed_up_small": true, "player_hp_down_big": true,
-		"exhibitionist": true, "melee_lifesteal": true
+		"liquid_madness_light": true, "forced_forward_move": true, "player_speed_up_small": true,
+		"player_hp_down_big": true, "exhibitionist": true, "melee_lifesteal": true,
+		"captive_knight_lv0": true, "captive_knight_lv1": true, "captive_knight_lv2": true, "captive_knight_lv3": true,
+		"captive_witch_lv0": true, "captive_witch_lv1": true, "captive_witch_lv2": true, "captive_witch_lv3": true,
+		"captive_princess_lv0": true, "captive_princess_lv1": true, "captive_princess_lv2": true, "captive_princess_lv3": true,
+		"captive_priest_lv0": true, "captive_priest_lv1": true, "captive_priest_lv2": true, "captive_priest_lv3": true
 	}
 	for raw_effect in active_equipment_effects:
 		var key: String = str(raw_effect).strip_edges()
-		if key == "" or known.has(key) or key.begins_with("captive_") or key.begins_with("minion_attack_mul_") or key.begins_with("base_queue_speed_mul_") or key.begins_with("player_defense_add_"):
+		if key == "":
+			continue
+		if known.has(key) or key.begins_with("minion_attack_mul_") or key.begins_with("base_queue_speed_mul_") or key.begins_with("player_defense_add_"):
+			if equipment_effect_descriptions.has(key):
+				print("[EquipmentAudit][OK] equipment=", selected_equipment_id, " effect=", key, " -> ", str(equipment_effect_descriptions[key]))
+			else:
+				print("[EquipmentAudit][OK] equipment=", selected_equipment_id, " effect=", key)
 			continue
 		print("[EquipmentAudit][MissingEffect] effect_key=", key, " equipment=", selected_equipment_id)
 
@@ -936,6 +1010,33 @@ func apply_equipment_to_spawned_entity(entity) -> void:
 		entity.set_health_bar_hidden(true)
 	elif is_enemy_base_entity and entity.has_method("set_health_bar_hidden"):
 		entity.set_health_bar_hidden(false)
+
+	apply_equipment_minion_modifiers(entity)
+
+func apply_equipment_minion_modifiers(entity) -> void:
+	if entity == null or !is_instance_valid(entity):
+		return
+	if entity.faction != "tentacle" and entity.faction != "player":
+		return
+	if entity == player_entity or entity == tentacle_base:
+		return
+	var entity_tags: Array = []
+	var raw_tags: Variant = entity.get("tags")
+	if typeof(raw_tags) == TYPE_ARRAY:
+		entity_tags = raw_tags
+	if entity_tags.has("base") or entity_tags.has("building") or entity_tags.has("worker"):
+		return
+	var stat_mul: Dictionary = {}
+	if assimilated_stat_mul.has("minion_attack_mul"):
+		stat_mul["attack"] = float(assimilated_stat_mul.get("minion_attack_mul", 1.0))
+	if assimilated_stat_mul.has("minion_hp_mul"):
+		stat_mul["max_hp"] = float(assimilated_stat_mul.get("minion_hp_mul", 1.0))
+	if assimilated_stat_mul.has("minion_move_speed_mul"):
+		stat_mul["move_speed"] = float(assimilated_stat_mul.get("minion_move_speed_mul", 1.0))
+	if stat_mul.is_empty():
+		return
+	if entity.has_method("apply_runtime_stat_multipliers"):
+		entity.apply_runtime_stat_multipliers(stat_mul)
 
 func setup_block_mask() -> void:
 	if block_mask_sprite == null:
@@ -1239,6 +1340,16 @@ func apply_equipment_to_tentacle_base() -> void:
 	if active_equipment_effects.has("base_bio_cycle_yield_up") and tentacle_base.base_bio_cycle_amounts.size() > 0:
 		for i in range(tentacle_base.base_bio_cycle_amounts.size()):
 			tentacle_base.base_bio_cycle_amounts[i] = float(tentacle_base.base_bio_cycle_amounts[i]) + 5.0
+
+	var queue_mul: float = float(assimilated_stat_mul.get("base_queue_speed_mul", 1.0))
+	if queue_mul > 1.001:
+		tentacle_base.base_spawn_interval = max(0.25, tentacle_base.base_spawn_interval / queue_mul)
+		tentacle_base.base_bio_cycle_interval = max(0.5, tentacle_base.base_bio_cycle_interval / queue_mul)
+		for i in range(tentacle_base.base_spawn_queues.size()):
+			if typeof(tentacle_base.base_spawn_queues[i]) == TYPE_DICTIONARY:
+				var q: Dictionary = tentacle_base.base_spawn_queues[i]
+				q["interval"] = max(0.25, float(q.get("interval", 1.0)) / queue_mul)
+				tentacle_base.base_spawn_queues[i] = q
 
 func spawn_starting_worker() -> void:
 	if tentacle_base == null or !is_instance_valid(tentacle_base):
@@ -2524,17 +2635,38 @@ func process_equipment_events(delta: float) -> void:
 	if equipment_last_player_pos == Vector2.ZERO:
 		equipment_last_player_pos = current_pos
 
+	var input_dir: Vector2 = get_player_move_input_vector()
+	var input_moving: bool = input_dir.length() > 0.05
 	var moved: float = current_pos.distance_to(equipment_last_player_pos)
-	var is_moving: bool = moved > max(1.2, player_entity.move_speed * delta * 0.12)
-	if is_moving:
-		equipment_stop_timer = 0.0
-		emit_equipment_event("on_player_moved", {"distance": moved})
-		process_equipment_movement_distance(moved)
+	var position_moving: bool = moved > max(1.2, player_entity.move_speed * delta * 0.12)
+	var is_moving: bool = input_moving or position_moving
+
+	if whip_release_cooldown > 0.0:
+		whip_release_cooldown = max(0.0, whip_release_cooldown - delta)
+
+	# E007 小皮鞭：只看移动输入蓄力，换方向不清空；松开后释放。
+	# 这样不会因为被敌人/基地/碰撞卡住，或者从左换到右就把蓄力丢掉。
+	if active_equipment_effects.has("whip_charge"):
+		if input_moving:
+			equipment_last_move_direction = input_dir.normalized()
+			equipment_stop_timer = 0.0
+			emit_equipment_event("on_player_moved", {"distance": moved})
+			if whip_release_cooldown <= 0.0:
+				process_whip_charge_delta(delta)
+		else:
+			equipment_stop_timer += delta
+			if whip_charge_layers > 0 and equipment_stop_timer >= 0.12:
+				emit_equipment_event("on_player_stopped", {})
+				release_whip_charge()
 	else:
-		equipment_stop_timer += delta
-		if equipment_was_moving and equipment_stop_timer >= 0.12:
-			emit_equipment_event("on_player_stopped", {})
-			process_equipment_player_stopped()
+		if is_moving:
+			equipment_stop_timer = 0.0
+			emit_equipment_event("on_player_moved", {"distance": moved})
+		else:
+			equipment_stop_timer += delta
+			if equipment_was_moving and equipment_stop_timer >= 0.16:
+				emit_equipment_event("on_player_stopped", {})
+				process_equipment_player_stopped()
 
 	if active_equipment_effects.has("forced_forward_move"):
 		process_forced_forward_move(delta, is_moving)
@@ -2542,16 +2674,29 @@ func process_equipment_events(delta: float) -> void:
 	equipment_was_moving = is_moving
 	equipment_last_player_pos = player_entity.global_position
 
-func process_equipment_movement_distance(distance: float) -> void:
+func get_player_move_input_vector() -> Vector2:
+	var input := Vector2.ZERO
+	input.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
+	input.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
+	if input.length() > 1.0:
+		input = input.normalized()
+	return input
+
+func process_whip_charge_delta(delta: float) -> void:
 	if !active_equipment_effects.has("whip_charge"):
 		return
-	equipment_move_distance += distance
-	while equipment_move_distance >= whip_distance_per_layer and whip_charge_layers < whip_max_layers:
-		equipment_move_distance -= whip_distance_per_layer
-		whip_charge_layers += 1
+	whip_charge_progress = min(whip_charge_seconds_per_layer * float(whip_max_layers), whip_charge_progress + delta)
+	var next_layers: int = clamp(int(floor(whip_charge_progress / max(0.01, whip_charge_seconds_per_layer))), 0, whip_max_layers)
+	if next_layers > whip_charge_layers:
+		whip_charge_layers = next_layers
 		spawn_floating_number(player_entity.global_position + Vector2(0.0, -player_entity.radius - 58.0), "鞭蓄力 " + str(whip_charge_layers), Color(1.0, 0.55, 0.86, 1.0))
-	if whip_charge_layers >= whip_max_layers:
-		equipment_move_distance = min(equipment_move_distance, whip_distance_per_layer)
+		spawn_ring_fx(player_entity.global_position, player_entity.radius + 32.0 + float(whip_charge_layers) * 8.0, Color(1.0, 0.36, 0.82, 0.55), 3.0 + float(whip_charge_layers), 0.22)
+
+func process_equipment_movement_distance(distance: float) -> void:
+	# 旧接口保留兼容：现在小皮鞭不再靠位移距离蓄力。
+	if !active_equipment_effects.has("whip_charge"):
+		return
+	process_whip_charge_delta(distance / max(1.0, player_entity.move_speed))
 
 func process_equipment_player_stopped() -> void:
 	if active_equipment_effects.has("whip_charge") and whip_charge_layers > 0:
@@ -2571,24 +2716,62 @@ func process_forced_forward_move(delta: float, is_moving: bool) -> void:
 		move_entity(player_entity, plug_forced_direction * player_entity.move_speed * delta)
 
 func release_whip_charge() -> void:
-	var attack: Dictionary = load_attack_data("equipment_whip_slash")
-	if attack.is_empty():
-		whip_charge_layers = 0
+	if player_entity == null or !is_instance_valid(player_entity):
 		return
 	var layers: int = clamp(whip_charge_layers, 1, whip_max_layers)
-	var dir: Vector2 = player_entity.get_global_mouse_position() - player_entity.global_position
+	var dir: Vector2 = equipment_last_move_direction
+	if dir.length() <= 0.01 and player_entity.has_method("get_facing_direction"):
+		dir = player_entity.get_facing_direction()
 	if dir.length() <= 0.01:
-		dir = plug_forced_direction if plug_forced_direction.length() > 0.01 else Vector2.RIGHT
-	var emitter: Dictionary = attack.get("emitter", {})
-	emitter["count"] = layers
-	emitter["spread_angle"] = 8.0 + float(layers - 1) * 12.0
-	attack["emitter"] = emitter
-	multiply_attack_damage(attack, 0.85 + float(layers) * 0.25)
-	spawn_attack(player_entity, attack, {"direction": dir.normalized()})
-	spawn_skill_cast_fx({"visual": {"color": "ff66b8", "radius": 96.0 + layers * 22.0}}, player_entity.global_position)
-	emit_equipment_event("on_whip_released", {"layers": layers})
+		dir = Vector2.RIGHT
+	dir = dir.normalized()
+
+	# 独立释放：不走公共武器 visual/hit_shape，避免别的武器一改小皮鞭也变。
+	var origin: Vector2 = player_entity.global_position
+	var slash_range: float = 220.0 + float(layers) * 72.0
+	var half_angle: float = deg_to_rad(44.0 + float(layers) * 8.0)
+	var base_damage: float = 28.0 + float(layers) * 28.0
+	var hit_count := 0
+	var candidates: Array = query_entities_near(origin + dir * (slash_range * 0.45), slash_range + 110.0)
+	for entity in candidates:
+		if entity == null or !is_instance_valid(entity) or entity.is_dead:
+			continue
+		if entity == player_entity or are_factions_allied(entity.faction, player_entity.faction):
+			continue
+		var to_target: Vector2 = entity.global_position - origin
+		var dist: float = to_target.length()
+		if dist > slash_range + entity.radius:
+			continue
+		if dist > 0.01 and abs(dir.angle_to(to_target.normalized())) > half_angle:
+			continue
+		var attack_context := {"id": "equipment_whip_slash", "kind": "melee", "crit_chance": 0.0, "crit_multiplier": 1.5}
+		var final_damage: float = player_entity.get_scaled_damage(base_damage, entity, attack_context) if player_entity.has_method("get_scaled_damage") else base_damage
+		var dealt: float = entity.take_damage(final_damage, player_entity)
+		notify_attack_hit(player_entity, entity, dealt, {"attack": attack_context})
+		hit_count += 1
+
+	spawn_whip_release_fx(origin, dir, slash_range, half_angle, layers, hit_count)
+	emit_equipment_event("on_whip_released", {"layers": layers, "hit_count": hit_count})
+	print("[Equipment][WhipRelease] layers=", layers, " hit_count=", hit_count)
 	whip_charge_layers = 0
+	whip_charge_progress = 0.0
 	equipment_move_distance = 0.0
+	equipment_stop_timer = 0.0
+	whip_release_cooldown = 0.20
+
+func spawn_whip_release_fx(origin: Vector2, dir: Vector2, slash_range: float, half_angle: float, layers: int, hit_count: int) -> void:
+	var color := Color(1.0, 0.30, 0.82, 0.96)
+	var side := Vector2(-dir.y, dir.x)
+	var tip := origin + dir * slash_range
+	# 主鞭身 + 两条边界 + 几条扫击残影，生命周期拉长，确保肉眼能看到。
+	spawn_line_fx(origin + dir * 28.0, tip, color, 16.0 + layers * 3.0, 0.42)
+	spawn_line_fx(origin + dir.rotated(half_angle) * 34.0, origin + dir.rotated(half_angle) * slash_range, Color(1.0, 0.52, 0.90, 0.70), 7.0, 0.36)
+	spawn_line_fx(origin + dir.rotated(-half_angle) * 34.0, origin + dir.rotated(-half_angle) * slash_range, Color(1.0, 0.52, 0.90, 0.70), 7.0, 0.36)
+	for i in range(3):
+		var t: float = (float(i) - 1.0) * 0.22
+		spawn_line_fx(origin + side * t * 80.0 + dir * 42.0, tip + side * t * 130.0, Color(1.0, 0.18, 0.68, 0.42), 5.0, 0.28)
+	spawn_ring_fx(origin + dir * min(slash_range * 0.55, 210.0), 86.0 + layers * 20.0, color, 7.0, 0.36)
+	spawn_floating_number(player_entity.global_position + Vector2(0.0, -player_entity.radius - 72.0), "鞭释放 x" + str(layers) + " 命中" + str(hit_count), color)
 
 func trigger_liquid_madness() -> void:
 	if player_entity == null or !is_instance_valid(player_entity) or player_entity.is_dead:
@@ -2597,13 +2780,39 @@ func trigger_liquid_madness() -> void:
 	player_entity.take_damage(self_damage, player_entity)
 	var attack: Dictionary = load_attack_data("equipment_liquid_arc")
 	if attack.is_empty():
-		return
+		attack = make_equipment_liquid_arc_attack()
 	var dir: Vector2 = player_entity.get_global_mouse_position() - player_entity.global_position
 	if dir.length() <= 0.01:
 		dir = plug_forced_direction if plug_forced_direction.length() > 0.01 else Vector2.RIGHT
 	spawn_attack(player_entity, attack, {"direction": dir.normalized()})
 	spawn_floating_number(player_entity.global_position + Vector2(0.0, -player_entity.radius - 64.0), "射液狂", Color(0.62, 1.0, 0.78, 1.0))
 	emit_equipment_event("on_liquid_madness", {"self_damage": self_damage})
+
+
+func make_equipment_whip_slash_attack() -> Dictionary:
+	return {
+		"id": "equipment_whip_slash_fallback",
+		"kind": "attack_instance",
+		"hit_shape": {"mode": "sector", "radius": 170.0, "angle": 58.0},
+		"hit_rule": {"mode": "on_spawn_once"},
+		"motion": {"mode": "static", "duration": 0.18},
+		"target_filter": {"factions": ["enemy"]},
+		"effects": [{"mode": "damage", "value": 18.0, "life_steal": 0.0}],
+		"visual": {"primary": "ff66b8", "secondary": "ffe1f1", "alpha": 0.72}
+	}
+
+func make_equipment_liquid_arc_attack() -> Dictionary:
+	return {
+		"id": "equipment_liquid_arc_fallback",
+		"kind": "attack_instance",
+		"hit_shape": {"mode": "beam_rect", "length": 640.0, "width": 72.0},
+		"hit_rule": {"mode": "while_active_tick", "tick_interval": 0.16, "hit_same_target_delay": 0.20},
+		"motion": {"mode": "beam", "duration": 0.42, "follow_source": true, "track_aim": false},
+		"origin": {"mode": "self_center", "point": "center", "offset": [48, 0]},
+		"target_filter": {"factions": ["enemy"]},
+		"effects": [{"mode": "damage", "value": 10.0}],
+		"visual": {"primary": "75ffc6", "secondary": "e2fff5", "alpha": 0.68}
+	}
 
 func notify_attack_hit(source, target, dealt: float, context: Dictionary = {}) -> void:
 	if source == player_entity:
@@ -2612,6 +2821,8 @@ func notify_attack_hit(source, target, dealt: float, context: Dictionary = {}) -
 			"damage": dealt,
 			"attack_id": str(context.get("attack", {}).get("id", ""))
 		})
+		if active_equipment_effects.has("melee_lifesteal") and selected_weapon_type == "melee" and dealt > 0.0 and player_entity.has_method("heal"):
+			player_entity.heal(dealt * 0.08, player_entity, false)
 
 func spawn_bio_transfer(start_pos: Vector2, target_base, value: int) -> void:
 	if value <= 0:
@@ -3518,6 +3729,79 @@ func process_base_aura_buffs(delta: float) -> void:
 		if tentacle_base.base_aura_regen_add > 0.0:
 			entity.heal(tentacle_base.base_aura_regen_add * delta, tentacle_base, false)
 
+func process_base_contact_damage(delta: float) -> void:
+	# 基地菌毯接触是独立响应：敌人进入基地接触圈就每帧被推出，伤害/状态才走冷却。
+	# 之前使用普通 move_entity() 会被“建筑阻挡检测”挡住：敌人已经贴进基地 block_radius 时，
+	# 目标点仍然被判定为站在建筑里，于是看起来完全不击退。这里对当前基地使用 ignore_building。
+	for base_entity in [tentacle_base, enemy_base]:
+		if base_entity == null or !is_instance_valid(base_entity):
+			continue
+		if base_entity.is_dead or !base_entity.is_building:
+			continue
+		var contact_radius: float = float(base_entity.get("contact_radius"))
+		if contact_radius <= 0.0:
+			contact_radius = max(float(base_entity.get("radius")) + 34.0, 96.0)
+		var contact_damage: float = float(base_entity.get("contact_damage"))
+		if contact_damage <= 0.0:
+			contact_damage = max(2.0, float(base_entity.get("attack_power")) * 0.45)
+		var contact_cd: float = max(0.12, float(base_entity.get("contact_cooldown")))
+		var candidates: Array = query_entities_near(base_entity.global_position, contact_radius + 220.0)
+		for entity in candidates:
+			if entity == null or !is_instance_valid(entity):
+				continue
+			if entity.is_dead or entity.is_building or entity == base_entity:
+				continue
+			if are_factions_allied(entity.faction, base_entity.faction):
+				continue
+			var dist: float = entity.global_position.distance_to(base_entity.global_position)
+			var contact_limit: float = contact_radius + entity.radius
+			if dist > contact_limit:
+				continue
+			var key := "base_contact_" + make_contact_key(base_entity, entity)
+			var damage_ready := float(unit_contact_timers.get(key, 0.0)) <= 0.0
+			if damage_ready:
+				unit_contact_timers[key] = contact_cd
+			apply_base_contact_to_enemy(base_entity, entity, contact_damage, contact_radius, delta, damage_ready)
+
+func apply_base_contact_to_enemy(base_entity, entity, contact_damage: float, contact_radius: float, delta: float, damage_ready: bool) -> void:
+	var away: Vector2 = entity.global_position - base_entity.global_position
+	if away.length() <= 0.01:
+		away = Vector2.RIGHT.rotated(randf() * TAU)
+	away = away.normalized()
+	var knock_min: float = float(base_entity.get("contact_knockback_min"))
+	var knock_max: float = float(base_entity.get("contact_knockback_max"))
+	if knock_max <= 0.0:
+		knock_min = 95.0
+		knock_max = 170.0
+	var dist: float = entity.global_position.distance_to(base_entity.global_position)
+	var target_dist: float = contact_radius + entity.radius + 10.0
+	var overlap_push: float = max(0.0, target_dist - dist)
+	# 每帧持续推出，避免 AI 下一帧又怼回基地中心导致看起来没有击退。
+	var frame_push: float = max(overlap_push * 0.45, knock_min * delta * 2.8)
+	move_entity_ignoring_building(entity, away * frame_push, base_entity)
+	# 稍微让 AI 自己让路：已有 BattleEntity 里会读取 forced_avoid_timer / forced_avoid_side。
+	if entity.has_method("set"):
+		entity.set("forced_avoid_timer", max(float(entity.get("forced_avoid_timer")), 0.18))
+		entity.set("forced_avoid_side", 1.0 if randf() > 0.5 else -1.0)
+	if !damage_ready:
+		return
+	var impulse: float = randf_range(knock_min, knock_max)
+	move_entity_ignoring_building(entity, away * impulse, base_entity)
+	var attack_context := {"id": "base_contact", "kind": "base_contact", "crit_chance": 0.0, "crit_multiplier": 1.0}
+	var final_damage: float = base_entity.get_scaled_damage(contact_damage, entity, attack_context) if base_entity.has_method("get_scaled_damage") else contact_damage
+	var dealt: float = entity.take_damage(final_damage, base_entity)
+	spawn_line_fx(base_entity.global_position + away * min(contact_radius, 90.0), entity.global_position, Color(0.86, 0.24, 1.0, 0.52), 4.0, 0.14)
+	if dealt > 0.0 and randf() < 0.18:
+		spawn_floating_number(entity.global_position + Vector2(0.0, -entity.radius - 24.0), "菌毯 " + str(int(round(dealt))), Color(0.88, 0.42, 1.0, 1.0))
+	var statuses: Array = base_entity.get("contact_statuses")
+	for status in statuses:
+		if typeof(status) == TYPE_DICTIONARY:
+			entity.add_status_effect(status, base_entity)
+	var execute_chance: float = float(base_entity.get("contact_execute_chance"))
+	var execute_ratio: float = float(base_entity.get("contact_execute_hp_ratio"))
+	if execute_chance > 0.0 and execute_ratio > 0.0 and entity.hp / max(entity.max_hp, 1.0) <= execute_ratio and randf() <= execute_chance:
+		entity.take_damage(entity.max_hp, base_entity)
+
 func process_unit_contacts(delta: float) -> void:
 	for key in unit_contact_timers.keys():
 		unit_contact_timers[key] = max(0.0, float(unit_contact_timers[key]) - delta)
@@ -3832,22 +4116,32 @@ func clamp_to_map(pos: Vector2) -> Vector2:
 	return pos
 
 func move_entity(entity, move_delta: Vector2) -> Vector2:
+	return move_entity_ignoring_building(entity, move_delta, null)
+
+func move_entity_ignoring_building(entity, move_delta: Vector2, ignored_building = null) -> Vector2:
 	var from_pos: Vector2 = entity.global_position
 	var wanted: Vector2 = clamp_to_map(from_pos + move_delta)
 
-	if can_entity_stand_at(entity, wanted):
+	if can_entity_stand_at(entity, wanted, ignored_building):
 		entity.global_position = wanted
 		return wanted
 
 	var x_pos: Vector2 = clamp_to_map(from_pos + Vector2(move_delta.x, 0.0))
-	if can_entity_stand_at(entity, x_pos):
+	if can_entity_stand_at(entity, x_pos, ignored_building):
 		entity.global_position = x_pos
 		return x_pos
 
 	var y_pos: Vector2 = clamp_to_map(from_pos + Vector2(0.0, move_delta.y))
-	if can_entity_stand_at(entity, y_pos):
+	if can_entity_stand_at(entity, y_pos, ignored_building):
 		entity.global_position = y_pos
 		return y_pos
+
+	# 基地接触推挤时，如果 X/Y 分解仍然落在建筑阻挡内，就强制沿推挤方向挪一点。
+	# 这只在传入 ignored_building 时启用，普通移动仍然严格遵守建筑阻挡。
+	if ignored_building != null and move_delta.length() > 0.01 and is_world_walkable(wanted):
+		var safe_pos: Vector2 = wanted
+		entity.global_position = safe_pos
+		return safe_pos
 
 	entity.global_position = from_pos
 	return from_pos
