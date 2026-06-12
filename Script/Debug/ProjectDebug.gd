@@ -87,3 +87,16 @@ func _get_scene_text() -> String:
 	if path == "":
 		path = scene.name
 	return path
+
+
+func dump_battle_modifiers(reason: String = "manual") -> void:
+	var gs: Node = get_node_or_null("/root/GameState")
+	if gs == null:
+		print("[ProjectDebug][BattleModifiers] no GameState")
+		return
+	if gs.has_method("build_battle_modifiers"):
+		print("[ProjectDebug][BattleModifiers][", reason, "] ", JSON.stringify(gs.call("build_battle_modifiers")))
+	elif gs.has_method("get_merchant_next_battle_effects"):
+		print("[ProjectDebug][BattleModifiers][", reason, "] merchant_only=", JSON.stringify(gs.call("get_merchant_next_battle_effects")))
+	else:
+		print("[ProjectDebug][BattleModifiers] no modifier method")

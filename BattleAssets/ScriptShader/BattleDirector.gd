@@ -10,6 +10,7 @@ const BIO_TRANSFER_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleBioT
 const ATTACK_INSTANCE_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleAttackInstance.gd")
 const FLOATING_NUMBER_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleFloatingNumber.gd")
 const LINE_FX_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleLineFx.gd")
+const SHARED_GIF_BATCH_RENDERER_SCRIPT := preload("res://BattleAssets/ScriptShader/BattleSharedGifBatchRenderer.gd")
 
 @export var stage_config_path := "res://scenes/Battle/Battle_00.ini"
 
@@ -87,9 +88,18 @@ var test_skill2_index := 0
 var test_source_modes: Array[String] = ["player", "tentacle_base", "friendly_minion", "enemy", "enemy_base"]
 var test_source_index := 0
 var floating_numbers_this_frame := 0
-var floating_number_cap_per_frame := 28
+var floating_number_cap_per_frame := 8
 var entity_grid: Dictionary = {}
 var entity_grid_cell_size := 260.0
+
+# Shared-GIF batch rendering. Logic entities remain real nodes, but far/overlapped
+# follower trash units can hide their individual Sprite2D and be drawn by one
+# CanvasItem. This restores the render-budget optimization without data_swarm.
+var shared_gif_batch_renderer: Node2D = null
+var shared_gif_batch_entity_threshold := 120
+var shared_gif_batch_enter_distance := 220.0
+var shared_gif_batch_exit_distance := 140.0
+var shared_gif_batch_enabled := true
 var battle_loadout: Dictionary = {}
 var battle_won := false
 var battle_lost := false
@@ -255,6 +265,7 @@ func _ready() -> void:
 	setup_block_mask()
 	setup_ui()
 	setup_stage_area_visuals()
+	setup_shared_gif_batch_renderer()
 	spawn_initial_entities()
 	load_waves()
 	setup_camera()
@@ -278,7 +289,85 @@ func _physics_process(delta: float) -> void:
 	process_stage_events()
 	cleanup_lists()
 	update_camera_position()
+	update_shared_gif_batch_renderer()
 	update_ui()
+
+
+func setup_shared_gif_batch_renderer() -> void:
+	if !shared_gif_batch_enabled or entities_root == null:
+		return
+	if shared_gif_batch_renderer != null and is_instance_valid(shared_gif_batch_renderer):
+		return
+	shared_gif_batch_renderer = Node2D.new()
+	shared_gif_batch_renderer.name = "SharedGifBatchRenderer"
+	shared_gif_batch_renderer.set_script(SHARED_GIF_BATCH_RENDERER_SCRIPT)
+	shared_gif_batch_renderer.z_index = 0
+	entities_root.add_child(shared_gif_batch_renderer)
+	if shared_gif_batch_renderer.has_method("setup"):
+		shared_gif_batch_renderer.call("setup", self)
+	debug_log("Battle", "shared_gif_batch_renderer=ON threshold=" + str(shared_gif_batch_entity_threshold))
+
+func update_shared_gif_batch_renderer() -> void:
+	if shared_gif_batch_renderer != null and is_instance_valid(shared_gif_batch_renderer):
+		shared_gif_batch_renderer.queue_redraw()
+
+func mark_shared_gif_batch_dirty() -> void:
+	update_shared_gif_batch_renderer()
+
+func should_batch_shared_gif_entity(entity) -> bool:
+	if !shared_gif_batch_enabled:
+		return false
+	if entity == null or !is_instance_valid(entity):
+		return false
+	var count: int = entities.size()
+	if count < shared_gif_batch_entity_threshold:
+		return false
+	if !bool(entity.get("visual_is_shared_gif_sprite")):
+		return false
+	if str(entity.get("ai_role")) != "follower":
+		return false
+	if count >= 240:
+		return true
+	if !bool(entity.get("follower_precision_active")):
+		return true
+	var pos: Vector2 = entity.global_position
+	var min_dist := INF
+	if player_entity != null and is_instance_valid(player_entity):
+		min_dist = min(min_dist, pos.distance_to(player_entity.global_position))
+	if tentacle_base != null and is_instance_valid(tentacle_base):
+		min_dist = min(min_dist, pos.distance_to(tentacle_base.global_position))
+	if enemy_base != null and is_instance_valid(enemy_base):
+		min_dist = min(min_dist, pos.distance_to(enemy_base.global_position))
+	var already_batched: bool = bool(entity.get("batch_shared_gif_visual_active"))
+	if already_batched:
+		return min_dist > shared_gif_batch_exit_distance
+	return min_dist > shared_gif_batch_enter_distance
+
+func debug_log(scope: String, message: String) -> void:
+	var dbg: Node = get_node_or_null("/root/ProjectDebug")
+	if dbg != null and dbg.has_method("log"):
+		dbg.call("log", scope, message)
+	else:
+		print("[", scope, "] ", message)
+
+func debug_dump_battle_runtime(reason: String = "") -> void:
+	var summary := {
+		"reason": reason,
+		"entities": entities.size(),
+		"projectiles": projectiles.size(),
+		"attack_instances": attack_instances.size(),
+		"drops": drops.size(),
+		"run_player_attack_mul": run_player_attack_mul,
+		"run_player_area_mul": run_player_area_mul,
+		"run_player_range_mul": run_player_range_mul,
+		"run_player_attack_frequency_mul": run_player_attack_frequency_mul,
+		"run_lust_reward_mul": run_lust_reward_mul,
+		"run_lust_reward_add": run_lust_reward_add,
+		"run_base_start_bio_add": run_base_start_bio_add,
+		"equipment_effects": active_equipment_effects,
+		"selected_equipment_id": selected_equipment_id,
+	}
+	debug_log("BattleRuntime", JSON.stringify(summary))
 
 func setup_camera() -> void:
 	if battle_camera == null:
@@ -457,6 +546,7 @@ func load_battle_loadout() -> void:
 	if active_equipment_effects.has("slime_belt"):
 		run_lust_reward_add += 20.0
 	apply_captive_equipment_effect_keys()
+	debug_dump_battle_runtime("load_battle_loadout")
 
 func append_unique_effects(effects: Array) -> void:
 	for effect in effects:
@@ -1902,7 +1992,158 @@ func load_attack_data(attack_id: String) -> Dictionary:
 		push_error("Invalid attack json: " + path)
 		return {}
 
-	return parsed
+	return normalize_attack_data(attack_id, parsed)
+
+func normalize_attack_data(attack_id: String, raw_data: Dictionary) -> Dictionary:
+	var data: Dictionary = raw_data.duplicate(true)
+	var key: String = (attack_id + " " + str(data.get("id", "")) + " " + str(data.get("name", ""))).to_lower()
+	if !data.has("id") or str(data.get("id", "")) == "":
+		data["id"] = attack_id
+
+	var visual: Dictionary = data.get("visual", {})
+	var has_asset: bool = visual.has("texture") or visual.has("gif")
+	var asset_path: String = ""
+	var visual_size: Array = []
+	var visual_anchor: String = str(visual.get("anchor", "center"))
+
+	if key.contains("strong") and key.contains("melee"):
+		asset_path = "res://BattleAssets/StrongMelee.png"
+		visual_size = [190, 90]
+		visual_anchor = "left_center"
+	elif (key.contains("mid") or key.contains("normal")) and key.contains("melee"):
+		asset_path = "res://BattleAssets/NormalMelle.png"
+		visual_size = [158, 76]
+		visual_anchor = "left_center"
+	elif key.contains("weak") and key.contains("melee"):
+		asset_path = "res://BattleAssets/WeakMelle.png"
+		visual_size = [130, 62]
+		visual_anchor = "left_center"
+	elif key.contains("tracer"):
+		asset_path = "res://BattleAssets/TracerBullet.png"
+		visual_size = [56, 20]
+	elif key.contains("sniper"):
+		asset_path = "res://BattleAssets/Sniper.png"
+		visual_size = [92, 22]
+	elif key.contains("boomerang"):
+		asset_path = "res://BattleAssets/Boomerang.png"
+		visual_size = [78, 78]
+	elif key.contains("shotgun"):
+		asset_path = "res://BattleAssets/Shotgun.png"
+		visual_size = [42, 16]
+	elif key.contains("beam") or key.contains("laser"):
+		asset_path = "res://BattleAssets/Beam.png"
+		visual_anchor = "left_center"
+	elif key.contains("poison"):
+		asset_path = "res://BattleAssets/Poison.png"
+	elif key.contains("thunder") or key.contains("落雷"):
+		asset_path = "res://BattleAssets/Thunder.png"
+		visual_size = [130, 260]
+	elif key.contains("spike"):
+		asset_path = "res://BattleAssets/Spike.png"
+	elif key.contains("charm"):
+		asset_path = "res://BattleAssets/Charm.png"
+		visual_size = [58, 58]
+	elif key.contains("lighting") or key.contains("lightning") or key.contains("chain"):
+		asset_path = "res://BattleAssets/Lighting.png"
+		visual_size = [180, 34]
+		visual_anchor = "left_center"
+	elif key.contains("curve"):
+		asset_path = "res://BattleAssets/CurveBullet.png"
+		visual_size = [54, 22]
+	elif key.contains("flame") or key.contains("fire") or key.contains("喷"):
+		asset_path = "res://BattleAssets/Flame.png"
+		visual_size = [300, 104]
+		visual_anchor = "left_center"
+		var flame_shape: Dictionary = data.get("hit_shape", {})
+		flame_shape["mode"] = "beam_rect"
+		flame_shape["length"] = max(float(flame_shape.get("length", 0.0)), 300.0)
+		flame_shape["width"] = max(float(flame_shape.get("width", 0.0)), 104.0)
+		data["hit_shape"] = flame_shape
+		var flame_origin: Dictionary = data.get("origin", {})
+		if !flame_origin.has("point"):
+			flame_origin["point"] = "right"
+		data["origin"] = flame_origin
+	elif key.contains("rpg") or key.contains("rocket"):
+		asset_path = "res://BattleAssets/RPG.png"
+		visual_size = [74, 28]
+	elif key.contains("strong") and key.contains("strafe"):
+		asset_path = "res://BattleAssets/StrongStrafe.png"
+		visual_size = [360, 190]
+	elif key.contains("weak") and key.contains("strafe"):
+		asset_path = "res://BattleAssets/WeakStrafe.png"
+		visual_size = [300, 168]
+	elif key.contains("strafe") or key.contains("bombing") or key.contains("轰"):
+		asset_path = "res://BattleAssets/GeneralBombing.gif"
+		visual_size = [320, 180]
+	elif key.contains("bullet"):
+		asset_path = "res://BattleAssets/Bullet.png"
+		visual_size = [46, 16]
+
+	if asset_path != "":
+		if !has_asset:
+			if asset_path.get_extension().to_lower() == "gif":
+				visual["gif"] = asset_path
+			else:
+				visual["texture"] = asset_path
+		if !visual_size.is_empty() and !visual.has("size"):
+			visual["size"] = visual_size
+		if visual_anchor != "center" and !visual.has("anchor"):
+			visual["anchor"] = visual_anchor
+		data["visual"] = visual
+
+	if key.contains("strafe") or key.contains("bombing") or key.contains("轰"):
+		var strafe_visual: Dictionary = data.get("visual", {})
+		strafe_visual["indicator_texture"] = "res://BattleAssets/StrafeBox.png"
+		strafe_visual["indicator_alpha"] = 0.72
+		if !strafe_visual.has("size"):
+			strafe_visual["size"] = [340, 180]
+		data["visual"] = strafe_visual
+		var shape: Dictionary = data.get("hit_shape", {})
+		shape["mode"] = "rect"
+		shape["length"] = max(float(shape.get("length", 0.0)), float(strafe_visual.get("size", [340, 180])[0]))
+		shape["width"] = max(float(shape.get("width", 0.0)), float(strafe_visual.get("size", [340, 180])[1]))
+		data["hit_shape"] = shape
+		var origin: Dictionary = data.get("origin", {})
+		origin["mode"] = "aim_offset"
+		origin["distance"] = float(origin.get("distance", 360.0))
+		data["origin"] = origin
+		var aim: Dictionary = data.get("aim", {})
+		aim["mode"] = "mouse"
+		data["aim"] = aim
+		data["duration"] = max(float(data.get("duration", data.get("life_time", 0.55))), 0.55)
+
+	if key.contains("bullet") or key.contains("sniper") or key.contains("tracer") or key.contains("charm") or key.contains("curve"):
+		var motion: Dictionary = data.get("motion", {})
+		motion["max_distance"] = max(float(motion.get("max_distance", data.get("range", 0.0))), 1250.0)
+		if motion.has("speed"):
+			motion["speed"] = max(float(motion.get("speed", 0.0)), 720.0)
+		data["motion"] = motion
+
+	return data
+
+func spawn_textured_line_fx(start_pos: Vector2, end_pos: Vector2, texture_path: String = "res://BattleAssets/Lighting.png", width: float = 42.0, lifetime: float = 0.16, color: Color = Color(1.0, 1.0, 1.0, 0.92)) -> void:
+	var tex = load(texture_path)
+	if tex == null:
+		spawn_line_fx(start_pos, end_pos, color, width * 0.35, lifetime)
+		return
+	var delta: Vector2 = end_pos - start_pos
+	var dist: float = delta.length()
+	if dist <= 1.0:
+		return
+	var sprite := Sprite2D.new()
+	sprite.name = "TexturedLineFx"
+	sprite.texture = tex
+	sprite.centered = true
+	sprite.global_position = start_pos.lerp(end_pos, 0.5)
+	sprite.rotation = delta.angle()
+	sprite.modulate = color
+	sprite.z_index = 95
+	var tex_size: Vector2 = tex.get_size()
+	sprite.scale = Vector2(dist / max(tex_size.x, 1.0), width / max(tex_size.y, 1.0))
+	effects_root.add_child(sprite)
+	var tween := create_tween()
+	tween.tween_property(sprite, "modulate:a", 0.0, lifetime)
+	tween.tween_callback(sprite.queue_free)
 
 func spawn_bio_drop(pos: Vector2, value: int) -> void:
 	if value <= 0:
