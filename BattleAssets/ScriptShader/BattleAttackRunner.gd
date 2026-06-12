@@ -4,6 +4,15 @@ func run_attack(director, attacker, target, attack: Dictionary) -> void:
 	if attacker == null or !is_instance_valid(attacker):
 		return
 
+	# IMPORTANT: weapon_rocket/explosive projectiles must stay in the projectile path.
+	# Several normalization passes add hit_shape/effects to attacks, and the old generic
+	# branch below would convert rockets into BattleAttackInstance/GIFPlayer visuals.
+	# That is why the rocket looked like one huge bullet and never printed projectile
+	# explosion logs. Force rocket-like attacks through BattleProjectile first.
+	if _is_rocket_attack(attack):
+		_spawn_projectile(director, attacker, target, _normalize_rocket_projectile_attack(attack))
+		return
+
 	var kind: String = str(attack.get("kind", "projectile"))
 
 	if kind == "attack_instance" or attack.has("hit_shape") or attack.has("hit_rule") or attack.has("effects"):
@@ -17,6 +26,54 @@ func run_attack(director, attacker, target, attack: Dictionary) -> void:
 	if kind == "projectile":
 		_spawn_projectile(director, attacker, target, attack)
 		return
+
+func _is_rocket_attack(attack: Dictionary) -> bool:
+	var id_text := (str(attack.get("id", "")) + "|" + str(attack.get("attack_id", "")) + "|" + str(attack.get("name", ""))).to_lower()
+	if id_text.find("rocket") >= 0 or id_text.find("rpg") >= 0 or id_text.find("火箭") >= 0:
+		return true
+	var tags_value = attack.get("tags", [])
+	if typeof(tags_value) == TYPE_ARRAY:
+		for tag in tags_value:
+			var t := str(tag).to_lower()
+			if t == "rocket" or t == "explosive" or t == "rpg":
+				return true
+	elif typeof(tags_value) == TYPE_STRING:
+		var tags_text := str(tags_value).to_lower()
+		if tags_text.find("rocket") >= 0 or tags_text.find("explosive") >= 0 or tags_text.find("rpg") >= 0:
+			return true
+	return false
+
+func _normalize_rocket_projectile_attack(attack: Dictionary) -> Dictionary:
+	var result: Dictionary = attack.duplicate(true)
+	result["kind"] = "projectile"
+	result["id"] = str(result.get("id", result.get("attack_id", "weapon_rocket")))
+	result["is_rocket_projectile"] = true
+	result["explode_on_hit"] = true
+	result["explode_on_expire"] = bool(result.get("explode_on_expire", true))
+	result["damage"] = 0.0
+	result["direct_hit_damage"] = 0.0
+
+	var base_damage: float = float(attack.get("explosion_damage", attack.get("damage", 18.0)))
+	result["explosion_damage"] = base_damage
+	result["explosion_radius"] = float(result.get("explosion_radius", max(150.0, float(result.get("radius", 18.0)) * 5.0)))
+	result["explosion_edge_damage_mul"] = float(result.get("explosion_edge_damage_mul", 0.55))
+	result["explosion_visual_size"] = float(result.get("explosion_visual_size", result["explosion_radius"] * 2.0))
+	result["radius"] = min(float(result.get("radius", 18.0)), 18.0)
+	result["speed"] = float(result.get("speed", 320.0))
+	result["life_time"] = float(result.get("life_time", 2.6))
+	if !result.has("motion"):
+		result["motion"] = "homing"
+	result.erase("hit_shape")
+	result.erase("hit_rule")
+	result.erase("effects")
+
+	var visual: Dictionary = result.get("visual", {}) if typeof(result.get("visual", {})) == TYPE_DICTIONARY else {}
+	if str(visual.get("texture", visual.get("gif", ""))) == "":
+		visual["texture"] = "res://BattleAssets/Textures/RPG.png"
+	visual["max_size"] = visual.get("max_size", [44, 44])
+	visual["size"] = visual.get("size", [44, 44])
+	result["visual"] = visual
+	return result
 
 func _apply_melee(attacker, target, attack: Dictionary) -> void:
 	if target == null or !is_instance_valid(target):

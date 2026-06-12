@@ -157,7 +157,10 @@ var run_player_attack_mul := 1.0
 var run_player_area_mul := 1.0
 var run_player_range_mul := 1.0
 var run_player_attack_frequency_mul := 1.0
+var run_projectile_count_add := 0
 var run_base_start_bio_add := 0.0
+var battle_modifier_sources: Dictionary = {}
+var battle_modifier_formula: Dictionary = {}
 var run_mana_recovered := 0.0
 var player_mana_max := 100.0
 var player_mana := 100.0
@@ -361,9 +364,14 @@ func debug_dump_battle_runtime(reason: String = "") -> void:
 		"run_player_area_mul": run_player_area_mul,
 		"run_player_range_mul": run_player_range_mul,
 		"run_player_attack_frequency_mul": run_player_attack_frequency_mul,
+		"run_projectile_count_add": run_projectile_count_add,
 		"run_lust_reward_mul": run_lust_reward_mul,
 		"run_lust_reward_add": run_lust_reward_add,
 		"run_base_start_bio_add": run_base_start_bio_add,
+		"run_crit_chance_add": run_crit_chance_add,
+		"run_crit_multiplier_add": run_crit_multiplier_add,
+		"modifier_sources": battle_modifier_sources,
+		"modifier_formula": battle_modifier_formula,
 		"equipment_effects": active_equipment_effects,
 		"selected_equipment_id": selected_equipment_id,
 	}
@@ -528,6 +536,10 @@ func load_battle_loadout() -> void:
 			battle_modifiers = GameState.build_battle_modifiers()
 		elif GameState.has_method("get_merchant_next_battle_effects"):
 			battle_modifiers = GameState.get_merchant_next_battle_effects()
+		if GameState.has_method("get_runtime_battle_source_breakdown"):
+			battle_modifier_sources = GameState.get_runtime_battle_source_breakdown()
+		if GameState.has_method("get_runtime_battle_formula_debug"):
+			battle_modifier_formula = GameState.get_runtime_battle_formula_debug()
 		for raw_key in battle_modifiers.keys():
 			apply_runtime_battle_modifier(str(raw_key), float(battle_modifiers[raw_key]))
 
@@ -546,6 +558,7 @@ func load_battle_loadout() -> void:
 	if active_equipment_effects.has("slime_belt"):
 		run_lust_reward_add += 20.0
 	apply_captive_equipment_effect_keys()
+	apply_generic_equipment_effect_keys()
 	debug_dump_battle_runtime("load_battle_loadout")
 
 func append_unique_effects(effects: Array) -> void:
@@ -566,6 +579,8 @@ func apply_runtime_battle_modifier(effect_key: String, value: float) -> void:
 		run_player_area_mul *= 1.0 + value
 	elif key == "player_range_mul":
 		run_player_range_mul *= 1.0 + value
+	elif key == "player_projectile_count_add" or key == "emitter_count_add":
+		run_projectile_count_add += int(round(value))
 	elif key == "battle_lust_reward_mul":
 		run_lust_reward_mul *= 1.0 + value
 	elif key == "battle_win_lust_add" or key == "start_lust_add":
@@ -577,6 +592,10 @@ func apply_runtime_battle_modifier(effect_key: String, value: float) -> void:
 	elif key == "player_mana_max_add":
 		player_mana_max += value
 		player_mana += value
+	elif key == "player_crit_chance_add" or key == "crit_chance_add" or key == "crit_up":
+		run_crit_chance_add += value
+	elif key == "player_crit_multiplier_add" or key == "crit_multiplier_add" or key == "crit_mul_add":
+		run_crit_multiplier_add += value
 	elif key == "player_hp_mul" and player_entity != null and is_instance_valid(player_entity):
 		player_entity.max_hp *= 1.0 + value
 		player_entity.hp *= 1.0 + value
@@ -805,6 +824,18 @@ func apply_equipment_to_player_attack(attack: Dictionary) -> void:
 		add_effect_number(attack, "life_steal", 0.06)
 	attack["_equipment_applied"] = true
 
+func apply_generic_equipment_effect_keys() -> void:
+	# Lightweight parser for CSV effect_keys that encode numeric hooks, e.g. minion_attack_mul_18.
+	# This prevents equipment rows from being pure names when the effect_key is already data-like.
+	for raw_effect in active_equipment_effects:
+		var key: String = str(raw_effect).strip_edges()
+		if key.begins_with("minion_attack_mul_"):
+			assimilated_stat_mul["minion_attack_mul"] = 1.0 + float(key.get_slice("_", 3)) / 100.0
+		elif key.begins_with("base_queue_speed_mul_"):
+			assimilated_stat_mul["base_queue_speed_mul"] = 1.0 + float(key.get_slice("_", 4)) / 100.0
+		elif key.begins_with("player_defense_add_") and player_entity != null and is_instance_valid(player_entity):
+			player_entity.defense += float(key.get_slice("_", 3))
+
 func multiply_attack_damage(attack: Dictionary, multiplier: float) -> void:
 	for effect in attack.get("effects", []):
 		if typeof(effect) != TYPE_DICTIONARY:
@@ -831,6 +862,11 @@ func apply_run_stats_to_attack(attack: Dictionary) -> void:
 			attack["interval"] = max(0.05, float(attack.get("interval", 1.0)) * interval_mul)
 		if attack.has("cooldown"):
 			attack["cooldown"] = max(0.05, float(attack.get("cooldown", 1.0)) * interval_mul)
+	if run_projectile_count_add != 0:
+		var emitter: Dictionary = attack.get("emitter", {})
+		if !emitter.is_empty() or attack.has("emitter"):
+			emitter["count"] = max(1, int(emitter.get("count", 1)) + run_projectile_count_add)
+			attack["emitter"] = emitter
 	if run_damage_add != 0.0:
 		add_attack_damage(attack, run_damage_add)
 	if run_bonus_damage_add != 0.0:
@@ -1126,6 +1162,7 @@ func spawn_initial_entities() -> void:
 	var player_id: String = str(config.get_value("player", "entity_id", "000"))
 	var player_spawn: String = str(config.get_value("player", "spawn", "PlayerSpawn"))
 	player_entity = spawn_entity(player_id, get_spawn_position(player_spawn, {}))
+	apply_late_player_runtime_modifiers()
 	apply_loadout_to_player()
 
 	var base_id: String = str(config.get_value("tentacle_base", "entity_id", "001"))
@@ -1139,6 +1176,28 @@ func spawn_initial_entities() -> void:
 	enemy_base = spawn_entity(enemy_base_id, get_spawn_position(enemy_base_spawn, {}))
 	equipment_last_player_pos = player_entity.global_position if player_entity != null and is_instance_valid(player_entity) else Vector2.ZERO
 	emit_equipment_event("on_battle_start", {})
+
+func apply_late_player_runtime_modifiers() -> void:
+	# Some save-driven modifiers are loaded before the player entity exists. Apply entity-stat hooks here.
+	if player_entity == null or !is_instance_valid(player_entity):
+		return
+	var modifiers: Dictionary = {}
+	if GameState.is_loaded:
+		var data_value = GameState.get("data")
+		if typeof(data_value) == TYPE_DICTIONARY:
+			var runtime_value = data_value.get("runtime", {})
+			if typeof(runtime_value) == TYPE_DICTIONARY:
+				var pending_value = runtime_value.get("pending_battle_modifiers", {})
+				if typeof(pending_value) == TYPE_DICTIONARY:
+					modifiers = pending_value
+	if modifiers.has("player_hp_mul"):
+		var hp_mul: float = 1.0 + float(modifiers.get("player_hp_mul", 0.0))
+		player_entity.max_hp *= hp_mul
+		player_entity.hp *= hp_mul
+	if modifiers.has("player_defense_add"):
+		player_entity.defense += float(modifiers.get("player_defense_add", 0.0))
+	if modifiers.has("player_move_speed_mul"):
+		player_entity.move_speed *= 1.0 + float(modifiers.get("player_move_speed_mul", 0.0))
 
 func apply_equipment_to_tentacle_base() -> void:
 	if tentacle_base == null or !is_instance_valid(tentacle_base):
@@ -2065,7 +2124,29 @@ func normalize_attack_data(attack_id: String, raw_data: Dictionary) -> Dictionar
 		data["origin"] = flame_origin
 	elif key.contains("rpg") or key.contains("rocket"):
 		asset_path = "res://BattleAssets/RPG.png"
-		visual_size = [74, 28]
+		# Rocket projectile itself is only a carrier. The real hit is the RPGArea explosion.
+		visual_size = [48, 18]
+		var rocket_damage: float = max(18.0, float(data.get("damage", 24.0)))
+		var rocket_radius: float = max(150.0, float(data.get("explosion_radius", 150.0)))
+		data["kind"] = "projectile"
+		data["radius"] = min(float(data.get("radius", 14.0)), 16.0)
+		data["damage"] = 0.0
+		data["direct_hit_damage"] = 0.0
+		data["explosion_damage"] = rocket_damage
+		data["explosion_radius"] = rocket_radius
+		data["explosion_edge_damage_mul"] = 0.55
+		data["direct_aoe_on_explode"] = true
+		data["explode_on_hit"] = true
+		data["explode_on_expire"] = true
+		var rocket_motion: Dictionary = data.get("motion", {}) if typeof(data.get("motion", {})) == TYPE_DICTIONARY else {}
+		rocket_motion["mode"] = str(rocket_motion.get("mode", "rocket"))
+		rocket_motion["speed"] = max(float(rocket_motion.get("speed", data.get("speed", 360.0))), 360.0)
+		rocket_motion["life_time"] = max(float(rocket_motion.get("life_time", data.get("life_time", 2.4))), 2.0)
+		data["motion"] = rocket_motion
+		data["on_hit_spawn_attack"] = make_simple_blast_attack("rocket_explosion", rocket_radius, rocket_damage, Color(1.0, 0.52, 0.20, 0.84))
+		data["on_hit_spawn_attack"]["visual"] = {"texture": "res://BattleAssets/RPGArea.png", "size": [rocket_radius * 2.0, rocket_radius * 2.0], "alpha": 0.82}
+		data["on_hit_spawn_attack"]["hit_rule"] = {"mode": "on_spawn_once"}
+		data["on_hit_spawn_attack"]["hit_shape"] = {"mode": "circle", "radius": rocket_radius}
 	elif key.contains("strong") and key.contains("strafe"):
 		asset_path = "res://BattleAssets/StrongStrafe.png"
 		visual_size = [360, 190]
@@ -2120,6 +2201,9 @@ func normalize_attack_data(attack_id: String, raw_data: Dictionary) -> Dictionar
 		data["motion"] = motion
 
 	return data
+
+func debug_log_projectile_explosion(attack_id: String, pos: Vector2, radius: float, damage: float) -> void:
+	print("[BattleProjectile][Explosion] id=", attack_id, " pos=", pos, " radius=", radius, " damage=", damage)
 
 func spawn_textured_line_fx(start_pos: Vector2, end_pos: Vector2, texture_path: String = "res://BattleAssets/Lighting.png", width: float = 42.0, lifetime: float = 0.16, color: Color = Color(1.0, 1.0, 1.0, 0.92)) -> void:
 	var tex = load(texture_path)

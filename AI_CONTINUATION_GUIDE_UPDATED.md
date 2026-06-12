@@ -692,3 +692,10 @@ CG/剧情取得需要同步：
 - 命中敌人不允许弹“淫能+20”；淫能只在战斗结算、地窖放置/调教、商人/局外消费等明确节点变化。
 - 战斗结算应记录 `lust_before + lust_reward = lust_after`，避免 UI 显示全局值和本局奖励混淆。
 - CG/剧情回想占位 UI 在 `res://scenes/StoryGallery/StoryGallery.tscn`，读取 `Config/StoryEvents.csv` 和 `unlocks.story_events/cg_events/narrative_events`。
+
+## V10 notes
+- Formula convention for BattleDirector modifiers: CSV/save `*_mul` values are additive deltas, battle applies `final *= (1 + sum_delta)`. `*_add` values are flat additions.
+- GameState now stores runtime modifier source breakdown and formula debug in `runtime.pending_battle_source_breakdown` and `runtime.pending_battle_formula`.
+- ProjectDebug can print next-battle source/formula. Use it instead of checking by feel.
+- Rocket projectile now uses `on_hit_spawn_attack` to create a one-shot AOE explosion and should show `RPGArea.png`.
+- Crit MVP exists: `crit_chance` and `crit_multiplier` on attacks; direct damage is handled in BattleEntity, attack_instance damage through EffectRunner context.

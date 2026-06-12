@@ -150,16 +150,6 @@ func resolve_origin() -> Vector2:
 			return center + Vector2(randf_range(-half_view.x, half_view.x), -half_view.y)
 		return center + Vector2(randf_range(-half_view.x, half_view.x), half_view.y)
 
-	if mode == "aim_offset" and source != null and is_instance_valid(source):
-		var aim_dir: Vector2 = source.get_global_mouse_position() - source.global_position
-		if aim_dir.length() <= 0.01:
-			aim_dir = Vector2.RIGHT if bool(source.get("facing_right")) else Vector2.LEFT
-		var dist: float = float(origin.get("distance", 320.0))
-		var lateral: float = float(origin.get("lateral", 0.0))
-		var dir_n: Vector2 = aim_dir.normalized()
-		var side: Vector2 = Vector2(-dir_n.y, dir_n.x)
-		return source.global_position + dir_n * dist + side * lateral
-
 	if source != null and is_instance_valid(source):
 		return source.get_attack_point(str(origin.get("point", "center")), origin.get("offset", [0, 0]))
 
@@ -335,42 +325,6 @@ func setup_lob_motion(motion: Dictionary) -> void:
 		lob_range = 520.0
 	lob_end = global_position + direction * lob_range
 
-func get_visual_size(visual_data: Dictionary, fallback: Vector2) -> Vector2:
-	var result: Vector2 = fallback
-	if visual_data.has("size") and typeof(visual_data["size"]) == TYPE_ARRAY and visual_data["size"].size() >= 2:
-		result = Vector2(float(visual_data["size"][0]), float(visual_data["size"][1]))
-	else:
-		if visual_data.has("width"):
-			result.x = float(visual_data.get("width", result.x))
-		if visual_data.has("height"):
-			result.y = float(visual_data.get("height", result.y))
-	return Vector2(max(result.x, 1.0), max(result.y, 1.0))
-
-func get_anchor_position(anchor: String, visual_size: Vector2) -> Vector2:
-	if anchor == "left_center":
-		return Vector2(visual_size.x * 0.5, 0.0)
-	if anchor == "right_center":
-		return Vector2(-visual_size.x * 0.5, 0.0)
-	return Vector2.ZERO
-
-func add_rect_indicator(parent: Node2D, visual_data: Dictionary, visual_size: Vector2) -> void:
-	var indicator_path: String = str(visual_data.get("indicator_texture", ""))
-	if indicator_path == "":
-		return
-	var tex = load(indicator_path)
-	if tex == null:
-		return
-	var box := Sprite2D.new()
-	box.name = "AttackAreaIndicator"
-	box.texture = tex
-	box.centered = true
-	box.position = Vector2.ZERO
-	box.modulate = Color(1.0, 1.0, 1.0, float(visual_data.get("indicator_alpha", 0.68)))
-	box.z_index = -3
-	var tex_size: Vector2 = tex.get_size()
-	box.scale = Vector2(visual_size.x / max(tex_size.x, 1.0), visual_size.y / max(tex_size.y, 1.0))
-	parent.add_child(box)
-
 func create_visual() -> void:
 	var visual_data: Dictionary = attack.get("visual", {})
 	var primary: Color = parse_color(visual_data.get("primary", "ff4f72"))
@@ -393,27 +347,13 @@ func create_visual() -> void:
 				var beam_tex_size: Vector2 = beam_sprite.texture.get_size()
 				beam_sprite.scale = Vector2(length / max(beam_tex_size.x, 1.0), max(width, 8.0) / max(beam_tex_size.y, 1.0))
 		elif asset_path.get_extension().to_lower() == "gif":
-			var visual_size: Vector2 = get_visual_size(visual_data, Vector2(radius * 2.4, radius * 2.4))
-			add_rect_indicator(asset_root, visual_data, visual_size)
 			var gif_visual = GIFPlayer.new()
 			asset_root.add_child(gif_visual)
 			gif_visual.gif = load(asset_path)
-			# The GIFPlayer addon needs explicit stretch settings for size to mean rendered size.
-			if gif_visual.has_method("set"):
-				gif_visual.set("expand_mode", 1)
-				gif_visual.set("stretch_mode", 0)
-			gif_visual.size = visual_size
-			var anchor: String = str(visual_data.get("anchor", "center"))
-			if anchor == "left_center":
-				gif_visual.position = Vector2(0.0, -visual_size.y * 0.5)
-			elif anchor == "right_center":
-				gif_visual.position = Vector2(-visual_size.x, -visual_size.y * 0.5)
-			else:
-				gif_visual.position = -visual_size * 0.5
+			gif_visual.size = Vector2(radius * 2.4, radius * 2.4)
+			gif_visual.position = -gif_visual.size * 0.5
 			gif_visual.modulate = Color(1.0, 1.0, 1.0, alpha)
 		else:
-			var visual_size: Vector2 = get_visual_size(visual_data, Vector2(max(radius * 2.2, 12.0), max(radius * 2.2, 12.0)))
-			add_rect_indicator(asset_root, visual_data, visual_size)
 			var sprite := Sprite2D.new()
 			asset_root.add_child(sprite)
 			sprite.texture = load(asset_path)
@@ -421,9 +361,14 @@ func create_visual() -> void:
 			sprite.modulate = Color(1.0, 1.0, 1.0, alpha)
 			if sprite.texture != null:
 				var tex_size: Vector2 = sprite.texture.get_size()
-				sprite.scale = Vector2(visual_size.x / max(tex_size.x, 1.0), visual_size.y / max(tex_size.y, 1.0))
+				var target_size: float = max(radius * 2.2, 12.0)
+				var sprite_scale: float = target_size / max(tex_size.x, tex_size.y, 1.0)
+				sprite.scale = Vector2.ONE * sprite_scale
 				var anchor: String = str(visual_data.get("anchor", "center"))
-				sprite.position = get_anchor_position(anchor, visual_size)
+				if anchor == "left_center":
+					sprite.position = Vector2(tex_size.x * sprite_scale * 0.5, 0.0)
+				elif anchor == "right_center":
+					sprite.position = Vector2(-tex_size.x * sprite_scale * 0.5, 0.0)
 		visual = asset_root
 		trail = Line2D.new()
 		trail.width = max(3.0, float(visual_data.get("trail_width", radius * 0.30)))
@@ -446,19 +391,6 @@ func create_visual() -> void:
 			rect.position = Vector2(0.0, -rect.size.y * 0.5 + randf_range(-3.0, 3.0))
 			beam_root.add_child(rect)
 		visual = beam_root
-		return
-
-	if hit_shape_mode == "rect":
-		var rect_root := Node2D.new()
-		add_child(rect_root)
-		add_rect_indicator(rect_root, visual_data, Vector2(length, width))
-		if rect_root.get_child_count() == 0:
-			var outline := ColorRect.new()
-			outline.color = Color(primary.r, primary.g, primary.b, alpha * 0.22)
-			outline.size = Vector2(length, width)
-			outline.position = -outline.size * 0.5
-			rect_root.add_child(outline)
-		visual = rect_root
 		return
 
 	if hit_shape_mode == "sector":
@@ -570,8 +502,6 @@ func apply_hits(delta: float) -> void:
 func get_query_radius() -> float:
 	if hit_shape_mode == "beam_rect":
 		return length + width + 80.0
-	if hit_shape_mode == "rect":
-		return max(length, width) * 0.75 + 120.0
 	if hit_shape_mode == "sector":
 		return radius + 80.0
 	return radius + 80.0
@@ -612,10 +542,6 @@ func is_entity_in_shape(entity) -> bool:
 	if hit_shape_mode == "beam_rect":
 		var local: Vector2 = (entity.global_position - global_position).rotated(-rotation)
 		return local.x >= 0.0 and local.x <= length and abs(local.y) <= width * 0.5 + entity.radius
-
-	if hit_shape_mode == "rect":
-		var local_rect: Vector2 = (entity.global_position - global_position).rotated(-rotation)
-		return abs(local_rect.x) <= length * 0.5 + entity.radius and abs(local_rect.y) <= width * 0.5 + entity.radius
 
 	if hit_shape_mode == "sector":
 		var to_entity: Vector2 = entity.global_position - global_position

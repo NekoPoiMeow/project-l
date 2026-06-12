@@ -5,6 +5,8 @@ P_RANGE_001,player,player,延展弹道,玩家远程和范围攻击距离提升,5
 P_AREA_001,player,player,扩散火力,玩家范围攻击面积提升,5,45|100|200|360|600,player_area_mul,0.08|0.17|0.28|0.42|0.60,P_ATK_001:2,2|1
 P_COUNT_001,player,player,多重弹幕,部分弹幕数量提升,3,130|300|560,player_projectile_count_add,1|2|3,P_RANGE_001:2,3|0
 P_FIRE_001,player,player,持续火力,武器冷却缩短,4,70|150|300|520,player_cooldown_mul,-0.06|-0.12|-0.20|-0.30,P_ATK_002:1,3|1
+P_CRIT_001,player,player,弱点感知,玩家暴击率与爆伤提升,4,80|180|360|640,player_crit_chance_add,0.04|0.08|0.13|0.18,P_ATK_001:2,4|1
+P_CRIT_002,player,player,爆裂快感,玩家暴击伤害提升,3,120|280|560,player_crit_multiplier_add,0.15|0.35|0.60,P_CRIT_001:2,5|1
 P_HP_001,player,player,拟态肉体,玩家最大生命提升,5,20|50|100|180|300,player_hp_mul,0.10|0.22|0.36|0.52|0.70,,0|2
 P_DEF_001,player,player,粘液护膜,玩家防御固定提升,4,45|100|200|360,player_defense_add,1|2|4|7,P_HP_001:2,1|2
 P_SPD_001,player,player,柔体疾行,玩家移动速度提升,4,35|80|160|300,player_move_speed_mul,0.04|0.08|0.13|0.18,P_HP_001:1,2|2

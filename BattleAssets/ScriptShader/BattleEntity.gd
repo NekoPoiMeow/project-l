@@ -106,14 +106,6 @@ var follower_spacing_max_neighbors := 8
 var follower_spacing_push := Vector2.ZERO
 var follower_target_standoff := 58.0
 var follower_target_standoff_strength := 0.75
-var follower_orbit_slot_angle := 0.0
-var follower_orbit_radius_bias := 0.0
-
-# Non-player attack logic does not need to check cooldown/target every physics frame.
-# This is especially important when hundreds of trash bodies are close to the player/base.
-var attack_logic_timer := 0.0
-var attack_logic_interval := 0.12
-var attack_logic_accum := 0.0
 
 # GIF/visual LOD. Trash followers can keep moving as nodes while their GIFPlayer
 # is frozen on a static frame when the battle is crowded and they are not in
@@ -289,22 +281,12 @@ func setup(new_director, new_data: Dictionary) -> void:
 	follower_break_distance = float(ai.get("follower_break_distance", follower_break_distance))
 	follower_spacing_interval = float(ai.get("follower_spacing_interval", randf_range(0.10, 0.20)))
 	follower_spacing_timer = randf() * max(follower_spacing_interval, 0.05)
-	follower_spacing_radius = float(ai.get("follower_spacing_radius", max(58.0, min(96.0, radius * 2.35))))
-	follower_spacing_strength = float(ai.get("follower_spacing_strength", max(follower_spacing_strength, 1.45)))
+	follower_spacing_radius = float(ai.get("follower_spacing_radius", max(42.0, min(76.0, radius * 1.85))))
+	follower_spacing_strength = float(ai.get("follower_spacing_strength", follower_spacing_strength))
 	follower_spacing_max_neighbors = int(ai.get("follower_spacing_max_neighbors", follower_spacing_max_neighbors))
-	follower_target_standoff = float(ai.get("follower_target_standoff", max(68.0, radius * 2.35)))
-	follower_target_standoff_strength = float(ai.get("follower_target_standoff_strength", max(follower_target_standoff_strength, 1.05)))
+	follower_target_standoff = float(ai.get("follower_target_standoff", max(44.0, radius * 1.65)))
+	follower_target_standoff_strength = float(ai.get("follower_target_standoff_strength", follower_target_standoff_strength))
 	follower_side_bias = randf_range(-1.0, 1.0)
-	# Stable ring slot around targets. This makes follower hordes look like a flow/cloud
-	# instead of every trash unit aiming for the exact same target center.
-	var slot_seed: int = int(abs(hash(str(ai_group_id) + ":" + str(get_instance_id()))))
-	follower_orbit_slot_angle = fmod(float(slot_seed % 4096) / 4096.0 * TAU + randf_range(-0.10, 0.10), TAU)
-	follower_orbit_radius_bias = randf_range(-0.18, 0.28)
-	attack_logic_interval = float(ai.get("attack_logic_interval", 0.0))
-	if attack_logic_interval <= 0.0:
-		attack_logic_interval = randf_range(0.16, 0.28) if ai_role == "follower" else randf_range(0.08, 0.16)
-	attack_logic_timer = randf() * max(attack_logic_interval, 0.04)
-	attack_logic_accum = 0.0
 	if ai_role == "follower":
 		# Followers should be much cheaper than leaders. They still move every frame,
 		# but expensive local target pickup is low frequency and staggered.
@@ -1081,18 +1063,10 @@ func create_delivery_visual() -> void:
 		add_child(gif_visual)
 		gif_visual.gif = load(delivery_texture_path)
 		configure_gif_player_for_explicit_size(gif_visual)
-		# This GIFPlayer is TextureRect-like. Do not rely on its loaded raw size here;
-		# several optimization passes accidentally left the delivery area as only a ring.
-		# The delivery area should behave like the old hand-placed node:
-		# top-left = delivery center - size / 2.
-		var area_size: Vector2 = get_config_vector2(data.get("zones", {}).get("delivery_size", []), Vector2.ZERO)
+		var area_size: Vector2 = gif_visual.size
 		if area_size.x <= 0.0 or area_size.y <= 0.0:
 			area_size = Vector2(delivery_radius * 2.0, delivery_radius * 2.0)
-		gif_visual.size = area_size
 		gif_visual.position = delivery_offset - area_size * 0.5
-		gif_visual.scale = Vector2.ONE
-		gif_visual.process_mode = Node.PROCESS_MODE_INHERIT
-		gif_visual.visible = true
 		gif_visual.modulate = Color(1.0, 0.72, 0.98, 0.72)
 		gif_visual.z_index = 2
 		return
@@ -1790,24 +1764,13 @@ func apply_follower_target_standoff(dir: Vector2, target_entity) -> Vector2:
 	var dist: float = to_target.length()
 	if dist <= 0.01:
 		return dir
-
-	# Instead of every follower steering to the exact target center, give it a stable
-	# personal slot on a ring around that target. This is deliberately regular: a
-	# horde/legion look is cheaper and more readable than 300 independent pathing brains.
-	var ring_radius: float = follower_target_standoff + target_entity.radius * 0.35
-	ring_radius *= 1.0 + follower_orbit_radius_bias
-	var orbit_vec: Vector2 = Vector2.RIGHT.rotated(follower_orbit_slot_angle) * ring_radius
-	var desired_point: Vector2 = target_entity.global_position + orbit_vec
-	var to_slot: Vector2 = desired_point - global_position
-	var slot_dir: Vector2 = to_slot.normalized() if to_slot.length() > 0.01 else dir
-
-	var influence: float = clamp(1.0 - ((dist - ring_radius) / max(ring_radius * 2.4, 1.0)), 0.0, 1.0)
-	if dist < ring_radius:
+	# Only a soft preference. Units can still touch/attack; they just stop all aiming
+	# for the same exact center. This is especially important around the player.
+	if dist < follower_target_standoff:
 		var away: Vector2 = -to_target.normalized()
-		var tangent: Vector2 = Vector2(-to_target.y, to_target.x).normalized() * follower_side_bias * 0.45
-		return (dir + away * follower_target_standoff_strength + tangent + slot_dir * 0.55).normalized()
-	if influence > 0.0:
-		return dir.lerp(slot_dir, min(0.72, influence * 0.55)).normalized()
+		var tangent: Vector2 = Vector2(-to_target.y, to_target.x).normalized() * follower_side_bias * 0.28
+		var pressure: float = 1.0 - (dist / max(follower_target_standoff, 1.0))
+		return (dir + away * follower_target_standoff_strength * pressure + tangent).normalized()
 	return dir
 
 func move_follower_in_direction(dir: Vector2, delta: float) -> void:
@@ -2201,11 +2164,7 @@ func update_base_spawn_queues(delta: float) -> void:
 	var power_budget: float = base_bio
 	var sorted: Array = base_spawn_queues.duplicate()
 	sorted.sort_custom(func(a, b):
-		var la: int = int(a.get("level", 0))
-		var lb: int = int(b.get("level", 0))
-		if la != lb:
-			return la > lb
-		return str(a.get("entity_id", a.get("id", ""))) < str(b.get("entity_id", b.get("id", "")))
+		return int(a.get("level", 0)) > int(b.get("level", 0))
 	)
 
 	for queue in sorted:
@@ -2461,6 +2420,15 @@ func get_scaled_damage(base_damage: float, target_entity, attack: Dictionary = {
 	multiplier *= get_multiplier_from_dict(damage_multipliers, target_entity)
 	if low_hp_attack_damage_mul != 1.0 and max_hp > 0.0 and hp / max_hp <= low_hp_attack_threshold:
 		multiplier *= low_hp_attack_damage_mul
+
+	# MVP crit formula: final_damage = base * all_mul * status_mul * crit_mul.
+	# crit_chance is 0.0-1.0, crit_multiplier defaults to 1.5.
+	# EffectRunner handles crit for attack_instance damage effects through context; this path covers
+	# direct melee/projectile damage and any legacy attack dictionary.
+	var crit_chance: float = clamp(float(attack.get("crit_chance", 0.0)), 0.0, 0.95)
+	if crit_chance > 0.0 and randf() < crit_chance:
+		multiplier *= max(1.0, float(attack.get("crit_multiplier", 1.5)))
+
 	return base_damage * multiplier * get_status_attack_damage_multiplier()
 
 func get_status_attack_damage_multiplier() -> float:
@@ -2513,18 +2481,8 @@ func update_attacks(delta: float) -> void:
 	if ai_role == "follower" and !follower_precision_active:
 		return
 
-	var logic_delta: float = delta
-	if ai_mode != "player" and !is_building:
-		attack_logic_accum += delta
-		attack_logic_timer -= delta
-		if attack_logic_timer > 0.0:
-			return
-		logic_delta = max(attack_logic_accum, delta)
-		attack_logic_accum = 0.0
-		attack_logic_timer = attack_logic_interval
-
 	for i in range(attacks.size()):
-		attack_cooldowns[i] -= logic_delta
+		attack_cooldowns[i] -= delta
 		if attack_cooldowns[i] > 0.0:
 			continue
 

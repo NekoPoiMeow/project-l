@@ -59,8 +59,10 @@ func dump_next_battle(reason: String = "manual") -> void:
 		return
 	if gs.has_method("get_next_battle_debug_summary"):
 		print("[ProjectDebug][NextBattle][", reason, "] ", JSON.stringify(gs.call("get_next_battle_debug_summary")))
-	else:
-		print("[ProjectDebug][NextBattle] GameState has no get_next_battle_debug_summary")
+	if gs.has_method("get_runtime_battle_source_breakdown"):
+		print("[ProjectDebug][NextBattleSources][", reason, "] ", JSON.stringify(gs.call("get_runtime_battle_source_breakdown")))
+	if gs.has_method("get_runtime_battle_formula_debug"):
+		print("[ProjectDebug][NextBattleFormula][", reason, "] ", JSON.stringify(gs.call("get_runtime_battle_formula_debug")))
 
 
 func _dump_battle_runtime(reason: String) -> void:
@@ -108,6 +110,8 @@ func _dump_save_snapshot(reason: String) -> void:
 		parts.append("temp_items=" + JSON.stringify(gs.call("get_next_battle_temp_items")))
 	if gs.has_method("get_merchant_next_battle_effects"):
 		parts.append("temp_effects=" + JSON.stringify(gs.call("get_merchant_next_battle_effects")))
+	if gs.has_method("get_runtime_battle_source_breakdown"):
+		parts.append("sources=" + JSON.stringify(gs.call("get_runtime_battle_source_breakdown")))
 	if gs.has_method("get_next_battle_captive_equipment_id"):
 		parts.append("captive_eq=" + str(gs.call("get_next_battle_captive_equipment_id")))
 	if gs.has_method("get_captives"):

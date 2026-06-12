@@ -109,6 +109,8 @@ func make_default_data() -> Dictionary:
 		"runtime": {
 			"pending_battle_modifiers": {},
 			"pending_battle_sources": [],
+			"pending_battle_source_breakdown": {},
+			"pending_battle_formula": {},
 			"last_battle_clear_reason": "",
 		},
 		"flags": {},
@@ -288,6 +290,8 @@ func normalize_save_schema(save_data: Dictionary) -> void:
 	# Runtime data that can be read by BattleDirector. It is persisted only so reload-before-battle keeps the pending state.
 	ensure_dict(save_data["runtime"], "pending_battle_modifiers")
 	ensure_array(save_data["runtime"], "pending_battle_sources")
+	ensure_dict(save_data["runtime"], "pending_battle_source_breakdown")
+	ensure_dict(save_data["runtime"], "pending_battle_formula")
 	if !save_data["runtime"].has("last_battle_clear_reason"):
 		save_data["runtime"]["last_battle_clear_reason"] = ""
 
@@ -648,19 +652,24 @@ func get_runtime_battle_modifiers() -> Dictionary:
 	return {}
 
 func build_battle_modifiers() -> Dictionary:
-	# Single source of truth for BattleDirector. Merges permanent outgame upgrades,
-	# merchant next-battle items and runtime cache. Captive materialized equipment remains an Equipment ID.
+	# Single source of truth for BattleDirector. Formula convention:
+	#   *_mul keys are additive percentage deltas in data/save, then multiplied in battle as final *= (1 + sum_delta).
+	#   *_add keys are flat additions in battle units.
+	#   Unlock/flag effect_keys are intentionally ignored here and handled by save/unlock logic.
 	ensure_loaded()
 	var result: Dictionary = {}
 	var sources: Array = []
-	merge_modifier_dict(result, get_outgame_battle_modifiers(), sources, "upgrade")
-	merge_modifier_dict(result, get_merchant_next_battle_effects(), sources, "merchant")
-	merge_modifier_dict(result, get_runtime_battle_modifiers(), sources, "runtime")
+	var breakdown: Dictionary = {}
+	merge_modifier_dict(result, get_outgame_battle_modifiers(), sources, "upgrade", breakdown)
+	merge_modifier_dict(result, get_merchant_next_battle_effects(), sources, "merchant", breakdown)
+	merge_modifier_dict(result, get_runtime_battle_modifiers(), sources, "runtime", breakdown)
 	data["runtime"]["pending_battle_modifiers"] = result.duplicate(true)
 	data["runtime"]["pending_battle_sources"] = sources.duplicate(true)
+	data["runtime"]["pending_battle_source_breakdown"] = breakdown.duplicate(true)
+	data["runtime"]["pending_battle_formula"] = build_battle_formula_debug(result)
 	return result
 
-func merge_modifier_dict(target: Dictionary, source: Dictionary, sources: Array = [], source_name: String = "") -> void:
+func merge_modifier_dict(target: Dictionary, source: Dictionary, sources: Array = [], source_name: String = "", breakdown: Dictionary = {}) -> void:
 	for raw_key in source.keys():
 		var key: String = str(raw_key).strip_edges()
 		if key == "":
@@ -669,6 +678,36 @@ func merge_modifier_dict(target: Dictionary, source: Dictionary, sources: Array 
 		target[key] = float(target.get(key, 0.0)) + value
 		if source_name != "":
 			sources.append(source_name + ":" + key + "=" + str(value))
+			if !breakdown.has(key) or typeof(breakdown[key]) != TYPE_ARRAY:
+				breakdown[key] = []
+			breakdown[key].append({"source": source_name, "value": value})
+
+func build_battle_formula_debug(modifiers: Dictionary) -> Dictionary:
+	var formula: Dictionary = {}
+	for raw_key in modifiers.keys():
+		var key: String = str(raw_key)
+		var value: float = float(modifiers[raw_key])
+		if key.ends_with("_mul"):
+			formula[key] = "final *= (1 + " + str(value) + ")"
+		elif key.ends_with("_add"):
+			formula[key] = "final += " + str(value)
+		else:
+			formula[key] = "hook = " + str(value)
+	return formula
+
+func get_runtime_battle_source_breakdown() -> Dictionary:
+	ensure_loaded()
+	var value = data.get("runtime", {}).get("pending_battle_source_breakdown", {})
+	if typeof(value) == TYPE_DICTIONARY:
+		return value.duplicate(true)
+	return {}
+
+func get_runtime_battle_formula_debug() -> Dictionary:
+	ensure_loaded()
+	var value = data.get("runtime", {}).get("pending_battle_formula", {})
+	if typeof(value) == TYPE_DICTIONARY:
+		return value.duplicate(true)
+	return {}
 
 func get_outgame_battle_modifiers() -> Dictionary:
 	ensure_loaded()
