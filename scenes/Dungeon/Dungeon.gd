@@ -232,12 +232,13 @@ func refresh_captive_list() -> void:
 		var captive_id: String = str(key_value)
 		var captive: Dictionary = GameState.get_captive_state(captive_id)
 		var row: Dictionary = get_captive_row(captive_id)
-		var name: String = str(row.get("name", captive_id))
+		var captive_name: String = str(row.get("name", captive_id))
 		var level: int = int(captive.get("humiliation_level", 0))
 		var xp: int = int(captive.get("humiliation_xp", 0))
 		var pending: bool = as_bool(captive.get("pending_action", false))
 		var mark: String = "待处理" if pending else "已处理"
-		var text: String = "%s  Lv%d  XP%d  [%s]" % [name, level, xp, mark]
+		var tier_label: String = get_captive_tier_label(captive_id)
+		var text: String = "%s  [%s]  Lv%d  XP%d  [%s]" % [captive_name, tier_label, level, xp, mark]
 		var index: int = captive_list.add_item(text)
 		captive_list.set_item_metadata(index, captive_id)
 	if captive_list.item_count > 0:
@@ -264,7 +265,7 @@ func refresh_options() -> void:
 			var captive_id: String = str(key_value)
 			var row: Dictionary = get_captive_row(captive_id)
 			var captive: Dictionary = GameState.get_captive_state(captive_id)
-			var label: String = "%s  Lv%s" % [str(row.get("name", captive_id)), str(captive.get("humiliation_level", 0))]
+			var label: String = "%s  [%s]  Lv%s" % [str(row.get("name", captive_id)), get_captive_tier_label(captive_id), str(captive.get("humiliation_level", 0))]
 			var index: int = captive_option.item_count
 			captive_option.add_item(label)
 			captive_option.set_item_metadata(index, captive_id)
@@ -316,30 +317,40 @@ func refresh_detail() -> void:
 		return
 	var captive: Dictionary = GameState.get_captive_state(selected_captive_id)
 	var row: Dictionary = get_captive_row(selected_captive_id)
-	var name: String = str(row.get("name", selected_captive_id))
+	var captive_name: String = str(row.get("name", selected_captive_id))
 	var xp: int = int(captive.get("humiliation_xp", 0))
 	var level: int = int(captive.get("humiliation_level", 0))
-	var text: String = "[b]" + name + "[/b]\n"
+	var text: String = "[b]" + captive_name + "[/b]\n"
 	text += "ID：" + selected_captive_id + "\n"
+	text += "类型：" + get_captive_tier_label(selected_captive_id) + "\n"
 	text += "屈辱：Lv" + str(level) + " / 3   XP " + str(xp) + "\n"
 	text += "来源：" + str(captive.get("source", "")) + "\n"
 	text += "待处理：" + str(as_bool(captive.get("pending_action", false))) + "\n"
 	text += "最近操作：" + str(captive.get("last_action", "")) + "\n"
-	text += "下局物化装备：" + str(row.get("equipment_base_id", "")) + "_LV" + str(level) + "\n\n"
+	if captive_can_materialize(selected_captive_id):
+		text += "下局物化装备：" + str(row.get("equipment_base_id", "")) + "_LV" + str(level) + "\n\n"
+	else:
+		text += "下局物化装备：无（普通俘虏只参与房车/养母 Link）\n\n"
 	text += str(row.get("description", "占位俘虏")) + "\n\n"
 	text += "[b]当前操作说明[/b]\n"
 	if selected_action == "train":
-		text += "调教必须三件套：角色 + 调教道具 + 俘虏。缺任何一项会退回放置，不触发CG。\n"
-		text += "当前角色：" + get_selected_character_id() + "\n"
-		text += "当前道具：" + get_selected_item_id() + "\n"
+		if captive_can_train(selected_captive_id):
+			text += "调教必须三件套：角色 + 调教道具 + 俘虏。缺任何一项会退回放置，不触发CG。\n"
+			text += "当前角色：" + get_selected_character_id() + "\n"
+			text += "当前道具：" + get_selected_item_id() + "\n"
+		else:
+			text += "该俘虏是普通房车俘虏，不能进入专门调教；执行时会改为放置 Link。\n"
 	elif selected_action == "materialize":
-		text += "物化会把俘虏按当前屈辱等级转换成下局装备，只保留到下一场战斗。\n"
+		if captive_can_materialize(selected_captive_id):
+			text += "物化会把俘虏按当前屈辱等级转换成下局装备，只保留到下一场战斗。\n"
+		else:
+			text += "该俘虏不能物化装备；执行时会改为放置 Link。\n"
 	else:
-		text += "放置只需要俘虏，不显示角色/道具选择。\n"
+		text += get_captive_passive_label(selected_captive_id) + "\n"
 	detail_label.text = text
 
 func update_action_visibility() -> void:
-	var train_mode: bool = selected_action == "train"
+	var train_mode: bool = selected_action == "train" and (selected_captive_id == "" or captive_can_train(selected_captive_id))
 	if character_label != null:
 		character_label.visible = train_mode
 	if character_option != null:
@@ -349,7 +360,12 @@ func update_action_visibility() -> void:
 	if item_option != null:
 		item_option.visible = train_mode
 	if execute_button != null:
-		execute_button.text = "执行" + get_action_name(selected_action)
+		var label_action: String = selected_action
+		if selected_captive_id != "" and selected_action == "train" and !captive_can_train(selected_captive_id):
+			label_action = "passive"
+		elif selected_captive_id != "" and selected_action == "materialize" and !captive_can_materialize(selected_captive_id):
+			label_action = "passive"
+		execute_button.text = "执行" + get_action_name(label_action)
 	if action_label != null:
 		action_label.text = "当前：" + get_action_name(selected_action)
 
@@ -405,6 +421,12 @@ func process_one_captive(captive_id: String, action: String) -> void:
 	var item_id: String = get_selected_item_id()
 	var character_id: String = get_selected_character_id()
 	var actual_action: String = action
+	if actual_action == "train" and !captive_can_train(captive_id):
+		actual_action = "passive"
+		show_status("普通俘虏无法专门调教，已按房车/养母 Link 放置处理。")
+	elif actual_action == "materialize" and !captive_can_materialize(captive_id):
+		actual_action = "passive"
+		show_status("普通俘虏无法物化装备，已按房车/养母 Link 放置处理。")
 	if actual_action == "train" and (character_id == "" or item_id == "" or captive_id == ""):
 		actual_action = "passive"
 		show_status("调教缺少角色/道具/俘虏，已按放置处理。")
@@ -427,6 +449,8 @@ func process_one_captive(captive_id: String, action: String) -> void:
 	GameState.save_progress_now("dungeon_" + actual_action)
 	refresh_all()
 	var message: String = "%s完成：淫能 +%d，屈辱 +%d" % [get_action_name(actual_action), int(result.get("lust_gain", 0)), int(result.get("humiliation_gain", 0))]
+	if actual_action == "passive" and !captive_can_train(captive_id):
+		message += "\n" + get_captive_passive_label(captive_id)
 	if event_text != "":
 		message += "\n" + event_text
 	show_status(message)
@@ -443,6 +467,9 @@ func process_action_with_tables(action: String, captive_id: String, item_id: Str
 	return GameState.process_captive_action(action, captive_id, item_id, character_id, false, lust_gain, hum_gain)
 
 func apply_materialize_equipment(captive_id: String) -> void:
+	if !captive_can_materialize(captive_id):
+		show_status("该俘虏不能物化装备。")
+		return
 	var row: Dictionary = get_captive_row(captive_id)
 	var base_id: String = str(row.get("equipment_base_id", "")).strip_edges()
 	if base_id == "":
@@ -512,7 +539,48 @@ func get_captive_row(captive_id: String) -> Dictionary:
 	var value: Variant = captive_rows.get(captive_id, {})
 	if typeof(value) == TYPE_DICTIONARY:
 		return value
-	return {"id": captive_id, "name": captive_id, "description": "占位俘虏", "equipment_base_id": ""}
+	return {"id": captive_id, "name": captive_id, "description": "占位俘虏", "equipment_base_id": "", "tier": "common", "can_train": "FALSE", "can_materialize": "FALSE"}
+
+func get_captive_tier(captive_id: String) -> String:
+	var row: Dictionary = get_captive_row(captive_id)
+	var tier: String = str(row.get("tier", "")).strip_edges().to_lower()
+	if tier == "":
+		# Backward compatibility: old Captives.csv rows without tier are treated as special.
+		return "special"
+	if tier == "core":
+		return "special"
+	return tier
+
+func get_captive_tier_label(captive_id: String) -> String:
+	var tier: String = get_captive_tier(captive_id)
+	if tier == "special":
+		return "特别"
+	if tier == "common":
+		return "普通"
+	return tier
+
+func captive_can_train(captive_id: String) -> bool:
+	var row: Dictionary = get_captive_row(captive_id)
+	var raw: String = str(row.get("can_train", "")).strip_edges()
+	if raw == "":
+		return get_captive_tier(captive_id) == "special"
+	return as_bool(raw)
+
+func captive_can_materialize(captive_id: String) -> bool:
+	var row: Dictionary = get_captive_row(captive_id)
+	var raw: String = str(row.get("can_materialize", "")).strip_edges()
+	if raw == "":
+		return get_captive_tier(captive_id) == "special" and str(row.get("equipment_base_id", "")).strip_edges() != ""
+	return as_bool(raw) and str(row.get("equipment_base_id", "")).strip_edges() != ""
+
+func get_captive_passive_label(captive_id: String) -> String:
+	var row: Dictionary = get_captive_row(captive_id)
+	var text: String = str(row.get("passive_label", "")).strip_edges()
+	if text != "":
+		return text
+	if captive_can_train(captive_id):
+		return "放置：房车/养母自动处理，作为 Link 样本维持资源循环。"
+	return "放置：普通俘虏不进入专门调教，只作为房车/养母 Link 对象产出淫能。"
 
 func get_item_row(item_id: String) -> Dictionary:
 	var value: Variant = item_rows.get(item_id, {})
@@ -551,8 +619,10 @@ func is_torture_item_unlocked(row: Dictionary, id: String) -> bool:
 	return GameState.is_unlocked("torture_items", id)
 
 func as_bool(value: Variant) -> bool:
-	if value == true:
-		return true
+	if typeof(value) == TYPE_BOOL:
+		return bool(value)
+	if typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT:
+		return float(value) != 0.0
 	var text: String = str(value).strip_edges().to_lower()
 	return text == "true" or text == "1" or text == "yes"
 

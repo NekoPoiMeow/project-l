@@ -6,10 +6,10 @@ uid="uid://dt0qg7boe45u4"
 
 [deps]
 
-files=["res://Config/Captives.name.translation", "res://Config/Captives.description.translation", "res://Config/Captives.equipment.translation", "res://Config/Captives.icon.translation", "res://Config/Captives.visual.translation"]
+files=["res://Config/Captives.name.translation", "res://Config/Captives.description.translation", "res://Config/Captives.equipment.translation", "res://Config/Captives.tier.translation", "res://Config/Captives.can.translation", "res://Config/Captives.can.translation", "res://Config/Captives.passive.translation", "res://Config/Captives.icon.translation", "res://Config/Captives.visual.translation"]
 
 source_file="res://Config/Captives.csv"
-dest_files=["res://Config/Captives.name.translation", "res://Config/Captives.description.translation", "res://Config/Captives.equipment.translation", "res://Config/Captives.icon.translation", "res://Config/Captives.visual.translation"]
+dest_files=["res://Config/Captives.name.translation", "res://Config/Captives.description.translation", "res://Config/Captives.equipment.translation", "res://Config/Captives.tier.translation", "res://Config/Captives.can.translation", "res://Config/Captives.can.translation", "res://Config/Captives.passive.translation", "res://Config/Captives.icon.translation", "res://Config/Captives.visual.translation"]
 
 [params]
 
