@@ -15,6 +15,12 @@ func run_attack(director, attacker, target, attack: Dictionary) -> void:
 
 	var kind: String = str(attack.get("kind", "projectile"))
 
+	# Some weapons carry hit_shape/effects metadata for downstream logic, but must still be routed
+	# as physical projectiles first. Check this before the generic attack_instance shortcut.
+	if should_force_projectile_route(attack):
+		_spawn_projectile(director, attacker, target, attack)
+		return
+
 	if kind == "attack_instance" or attack.has("hit_shape") or attack.has("hit_rule") or attack.has("effects"):
 		director.spawn_attack(attacker, attack, {"trigger_target": target})
 		return
@@ -117,12 +123,45 @@ func _spawn_projectile(director, attacker, target, attack: Dictionary) -> void:
 	var fire_offset = attack.get("fire_offset", [0, 0])
 	var target_offset = attack.get("target_offset", [0, 0])
 	var start_pos: Vector2 = attacker.get_attack_point(fire_mode, fire_offset)
-	var target_pos: Vector2 = start_pos + Vector2.RIGHT
+	var target_pos: Vector2 = resolve_projectile_target_pos(attacker, target, attack, start_pos, target_mode, target_offset)
 
-	if target != null and is_instance_valid(target):
-		target_pos = target.get_attack_point(target_mode, target_offset)
+	var emitter: Dictionary = attack.get("emitter", {})
+	var mode: String = str(emitter.get("mode", "single"))
+	var count: int = max(1, int(emitter.get("count", 1)))
+	if mode == "spread" and count > 1:
+		var base_dir: Vector2 = (target_pos - start_pos).normalized()
+		if base_dir.length() <= 0.01:
+			base_dir = Vector2.RIGHT
+		var spread_angle: float = deg_to_rad(float(emitter.get("spread_angle", 35.0)))
+		var range_dist: float = start_pos.distance_to(target_pos)
+		for i in range(count):
+			var ratio: float = 0.5 if count <= 1 else float(i) / float(count - 1)
+			var angle: float = lerp(-spread_angle * 0.5, spread_angle * 0.5, ratio)
+			var dir: Vector2 = base_dir.rotated(angle).normalized()
+			director.spawn_projectile(attacker, target, attack, start_pos, start_pos + dir * max(range_dist, 1.0))
+		return
 
 	director.spawn_projectile(attacker, target, attack, start_pos, target_pos)
+
+func should_force_projectile_route(attack: Dictionary) -> bool:
+	if bool(attack.get("force_projectile", false)):
+		return true
+	var id_text: String = (str(attack.get("id", "")) + " " + str(attack.get("name", ""))).to_lower()
+	return id_text.contains("rocket") or id_text.contains("rpg")
+
+func resolve_projectile_target_pos(attacker, target, attack: Dictionary, start_pos: Vector2, target_mode: String, target_offset) -> Vector2:
+	var aim_mode: String = str(attack.get("projectile_aim", attack.get("aim_mode", "target")))
+	var range_dist: float = float(attack.get("projectile_range", attack.get("range", attack.get("max_distance", 1100.0))))
+	if aim_mode == "facing" and attacker != null and is_instance_valid(attacker):
+		var dir: Vector2 = attacker.get_facing_direction() if attacker.has_method("get_facing_direction") else (Vector2.RIGHT if bool(attacker.get("facing_right")) else Vector2.LEFT)
+		return start_pos + dir.normalized() * range_dist
+	if aim_mode == "mouse" and attacker != null and is_instance_valid(attacker):
+		var mouse_dir: Vector2 = attacker.get_global_mouse_position() - start_pos
+		if mouse_dir.length() > 0.01:
+			return start_pos + mouse_dir.normalized() * range_dist
+	if target != null and is_instance_valid(target):
+		return target.get_attack_point(target_mode, target_offset)
+	return start_pos + Vector2.RIGHT * range_dist
 
 func _apply_on_hit_statuses(attacker, target, attack: Dictionary) -> void:
 	if target == null or !is_instance_valid(target):

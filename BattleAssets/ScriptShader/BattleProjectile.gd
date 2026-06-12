@@ -32,6 +32,11 @@ var radius := 10.0
 var life_time := 2.0
 var motion := "linear"
 var velocity := Vector2.ZERO
+var age := 0.0
+var start_position := Vector2.ZERO
+var travel_direction := Vector2.RIGHT
+var curve_side := Vector2.UP
+var curve_travelled := 0.0
 
 var visual: Node = null
 var hit_targets: Array = []
@@ -47,20 +52,27 @@ func setup(new_director, new_owner, new_target, new_attack: Dictionary, target_p
 	damage = float(attack.get("damage", 10.0))
 	radius = float(attack.get("radius", 10.0))
 	life_time = float(attack.get("life_time", 2.0))
-	motion = str(attack.get("motion", "linear"))
+	var motion_value = attack.get("motion", "linear")
+	if typeof(motion_value) == TYPE_DICTIONARY:
+		motion = str(motion_value.get("mode", "linear"))
+	else:
+		motion = str(motion_value)
 
 	create_visual()
-
+	start_position = global_position
 	if target_pos.distance_to(global_position) > 0.01:
-		velocity = (target_pos - global_position).normalized() * speed
+		travel_direction = (target_pos - global_position).normalized()
 	else:
-		velocity = Vector2.RIGHT * speed
+		travel_direction = Vector2.RIGHT
+	curve_side = Vector2(-travel_direction.y, travel_direction.x) * (1.0 if bool(attack.get("curve_clockwise", false)) else -1.0)
+	velocity = travel_direction * speed
 
 func _physics_process(delta: float) -> void:
 	if projectile_owner == null or !is_instance_valid(projectile_owner):
 		queue_free()
 		return
 
+	age += delta
 	life_time -= delta
 	if life_time <= 0.0:
 		if bool(attack.get("explode_on_expire", false)):
@@ -73,7 +85,34 @@ func _physics_process(delta: float) -> void:
 		var desired: Vector2 = (target_pos - global_position).normalized() * speed
 		velocity = velocity.lerp(desired, float(attack.get("turn_rate", 0.12)))
 
-	global_position += velocity * delta
+	if motion == "parabola" or motion == "parabola_drop":
+		var prev_pos: Vector2 = global_position
+		curve_travelled += speed * delta
+		var range_dist: float = max(float(attack.get("curve_range", attack.get("projectile_range", attack.get("range", 430.0)))), 1.0)
+		var t: float = clamp(curve_travelled / range_dist, 0.0, 1.0)
+		var amp: float = float(attack.get("curve_amplitude", 190.0))
+		var drop: float = float(attack.get("curve_drop", 330.0))
+		# Cheap thrown arc: forward a short distance, then drops down through the front of the camera.
+		# This is not a side sine and not a far-map projectile.
+		global_position = start_position + travel_direction * curve_travelled + Vector2.UP * sin(t * PI) * amp + Vector2.DOWN * (t * t) * drop
+		velocity = (global_position - prev_pos) / max(delta, 0.0001)
+		if curve_travelled >= range_dist:
+			queue_free()
+			return
+	elif motion == "curve" or motion == "arc":
+		var prev_pos_curve: Vector2 = global_position
+		curve_travelled += speed * delta
+		var range_dist_curve: float = max(float(attack.get("curve_range", attack.get("projectile_range", attack.get("range", 950.0)))), 1.0)
+		var t_curve: float = clamp(curve_travelled / range_dist_curve, 0.0, 1.0)
+		var amp_curve: float = float(attack.get("curve_amplitude", 220.0))
+		global_position = start_position + travel_direction * curve_travelled + curve_side * sin(t_curve * PI) * amp_curve
+		velocity = (global_position - prev_pos_curve) / max(delta, 0.0001)
+		if curve_travelled >= range_dist_curve:
+			queue_free()
+			return
+	else:
+		global_position += velocity * delta
+
 	if velocity.length() > 0.01:
 		rotation = velocity.angle()
 
@@ -190,14 +229,24 @@ func check_hits() -> void:
 			return
 
 func apply_direct_hit(entity) -> void:
-	if attack.has("effects"):
-		effect_runner.apply_effects(director, projectile_owner, entity, attack.get("effects", []), {
+	var direct_attack: Dictionary = attack.duplicate(true)
+	var falloff: Dictionary = direct_attack.get("distance_damage_falloff", {}) if typeof(direct_attack.get("distance_damage_falloff", {})) == TYPE_DICTIONARY else {}
+	if !falloff.is_empty():
+		var dist: float = start_position.distance_to(global_position)
+		var near_dist: float = float(falloff.get("near", 120.0))
+		var far_dist: float = max(float(falloff.get("far", 520.0)), near_dist + 1.0)
+		var t: float = clamp((dist - near_dist) / (far_dist - near_dist), 0.0, 1.0)
+		var mul: float = lerp(float(falloff.get("near_mul", 1.0)), float(falloff.get("far_mul", 0.45)), t)
+		direct_attack["damage"] = float(direct_attack.get("damage", damage)) * mul
+	if direct_attack.has("effects"):
+		effect_runner.apply_effects(director, projectile_owner, entity, direct_attack.get("effects", []), {
 			"position": global_position,
 			"direction": velocity.normalized() if velocity.length() > 0.01 else Vector2.RIGHT,
-			"chain_depth": 0
+			"chain_depth": 0,
+			"attack": direct_attack
 		})
 	else:
-		var final_damage: float = projectile_owner.get_scaled_damage(damage, entity, attack)
+		var final_damage: float = projectile_owner.get_scaled_damage(float(direct_attack.get("damage", damage)), entity, direct_attack)
 		entity.take_damage(final_damage, projectile_owner)
 
 func explode(position: Vector2, direct_target, reason: String = "hit") -> void:

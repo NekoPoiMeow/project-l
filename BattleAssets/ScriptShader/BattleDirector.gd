@@ -557,8 +557,20 @@ func load_battle_loadout() -> void:
 		run_crit_multiplier_add += 0.18
 	if active_equipment_effects.has("slime_belt"):
 		run_lust_reward_add += 20.0
+	if active_equipment_effects.has("player_regen_down") and player_entity != null and is_instance_valid(player_entity):
+		player_entity.hp_regen_per_second *= 0.45
+	if active_equipment_effects.has("base_bio_cycle_yield_up"):
+		run_base_start_bio_add += 40.0
+	if active_equipment_effects.has("player_speed_down_big") and player_entity != null and is_instance_valid(player_entity):
+		player_entity.move_speed *= 0.72
+	if active_equipment_effects.has("player_speed_up_small") and player_entity != null and is_instance_valid(player_entity):
+		player_entity.move_speed *= 1.16
+	if active_equipment_effects.has("player_hp_down_big") and player_entity != null and is_instance_valid(player_entity):
+		player_entity.max_hp *= 0.72
+		player_entity.hp = min(player_entity.hp, player_entity.max_hp)
 	apply_captive_equipment_effect_keys()
 	apply_generic_equipment_effect_keys()
+	audit_equipment_effect_keys()
 	debug_dump_battle_runtime("load_battle_loadout")
 
 func append_unique_effects(effects: Array) -> void:
@@ -835,6 +847,22 @@ func apply_generic_equipment_effect_keys() -> void:
 			assimilated_stat_mul["base_queue_speed_mul"] = 1.0 + float(key.get_slice("_", 4)) / 100.0
 		elif key.begins_with("player_defense_add_") and player_entity != null and is_instance_valid(player_entity):
 			player_entity.defense += float(key.get_slice("_", 3))
+
+func audit_equipment_effect_keys() -> void:
+	var known := {
+		"hide_enemy_hp": true, "enemy_hp_random_up": true, "lust_reward_up": true,
+		"mana_recovery_up": true, "crit_rate_down": true, "player_regen_down": true,
+		"minute_lust_add": true, "base_bio_cycle_yield_up": true, "skill2_full_mana_required": true,
+		"whip_charge": true, "whip_weapon_penalty": true, "player_speed_down_big": true,
+		"range_weapon_only": true, "bind_area_boost": true, "liquid_madness": true,
+		"forced_forward_move": true, "player_speed_up_small": true, "player_hp_down_big": true,
+		"exhibitionist": true, "melee_lifesteal": true
+	}
+	for raw_effect in active_equipment_effects:
+		var key: String = str(raw_effect).strip_edges()
+		if key == "" or known.has(key) or key.begins_with("captive_") or key.begins_with("minion_attack_mul_") or key.begins_with("base_queue_speed_mul_") or key.begins_with("player_defense_add_"):
+			continue
+		print("[EquipmentAudit][MissingEffect] effect_key=", key, " equipment=", selected_equipment_id)
 
 func multiply_attack_damage(attack: Dictionary, multiplier: float) -> void:
 	for effect in attack.get("effects", []):
@@ -2124,29 +2152,13 @@ func normalize_attack_data(attack_id: String, raw_data: Dictionary) -> Dictionar
 		data["origin"] = flame_origin
 	elif key.contains("rpg") or key.contains("rocket"):
 		asset_path = "res://BattleAssets/RPG.png"
-		# Rocket projectile itself is only a carrier. The real hit is the RPGArea explosion.
-		visual_size = [48, 18]
-		var rocket_damage: float = max(18.0, float(data.get("damage", 24.0)))
-		var rocket_radius: float = max(150.0, float(data.get("explosion_radius", 150.0)))
-		data["kind"] = "projectile"
-		data["radius"] = min(float(data.get("radius", 14.0)), 16.0)
-		data["damage"] = 0.0
-		data["direct_hit_damage"] = 0.0
-		data["explosion_damage"] = rocket_damage
-		data["explosion_radius"] = rocket_radius
-		data["explosion_edge_damage_mul"] = 0.55
-		data["direct_aoe_on_explode"] = true
-		data["explode_on_hit"] = true
-		data["explode_on_expire"] = true
-		var rocket_motion: Dictionary = data.get("motion", {}) if typeof(data.get("motion", {})) == TYPE_DICTIONARY else {}
-		rocket_motion["mode"] = str(rocket_motion.get("mode", "rocket"))
-		rocket_motion["speed"] = max(float(rocket_motion.get("speed", data.get("speed", 360.0))), 360.0)
-		rocket_motion["life_time"] = max(float(rocket_motion.get("life_time", data.get("life_time", 2.4))), 2.0)
-		data["motion"] = rocket_motion
-		data["on_hit_spawn_attack"] = make_simple_blast_attack("rocket_explosion", rocket_radius, rocket_damage, Color(1.0, 0.52, 0.20, 0.84))
-		data["on_hit_spawn_attack"]["visual"] = {"texture": "res://BattleAssets/RPGArea.png", "size": [rocket_radius * 2.0, rocket_radius * 2.0], "alpha": 0.82}
+		visual_size = [74, 28]
+		data["on_hit_spawn_attack"] = make_simple_blast_attack("rocket_explosion", 118.0, max(22.0, float(data.get("damage", 22.0)) * 0.82), Color(1.0, 0.52, 0.20, 0.84))
+		data["on_hit_spawn_attack"]["visual"] = {"texture": "res://BattleAssets/RPGArea.png", "size": [236, 236], "alpha": 0.78}
 		data["on_hit_spawn_attack"]["hit_rule"] = {"mode": "on_spawn_once"}
-		data["on_hit_spawn_attack"]["hit_shape"] = {"mode": "circle", "radius": rocket_radius}
+		data["on_hit_spawn_attack"]["hit_shape"] = {"mode": "circle", "radius": 118.0}
+		data["on_hit_spawn_attack"]["duration"] = 0.22
+		data["explode_on_hit"] = true
 	elif key.contains("strong") and key.contains("strafe"):
 		asset_path = "res://BattleAssets/StrongStrafe.png"
 		visual_size = [360, 190]
@@ -2200,10 +2212,187 @@ func normalize_attack_data(attack_id: String, raw_data: Dictionary) -> Dictionar
 			motion["speed"] = max(float(motion.get("speed", 0.0)), 720.0)
 		data["motion"] = motion
 
+	data = apply_mvp_weapon_specialization(attack_id, key, data)
 	return data
 
-func debug_log_projectile_explosion(attack_id: String, pos: Vector2, radius: float, damage: float) -> void:
-	print("[BattleProjectile][Explosion] id=", attack_id, " pos=", pos, " radius=", radius, " damage=", damage)
+func apply_mvp_weapon_specialization(attack_id: String, key: String, data: Dictionary) -> Dictionary:
+	var result: Dictionary = data.duplicate(true)
+	var id_text: String = (attack_id + " " + str(result.get("id", "")) + " " + str(result.get("name", ""))).to_lower()
+
+	if id_text.contains("curve") or id_text.contains("曲线"):
+		# Curved bullet: a cheap thrown arc from just above the player's head.
+		# It uses player facing, NOT mouse aim, and lands in front of the player inside the camera view.
+		result["kind"] = "projectile"
+		result["force_projectile"] = true
+		result["projectile_aim"] = "facing"
+		result["fire_point"] = "top"
+		result["fire_offset"] = [0, -24]
+		result["motion"] = "parabola_drop"
+		result["speed"] = max(float(result.get("speed", 0.0)), 520.0)
+		# Keep this short: it should fall in front of the player, not fly to the far edge of the map.
+		result["projectile_range"] = float(result.get("projectile_range", result.get("range", 0.0)))
+		if float(result["projectile_range"]) <= 0.0 or float(result["projectile_range"]) > 620.0:
+			result["projectile_range"] = 430.0
+		result["curve_range"] = float(result["projectile_range"])
+		result["curve_amplitude"] = 190.0
+		result["curve_drop"] = 330.0
+		result["life_time"] = 1.35
+		# Hit radius stays modest; sprite size is only a visual stretch.
+		result["radius"] = clamp(float(result.get("radius", 20.0)), 18.0, 26.0)
+		var curve_visual: Dictionary = result.get("visual", {}) if typeof(result.get("visual", {})) == TYPE_DICTIONARY else {}
+		curve_visual["texture"] = str(curve_visual.get("texture", "res://BattleAssets/CurveBullet.png"))
+		curve_visual["size"] = curve_visual.get("size", [96, 34])
+		result["visual"] = curve_visual
+
+	elif id_text.contains("spike") or id_text.contains("地刺"):
+		# Long-range line AOE. Enough distance to reach the edge of the normal camera view.
+		result["kind"] = "attack_instance"
+		var spike_shape: Dictionary = result.get("hit_shape", {})
+		spike_shape["mode"] = "beam_rect"
+		spike_shape["length"] = max(float(spike_shape.get("length", 0.0)), 980.0)
+		spike_shape["width"] = max(float(spike_shape.get("width", 0.0)), 86.0)
+		result["hit_shape"] = spike_shape
+		result["hit_rule"] = {"mode": "on_spawn_once", "hit_same_target_delay": 999.0}
+		result["duration"] = max(float(result.get("duration", result.get("life_time", 0.0))), 0.30)
+		var spike_origin: Dictionary = result.get("origin", {})
+		spike_origin["point"] = str(spike_origin.get("point", "right"))
+		result["origin"] = spike_origin
+		var spike_aim: Dictionary = result.get("aim", {})
+		spike_aim["mode"] = "facing"
+		result["aim"] = spike_aim
+		var spike_visual: Dictionary = result.get("visual", {})
+		spike_visual["texture"] = str(spike_visual.get("texture", "res://BattleAssets/Spike.png"))
+		spike_visual["size"] = spike_visual.get("size", [980, 96])
+		spike_visual["anchor"] = "left_center"
+		result["visual"] = spike_visual
+
+	elif id_text.contains("bombard") or id_text.contains("bombing") or id_text.contains("轰炸") or id_text.contains("strafe"):
+		# Bombardment: fixed mouse-selected box. It should NOT behave like bullets flying outward.
+		# Light = WeakStrafe small AOEs that appear inside the box. Heavy = one StrongStrafe strike covering the whole box.
+		result["kind"] = "attack_instance"
+		var is_heavy_bomb := id_text.contains("heavy") or id_text.contains("strong") or id_text.contains("重")
+		var box_size := Vector2(560.0, 320.0) if is_heavy_bomb else Vector2(520.0, 300.0)
+		var base_damage: float = max(8.0, float(result.get("damage", result.get("base_damage", 18.0))))
+		result["effects"] = [{"mode": "damage", "value": base_damage}]
+		var bomb_visual: Dictionary = result.get("visual", {}) if typeof(result.get("visual", {})) == TYPE_DICTIONARY else {}
+		bomb_visual.clear()
+		bomb_visual["indicator_texture"] = "res://BattleAssets/StrafeBox.png"
+		bomb_visual["indicator_alpha"] = 0.82
+		bomb_visual["indicator_z_index"] = 8
+		bomb_visual["indicator_fallback_color"] = "35bfff"
+		bomb_visual["size"] = [box_size.x, box_size.y]
+		result["motion"] = {"mode": "static", "duration": 0.95 if is_heavy_bomb else 1.20}
+		result["speed"] = 0.0
+		if is_heavy_bomb:
+			bomb_visual["texture"] = "res://BattleAssets/StrongStrafe.png"
+			bomb_visual["alpha"] = 0.86
+			result["bombard_mode"] = "whole_box"
+			result["hit_rule"] = {"mode": "bombard_box_once", "delay": 0.38, "hit_same_target_delay": 999.0}
+			result["duration"] = 0.95
+		else:
+			result["bombard_mode"] = "random_small_aoe"
+			result["bombard_tick_interval"] = 0.28
+			result["bombard_child_radius"] = max(float(result.get("bombard_child_radius", 0.0)), 82.0)
+			result["bombard_child_visual"] = "res://BattleAssets/WeakStrafe.png"
+			result["hit_rule"] = {"mode": "bombard_tick"}
+			result["duration"] = 1.20
+		result["visual"] = bomb_visual
+		var bomb_shape: Dictionary = {}
+		bomb_shape["mode"] = "rect"
+		bomb_shape["length"] = box_size.x
+		bomb_shape["width"] = box_size.y
+		result["hit_shape"] = bomb_shape
+		result["origin"] = {"mode": "mouse_world"}
+		result["aim"] = {"mode": "fixed_angle", "angle": 0}
+
+	elif id_text.contains("charm") or id_text.contains("魅惑"):
+		# Charm: straight projectile; the first enemy hit gets the control status.
+		result["kind"] = "projectile"
+		result["force_projectile"] = true
+		result["projectile_aim"] = "mouse"
+		result["speed"] = max(float(result.get("speed", 0.0)), 760.0)
+		result["projectile_range"] = max(float(result.get("projectile_range", result.get("range", 0.0))), 1100.0)
+		result["radius"] = max(float(result.get("radius", 0.0)), 26.0)
+		result["life_time"] = max(float(result.get("life_time", 0.0)), 1.8)
+		result["effects"] = [{"mode": "status", "status": "control", "duration": max(float(result.get("duration", 0.0)), 3.0)}]
+		var charm_visual: Dictionary = result.get("visual", {})
+		charm_visual["texture"] = str(charm_visual.get("texture", "res://BattleAssets/Charm.png"))
+		charm_visual["size"] = charm_visual.get("size", [58, 58])
+		result["visual"] = charm_visual
+
+	elif id_text.contains("flame") or id_text.contains("fire") or id_text.contains("喷火") or id_text.contains("喷"):
+		# Flame: damage only while the visible flame rectangle overlaps. No lingering DOT/status.
+		result["kind"] = "attack_instance"
+		var flame_shape: Dictionary = result.get("hit_shape", {})
+		flame_shape["mode"] = "beam_rect"
+		flame_shape["length"] = max(float(flame_shape.get("length", 0.0)), 340.0)
+		flame_shape["width"] = max(float(flame_shape.get("width", 0.0)), 116.0)
+		result["hit_shape"] = flame_shape
+		result["hit_rule"] = {"mode": "while_active_tick", "tick_interval": 0.12, "hit_same_target_delay": 0.12}
+		result["duration"] = max(float(result.get("duration", result.get("life_time", 0.0))), 0.42)
+		var clean_effects: Array = []
+		for effect in result.get("effects", []):
+			if typeof(effect) == TYPE_DICTIONARY and str(effect.get("mode", "damage")) == "damage":
+				clean_effects.append(effect)
+		if clean_effects.is_empty():
+			clean_effects.append({"mode": "damage", "value": max(float(result.get("damage", 0.0)), 8.0)})
+		result["effects"] = clean_effects
+		result.erase("on_hit_statuses")
+		var flame_visual: Dictionary = result.get("visual", {})
+		flame_visual["texture"] = str(flame_visual.get("texture", "res://BattleAssets/Flame.png"))
+		flame_visual["size"] = flame_visual.get("size", [340, 116])
+		flame_visual["anchor"] = "left_center"
+		result["visual"] = flame_visual
+
+	elif id_text.contains("lighting") or id_text.contains("lightning") or id_text.contains("chain") or id_text.contains("闪电"):
+		var lightning_visual: Dictionary = result.get("visual", {})
+		lightning_visual["texture"] = str(lightning_visual.get("texture", "res://BattleAssets/Lighting.png"))
+		lightning_visual["size"] = lightning_visual.get("size", [260, 54])
+		lightning_visual["anchor"] = "left_center"
+		result["visual"] = lightning_visual
+
+	elif id_text.contains("shotgun") or id_text.contains("霰弹"):
+		result["kind"] = "projectile"
+		result["force_projectile"] = true
+		result["projectile_aim"] = "mouse"
+		result["speed"] = max(float(result.get("speed", 0.0)), 840.0)
+		result["radius"] = max(float(result.get("radius", 0.0)), 15.0)
+		result["projectile_range"] = max(float(result.get("projectile_range", result.get("range", 0.0))), 760.0)
+		result["life_time"] = max(float(result.get("life_time", 0.0)), 0.95)
+		result["distance_damage_falloff"] = {"near": 120.0, "far": 680.0, "near_mul": 1.18, "far_mul": 0.38}
+		var shotgun_emitter: Dictionary = result.get("emitter", {})
+		shotgun_emitter["mode"] = "spread"
+		shotgun_emitter["count"] = max(int(shotgun_emitter.get("count", 1)), 6)
+		shotgun_emitter["spread_angle"] = max(float(shotgun_emitter.get("spread_angle", 0.0)), 34.0)
+		result["emitter"] = shotgun_emitter
+		var shotgun_visual: Dictionary = result.get("visual", {})
+		shotgun_visual["texture"] = str(shotgun_visual.get("texture", "res://BattleAssets/Shotgun.png"))
+		shotgun_visual["size"] = shotgun_visual.get("size", [42, 16])
+		result["visual"] = shotgun_visual
+
+	elif id_text.contains("rpg") or id_text.contains("rocket") or id_text.contains("火箭"):
+		result["kind"] = "projectile"
+		result["force_projectile"] = true
+		result["is_rocket_projectile"] = true
+		result["explode_on_hit"] = true
+		result["explode_on_expire"] = false
+		result["projectile_aim"] = str(result.get("projectile_aim", "mouse"))
+		result["speed"] = max(float(result.get("speed", 0.0)), 480.0)
+		result["radius"] = max(float(result.get("radius", 0.0)), 18.0)
+		result["projectile_visual_max"] = 44.0
+		result["damage"] = 0.0
+		var rocket_base_damage: float = max(float(result.get("explosion_damage", 0.0)), 58.0)
+		result["explosion_damage"] = rocket_base_damage
+		result["explosion_radius"] = max(float(result.get("explosion_radius", 0.0)), 180.0)
+		result["explosion_edge_damage_mul"] = max(float(result.get("explosion_edge_damage_mul", 0.0)), 0.58)
+		result["explosion_texture"] = "res://BattleAssets/RPGArea.png"
+		result["explosion_visual_size"] = max(float(result.get("explosion_visual_size", 0.0)), float(result["explosion_radius"]) * 2.0)
+		var rocket_visual: Dictionary = result.get("visual", {})
+		rocket_visual["texture"] = str(rocket_visual.get("texture", "res://BattleAssets/RPG.png"))
+		rocket_visual["size"] = rocket_visual.get("size", [44, 24])
+		result["visual"] = rocket_visual
+
+	return result
 
 func spawn_textured_line_fx(start_pos: Vector2, end_pos: Vector2, texture_path: String = "res://BattleAssets/Lighting.png", width: float = 42.0, lifetime: float = 0.16, color: Color = Color(1.0, 1.0, 1.0, 0.92)) -> void:
 	var tex = load(texture_path)
@@ -2893,14 +3082,21 @@ func apply_one_stat_op_to_attack(attack: Dictionary, key: String, value: float) 
 		multiply_force_strength(attack, value)
 
 func multiply_nested_number(attack: Dictionary, section_name: String, key: String, value: float, require_existing: bool = false) -> void:
-	var section: Dictionary = attack.get(section_name, {})
+	var raw_section = attack.get(section_name, {})
+	if typeof(raw_section) != TYPE_DICTIONARY:
+		# Some old attack jsons use fields like motion="curve". Do not overwrite them with a Dictionary.
+		return
+	var section: Dictionary = raw_section
 	if require_existing and !section.has(key):
 		return
 	section[key] = float(section.get(key, 0.0)) * value
 	attack[section_name] = section
 
 func add_nested_number(attack: Dictionary, section_name: String, key: String, value: float) -> void:
-	var section: Dictionary = attack.get(section_name, {})
+	var raw_section = attack.get(section_name, {})
+	if typeof(raw_section) != TYPE_DICTIONARY:
+		return
+	var section: Dictionary = raw_section
 	section[key] = float(section.get(key, 0.0)) + value
 	attack[section_name] = section
 

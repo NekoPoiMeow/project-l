@@ -2427,7 +2427,9 @@ func get_scaled_damage(base_damage: float, target_entity, attack: Dictionary = {
 	# direct melee/projectile damage and any legacy attack dictionary.
 	var crit_chance: float = clamp(float(attack.get("crit_chance", 0.0)), 0.0, 0.95)
 	if crit_chance > 0.0 and randf() < crit_chance:
-		multiplier *= max(1.0, float(attack.get("crit_multiplier", 1.5)))
+		var crit_mul: float = max(1.0, float(attack.get("crit_multiplier", 1.5)))
+		multiplier *= crit_mul
+		print("[BattleCrit] attack=", str(attack.get("id", "")), " chance=", snapped(crit_chance, 0.001), " mul=", snapped(crit_mul, 0.01))
 
 	return base_damage * multiplier * get_status_attack_damage_multiplier()
 

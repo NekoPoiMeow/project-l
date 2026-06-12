@@ -77,8 +77,9 @@ func get_attack_crit_multiplier(context: Dictionary) -> float:
 
 	if randf() > crit_chance:
 		return 1.0
-
-	return max(1.0, float(attack.get("crit_multiplier", 1.5)))
+	var crit_mul: float = max(1.0, float(attack.get("crit_multiplier", 1.5)))
+	print("[BattleCrit] attack=", str(attack.get("id", "")), " chance=", snapped(crit_chance, 0.001), " mul=", snapped(crit_mul, 0.01))
+	return crit_mul
 
 func get_mechanic_bonus_damage(target, context: Dictionary) -> float:
 	var attack = context.get("attack", {})
@@ -307,7 +308,9 @@ func apply_chain_attack(director, source, target, effect: Dictionary, context: D
 	next_context["position"] = target.global_position
 	next_context["trigger_target"] = best
 	next_context["direction"] = (best.global_position - target.global_position).normalized()
-	if director.has_method("spawn_line_fx"):
-		director.spawn_line_fx(target.global_position, best.global_position, Color(1.0, 0.88, 0.35, 0.98), 16.0, 0.28)
-		director.spawn_line_fx(target.global_position, best.global_position, Color(1.0, 0.25, 0.92, 0.70), 5.0, 0.34)
+	if director.has_method("spawn_textured_line_fx"):
+		director.spawn_textured_line_fx(target.global_position, best.global_position, "res://BattleAssets/Lighting.png", 56.0, 0.22, Color(1.0, 0.92, 0.35, 0.98))
+	elif director.has_method("spawn_line_fx"):
+		director.spawn_line_fx(target.global_position, best.global_position, Color(1.0, 0.88, 0.35, 0.98), 20.0, 0.28)
+		director.spawn_line_fx(target.global_position, best.global_position, Color(1.0, 0.25, 0.92, 0.70), 7.0, 0.34)
 	director.spawn_attack(source, attack, next_context)

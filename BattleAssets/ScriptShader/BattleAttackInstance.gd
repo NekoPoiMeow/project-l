@@ -46,6 +46,11 @@ var lob_start := Vector2.ZERO
 var lob_end := Vector2.ZERO
 var released_from_orbit := false
 var pierce_left := 0
+var bombard_tick_interval := 0.25
+var bombard_tick_timer := 0.0
+var bombard_box_delay := 0.35
+var bombard_box_applied := false
+
 
 func setup(new_director, new_source, new_attack: Dictionary, new_context: Dictionary = {}) -> void:
 	director = new_director
@@ -53,11 +58,14 @@ func setup(new_director, new_source, new_attack: Dictionary, new_context: Dictio
 	attack = new_attack
 	context = new_context
 
-	var motion: Dictionary = attack.get("motion", {})
-	var hit_shape: Dictionary = attack.get("hit_shape", {})
-	var hit_rule: Dictionary = attack.get("hit_rule", {})
+	var raw_motion = attack.get("motion", {})
+	var motion: Dictionary = raw_motion if typeof(raw_motion) == TYPE_DICTIONARY else {}
+	var raw_hit_shape = attack.get("hit_shape", {})
+	var hit_shape: Dictionary = raw_hit_shape if typeof(raw_hit_shape) == TYPE_DICTIONARY else {}
+	var raw_hit_rule = attack.get("hit_rule", {})
+	var hit_rule: Dictionary = raw_hit_rule if typeof(raw_hit_rule) == TYPE_DICTIONARY else {}
 
-	motion_mode = str(motion.get("mode", attack.get("motion", "static")))
+	motion_mode = str(motion.get("mode", raw_motion if typeof(raw_motion) != TYPE_DICTIONARY else "static"))
 	duration = float(motion.get("duration", motion.get("life_time", attack.get("life_time", 1.0))))
 	max_distance = float(motion.get("max_distance", 0.0))
 	follow_source = bool(motion.get("follow_source", false))
@@ -73,6 +81,10 @@ func setup(new_director, new_source, new_attack: Dictionary, new_context: Dictio
 	hit_rule_mode = str(hit_rule.get("mode", "on_contact"))
 	tick_interval = float(hit_rule.get("tick_interval", 0.2))
 	hit_same_target_delay = float(hit_rule.get("hit_same_target_delay", 999.0))
+	bombard_tick_interval = float(attack.get("bombard_tick_interval", hit_rule.get("tick_interval", 0.25)))
+	bombard_tick_timer = min(0.08, bombard_tick_interval)
+	bombard_box_delay = float(hit_rule.get("delay", attack.get("bombard_box_delay", 0.35)))
+	bombard_box_applied = false
 	destroy_on_hit = bool(hit_rule.get("destroy_on_hit", false))
 	pierce_left = int(attack.get("pierce", 0))
 	effects = attack.get("effects", [])
@@ -107,6 +119,17 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 		return
 
+	if hit_rule_mode == "bombard_tick":
+		bombard_tick_timer -= delta
+		if bombard_tick_timer <= 0.0:
+			bombard_tick_timer = bombard_tick_interval
+			spawn_bombard_child_hit()
+
+	if hit_rule_mode == "bombard_box_once" and !bombard_box_applied and age >= bombard_box_delay:
+		bombard_box_applied = true
+		spawn_bombard_box_visual()
+		apply_hits(delta)
+
 	if age >= duration:
 		if hit_rule_mode == "on_expire":
 			apply_hits(delta)
@@ -127,6 +150,9 @@ func resolve_origin() -> Vector2:
 
 	if context.has("position"):
 		return context["position"]
+
+	if mode == "mouse_world" and source != null and is_instance_valid(source):
+		return source.get_global_mouse_position()
 
 	if mode == "target_center":
 		var trigger_target = context.get("trigger_target", null)
@@ -325,6 +351,46 @@ func setup_lob_motion(motion: Dictionary) -> void:
 		lob_range = 520.0
 	lob_end = global_position + direction * lob_range
 
+func get_visual_size(visual_data: Dictionary, fallback: Vector2) -> Vector2:
+	var result: Vector2 = fallback
+	if visual_data.has("size") and typeof(visual_data["size"]) == TYPE_ARRAY and visual_data["size"].size() >= 2:
+		result = Vector2(float(visual_data["size"][0]), float(visual_data["size"][1]))
+	else:
+		if visual_data.has("width"):
+			result.x = float(visual_data.get("width", result.x))
+		if visual_data.has("height"):
+			result.y = float(visual_data.get("height", result.y))
+	return Vector2(max(result.x, 1.0), max(result.y, 1.0))
+
+
+
+func add_rect_indicator(parent: Node2D, visual_data: Dictionary, visual_size: Vector2) -> void:
+	var indicator_path: String = str(visual_data.get("indicator_texture", ""))
+	var tex = load(indicator_path) if indicator_path != "" else null
+	if tex != null:
+		var box := Sprite2D.new()
+		box.name = "AttackAreaIndicator"
+		box.texture = tex
+		box.centered = true
+		box.position = Vector2.ZERO
+		box.modulate = Color(1.0, 1.0, 1.0, float(visual_data.get("indicator_alpha", 0.68)))
+		box.z_index = int(visual_data.get("indicator_z_index", 8))
+		var tex_size: Vector2 = tex.get_size()
+		box.scale = Vector2(visual_size.x / max(tex_size.x, 1.0), visual_size.y / max(tex_size.y, 1.0))
+		parent.add_child(box)
+		return
+
+	# Fallback: never silently hide the bombard target box just because the PNG path moved.
+	var fallback := ColorRect.new()
+	fallback.name = "AttackAreaIndicatorFallback"
+	var c: Color = parse_color(visual_data.get("indicator_fallback_color", "35bfff"))
+	c.a = float(visual_data.get("indicator_alpha", 0.42)) * 0.45
+	fallback.color = c
+	fallback.size = visual_size
+	fallback.position = -visual_size * 0.5
+	fallback.z_index = int(visual_data.get("indicator_z_index", 8))
+	parent.add_child(fallback)
+
 func create_visual() -> void:
 	var visual_data: Dictionary = attack.get("visual", {})
 	var primary: Color = parse_color(visual_data.get("primary", "ff4f72"))
@@ -333,9 +399,17 @@ func create_visual() -> void:
 	trail_max_points = int(visual_data.get("trail_points", 12))
 
 	var asset_path: String = str(visual_data.get("gif", visual_data.get("texture", "")))
+	if asset_path == "" and visual_data.has("indicator_texture"):
+		var indicator_root := Node2D.new()
+		add_child(indicator_root)
+		add_rect_indicator(indicator_root, visual_data, Vector2(length if length > 0.0 else radius * 2.0, width if width > 0.0 else radius * 2.0))
+		visual = indicator_root
+		return
 	if asset_path != "":
 		var asset_root := Node2D.new()
 		add_child(asset_root)
+		if visual_data.has("indicator_texture"):
+			add_rect_indicator(asset_root, visual_data, Vector2(length if length > 0.0 else radius * 2.0, width if width > 0.0 else radius * 2.0))
 		if hit_shape_mode == "beam_rect" and asset_path.get_extension().to_lower() != "gif":
 			var beam_sprite := Sprite2D.new()
 			asset_root.add_child(beam_sprite)
@@ -350,8 +424,12 @@ func create_visual() -> void:
 			var gif_visual = GIFPlayer.new()
 			asset_root.add_child(gif_visual)
 			gif_visual.gif = load(asset_path)
-			gif_visual.size = Vector2(radius * 2.4, radius * 2.4)
-			gif_visual.position = -gif_visual.size * 0.5
+			var gif_size: Vector2 = get_visual_size(visual_data, Vector2(radius * 2.4, radius * 2.4))
+			if gif_visual.has_method("set"):
+				gif_visual.set("expand_mode", 1)
+				gif_visual.set("stretch_mode", 0)
+			gif_visual.size = gif_size
+			gif_visual.position = -gif_size * 0.5
 			gif_visual.modulate = Color(1.0, 1.0, 1.0, alpha)
 		else:
 			var sprite := Sprite2D.new()
@@ -361,14 +439,13 @@ func create_visual() -> void:
 			sprite.modulate = Color(1.0, 1.0, 1.0, alpha)
 			if sprite.texture != null:
 				var tex_size: Vector2 = sprite.texture.get_size()
-				var target_size: float = max(radius * 2.2, 12.0)
-				var sprite_scale: float = target_size / max(tex_size.x, tex_size.y, 1.0)
-				sprite.scale = Vector2.ONE * sprite_scale
+				var wanted_size: Vector2 = get_visual_size(visual_data, Vector2(max(radius * 2.2, 12.0), max(radius * 2.2, 12.0)))
+				sprite.scale = Vector2(wanted_size.x / max(tex_size.x, 1.0), wanted_size.y / max(tex_size.y, 1.0))
 				var anchor: String = str(visual_data.get("anchor", "center"))
 				if anchor == "left_center":
-					sprite.position = Vector2(tex_size.x * sprite_scale * 0.5, 0.0)
+					sprite.position = Vector2(wanted_size.x * 0.5, 0.0)
 				elif anchor == "right_center":
-					sprite.position = Vector2(-tex_size.x * sprite_scale * 0.5, 0.0)
+					sprite.position = Vector2(-wanted_size.x * 0.5, 0.0)
 		visual = asset_root
 		trail = Line2D.new()
 		trail.width = max(3.0, float(visual_data.get("trail_width", radius * 0.30)))
@@ -458,6 +535,87 @@ func parse_color(value) -> Color:
 		text = text.substr(1)
 	return Color.html("#" + text)
 
+func spawn_bombard_box_visual() -> void:
+	var texture_path: String = str(attack.get("bombard_box_visual", ""))
+	if texture_path == "":
+		var visual_data: Dictionary = attack.get("visual", {}) if typeof(attack.get("visual", {})) == TYPE_DICTIONARY else {}
+		texture_path = str(visual_data.get("texture", "res://BattleAssets/StrongStrafe.png"))
+	if texture_path == "":
+		return
+	var root: Node = get_parent()
+	if root == null:
+		return
+	var tex = load(texture_path)
+	if tex == null:
+		return
+	var sprite := Sprite2D.new()
+	sprite.name = "BombardWholeBoxStrike"
+	sprite.texture = tex
+	sprite.centered = true
+	sprite.global_position = global_position
+	sprite.rotation = rotation
+	sprite.modulate = Color(1.0, 1.0, 1.0, 0.88)
+	sprite.z_index = int(global_position.y) + 10
+	var tex_size: Vector2 = tex.get_size()
+	sprite.scale = Vector2(length / max(tex_size.x, 1.0), width / max(tex_size.y, 1.0))
+	root.add_child(sprite)
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.wait_time = 0.28
+	sprite.add_child(timer)
+	timer.timeout.connect(sprite.queue_free)
+	timer.start()
+
+func spawn_bombard_child_hit() -> void:
+	var child_radius: float = max(8.0, float(attack.get("bombard_child_radius", 86.0)))
+	var half_w: float = max(1.0, length * 0.5 - child_radius)
+	var half_h: float = max(1.0, width * 0.5 - child_radius)
+	var local := Vector2(randf_range(-half_w, half_w), randf_range(-half_h, half_h))
+	var hit_pos := global_position + local.rotated(rotation)
+	spawn_bombard_child_visual(hit_pos, child_radius)
+	var old_pos: Vector2 = global_position
+	var old_radius: float = radius
+	var old_shape: String = hit_shape_mode
+	global_position = hit_pos
+	radius = child_radius
+	hit_shape_mode = "circle"
+	apply_hits(0.0)
+	global_position = old_pos
+	radius = old_radius
+	hit_shape_mode = old_shape
+
+func spawn_bombard_child_visual(hit_pos: Vector2, child_radius: float) -> void:
+	if director == null or !is_instance_valid(director):
+		return
+	var root: Node = get_parent()
+	if root == null:
+		return
+	var texture_path: String = str(attack.get("bombard_child_visual", "res://BattleAssets/WeakStrafe.png"))
+	var sprite := Sprite2D.new()
+	sprite.name = "BombardChildAoE"
+	sprite.global_position = hit_pos
+	sprite.z_index = int(hit_pos.y) + 6
+	var tex = load(texture_path)
+	if tex != null:
+		sprite.texture = tex
+		sprite.centered = true
+		var tex_size: Vector2 = tex.get_size()
+		var size := child_radius * 2.0
+		sprite.scale = Vector2(size / max(tex_size.x, 1.0), size / max(tex_size.y, 1.0))
+	else:
+		var rect := ColorRect.new()
+		rect.color = Color(1.0, 0.35, 0.12, 0.30)
+		rect.size = Vector2(child_radius * 2.0, child_radius * 2.0)
+		rect.position = -rect.size * 0.5
+		sprite.add_child(rect)
+	root.add_child(sprite)
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.wait_time = 0.20
+	sprite.add_child(timer)
+	timer.timeout.connect(sprite.queue_free)
+	timer.start()
+
 func apply_hits(delta: float) -> void:
 	var candidates: Array = director.entities
 	if director.has_method("query_entities_near"):
@@ -504,6 +662,8 @@ func get_query_radius() -> float:
 		return length + width + 80.0
 	if hit_shape_mode == "sector":
 		return radius + 80.0
+	if hit_shape_mode == "rect":
+		return max(length, width) * 0.75 + 120.0
 	return radius + 80.0
 
 func can_hit_entity(entity) -> bool:
@@ -542,6 +702,10 @@ func is_entity_in_shape(entity) -> bool:
 	if hit_shape_mode == "beam_rect":
 		var local: Vector2 = (entity.global_position - global_position).rotated(-rotation)
 		return local.x >= 0.0 and local.x <= length and abs(local.y) <= width * 0.5 + entity.radius
+
+	if hit_shape_mode == "rect":
+		var local_rect: Vector2 = (entity.global_position - global_position).rotated(-rotation)
+		return abs(local_rect.x) <= length * 0.5 + entity.radius and abs(local_rect.y) <= width * 0.5 + entity.radius
 
 	if hit_shape_mode == "sector":
 		var to_entity: Vector2 = entity.global_position - global_position
