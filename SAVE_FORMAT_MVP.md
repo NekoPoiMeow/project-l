@@ -177,3 +177,21 @@ CG/剧情取得不要只放 flags；要同步写入 `unlocks.story_events / unlo
 如果没有通过标题/存档 UI 明确 `load_slot()`，`ensure_loaded()` 会选择已有槽位中最像真实进度的存档，优先考虑非 0 淫能、章节、自动存档代数。这样直接运行商人/地窖场景时，不会默默回到 0 淫能或旧默认值。
 
 发布版仍然应该通过存档 UI 调用 `GameState.load_slot(path)`。
+
+
+## V6 调试存档清理约定
+
+- Save0 保持真正 0 进度：不送俘虏，lust=0。
+- SaveAuto / SaveAuto2 可作为调试档：lust=20000，但不送俘虏。
+- 俘虏必须通过商人/关卡/剧情写入 `dungeon.captives`，不得靠存档模板兜底。
+
+
+## v7 补充
+
+- `progress.unlocked_levels`：关卡解锁的唯一主字段。`level_bonus_collect` 只保留旧兼容，不再驱动关卡解锁。
+- `unlocks.story_events / cg_events / narrative_events`：剧情、CG、回想 UI 的解锁索引。
+- `story.events_seen / cg_seen / narrative_flags / pending_event_id / last_event_id`：剧情播放状态与占位 AVG 路由。
+- `merchant.next_battle_effects / next_battle_temp_items`：下局临时道具实际数值与 UI 显示 ID。战斗结算后清空。
+- `dungeon.next_battle_captive_equipment_id`：地窖物化装备 ID，按 `Captives.equipment_base_id + _LV + humiliation_level` 得出。战斗结算后清空。
+- `runtime.pending_battle_modifiers / pending_battle_sources`：BattleDirector 可读的合并后运行时加成，来源包括局外升级、商人临时道具与运行时注入。
+- `flags.last_battle_result`：最近一局结算，包含 `lust_before / lust_reward / lust_after / lust_reward_mul / kill_count / battle_time`，用于局外升级界面显示。

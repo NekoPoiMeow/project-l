@@ -433,10 +433,14 @@ func load_battle_loadout() -> void:
 			var captive_equipment_row: Dictionary = equipment_catalog.get(captive_equipment_id, {})
 			append_unique_effects(parse_string_list(str(captive_equipment_row.get("effect_keys", ""))))
 
-	if GameState.is_loaded and GameState.has_method("get_merchant_next_battle_effects"):
-		var temp_effects: Dictionary = GameState.get_merchant_next_battle_effects()
-		for raw_key in temp_effects.keys():
-			apply_runtime_battle_modifier(str(raw_key), float(temp_effects[raw_key]))
+	if GameState.is_loaded:
+		var battle_modifiers: Dictionary = {}
+		if GameState.has_method("build_battle_modifiers"):
+			battle_modifiers = GameState.build_battle_modifiers()
+		elif GameState.has_method("get_merchant_next_battle_effects"):
+			battle_modifiers = GameState.get_merchant_next_battle_effects()
+		for raw_key in battle_modifiers.keys():
+			apply_runtime_battle_modifier(str(raw_key), float(battle_modifiers[raw_key]))
 
 	equipment_event_counts.clear()
 	hide_enemy_health_bars = active_equipment_effects.has("hide_enemy_hp")
@@ -462,23 +466,42 @@ func append_unique_effects(effects: Array) -> void:
 
 func apply_runtime_battle_modifier(effect_key: String, value: float) -> void:
 	var key: String = effect_key.strip_edges()
-	if key == "player_attack_mul":
+	if key == "player_attack_mul" or key == "player_skill_damage_mul":
 		run_player_attack_mul *= 1.0 + value
 	elif key == "player_attack_frequency_mul":
 		run_player_attack_frequency_mul *= 1.0 + value
+	elif key == "player_cooldown_mul":
+		run_player_attack_frequency_mul *= 1.0 + max(-0.85, -value if value < 0.0 else value)
 	elif key == "player_area_mul":
 		run_player_area_mul *= 1.0 + value
 	elif key == "player_range_mul":
 		run_player_range_mul *= 1.0 + value
 	elif key == "battle_lust_reward_mul":
 		run_lust_reward_mul *= 1.0 + value
+	elif key == "battle_win_lust_add" or key == "start_lust_add":
+		run_lust_reward_add += value
 	elif key == "base_start_bio_add":
 		run_base_start_bio_add += value
 	elif key == "player_mana_regen_add":
 		player_mana_regen += value
-	elif key == "minion_attack_mul":
-		# Applied through captive equipment effect keys for now; keep hook name accepted.
-		pass
+	elif key == "player_mana_max_add":
+		player_mana_max += value
+		player_mana += value
+	elif key == "player_hp_mul" and player_entity != null and is_instance_valid(player_entity):
+		player_entity.max_hp *= 1.0 + value
+		player_entity.hp *= 1.0 + value
+	elif key == "player_defense_add" and player_entity != null and is_instance_valid(player_entity):
+		player_entity.defense += value
+	elif key == "player_move_speed_mul" and player_entity != null and is_instance_valid(player_entity):
+		player_entity.move_speed *= 1.0 + value
+	elif key == "minion_attack_mul" or key == "minion_hp_mul" or key == "minion_move_speed_mul" or key == "minion_regen_mul" or key == "minion_building_damage_mul" or key == "minion_guard_mul" or key == "minion_elite_mul" or key == "minion_bio_return":
+		# MVP hook: keep accepted and visible in debug; detailed per-minion application is handled later in spawn stat hooks.
+		assimilated_stat_mul[key] = 1.0 + value
+	elif key == "base_hp_mul" and tentacle_base != null and is_instance_valid(tentacle_base):
+		tentacle_base.max_hp *= 1.0 + value
+		tentacle_base.hp *= 1.0 + value
+	elif key == "base_regen_mul" or key == "base_bio_gain_mul" or key == "base_queue_speed_mul" or key == "base_contact_damage_mul" or key == "base_bio_cap_mul" or key == "base_revive_efficiency":
+		assimilated_stat_mul[key] = 1.0 + value
 
 func apply_captive_equipment_effect_keys() -> void:
 	if active_equipment_effects.has("captive_knight_lv0"):
@@ -520,6 +543,27 @@ func apply_captive_equipment_effect_keys() -> void:
 		run_player_area_mul *= 1.08
 	if active_equipment_effects.has("captive_priest_lv3"):
 		run_lust_reward_mul *= 1.25
+		run_player_area_mul *= 1.12
+
+	# Extra explicit effect keys used by captive equipment CSV.
+	if active_equipment_effects.has("minion_attack_mul_10"):
+		assimilated_stat_mul["minion_attack_mul"] = max(float(assimilated_stat_mul.get("minion_attack_mul", 1.0)), 1.10)
+	if active_equipment_effects.has("minion_attack_mul_18"):
+		assimilated_stat_mul["minion_attack_mul"] = max(float(assimilated_stat_mul.get("minion_attack_mul", 1.0)), 1.18)
+	if active_equipment_effects.has("minion_attack_mul_28"):
+		assimilated_stat_mul["minion_attack_mul"] = max(float(assimilated_stat_mul.get("minion_attack_mul", 1.0)), 1.28)
+	if active_equipment_effects.has("base_queue_speed_mul_08"):
+		assimilated_stat_mul["base_queue_speed_mul"] = max(float(assimilated_stat_mul.get("base_queue_speed_mul", 1.0)), 1.08)
+	if active_equipment_effects.has("base_queue_speed_mul_16"):
+		assimilated_stat_mul["base_queue_speed_mul"] = max(float(assimilated_stat_mul.get("base_queue_speed_mul", 1.0)), 1.16)
+	if active_equipment_effects.has("base_queue_speed_mul_25"):
+		assimilated_stat_mul["base_queue_speed_mul"] = max(float(assimilated_stat_mul.get("base_queue_speed_mul", 1.0)), 1.25)
+	if active_equipment_effects.has("player_defense_add_1") and player_entity != null and is_instance_valid(player_entity):
+		player_entity.defense += 1.0
+	if active_equipment_effects.has("player_defense_add_2") and player_entity != null and is_instance_valid(player_entity):
+		player_entity.defense += 2.0
+	if active_equipment_effects.has("player_defense_add_4") and player_entity != null and is_instance_valid(player_entity):
+		player_entity.defense += 4.0
 
 func load_player_skills() -> void:
 	player_skills.clear()
@@ -1946,7 +1990,7 @@ func process_equipment_timers(delta: float) -> void:
 			run_lust_reward_add += 20.0
 			emit_equipment_event("on_minute_tick", {"lust_add": 20.0})
 
-	if active_equipment_effects.has("liquid_madness"):
+	if active_equipment_effects.has("liquid_madness") or active_equipment_effects.has("liquid_madness_light"):
 		shooter_timer += delta
 		while shooter_timer >= 5.0:
 			shooter_timer -= 5.0
@@ -2035,7 +2079,7 @@ func release_whip_charge() -> void:
 func trigger_liquid_madness() -> void:
 	if player_entity == null or !is_instance_valid(player_entity) or player_entity.is_dead:
 		return
-	var self_damage: float = max(1.0, player_entity.hp * 0.10)
+	var self_damage: float = max(1.0, player_entity.hp * (0.05 if active_equipment_effects.has("liquid_madness_light") else 0.10))
 	player_entity.take_damage(self_damage, player_entity)
 	var attack: Dictionary = load_attack_data("equipment_liquid_arc")
 	if attack.is_empty():
@@ -2054,8 +2098,6 @@ func notify_attack_hit(source, target, dealt: float, context: Dictionary = {}) -
 			"damage": dealt,
 			"attack_id": str(context.get("attack", {}).get("id", ""))
 		})
-		if player_entity != null and is_instance_valid(player_entity):
-			spawn_floating_number(player_entity.global_position + Vector2(0.0, -player_entity.radius - 70.0), "淫能 +20", Color(1.0, 0.46, 0.86, 1.0))
 
 func spawn_bio_transfer(start_pos: Vector2, target_base, value: int) -> void:
 	if value <= 0:
@@ -3391,8 +3433,25 @@ func record_battle_win(_dead_base) -> void:
 		if level_id != "":
 			GameState.record_level_clear(level_id, 1, false)
 		var lust_reward: int = calculate_battle_lust_reward(true)
-		if lust_reward > 0:
+		var tx: Dictionary = {"before": GameState.get_lust(), "delta": 0, "after": GameState.get_lust()}
+		if lust_reward > 0 and GameState.has_method("add_lust_transaction"):
+			tx = GameState.add_lust_transaction(lust_reward, "battle_win", false)
+		elif lust_reward > 0:
 			GameState.add_lust(lust_reward, false)
+			tx["delta"] = lust_reward
+			tx["after"] = GameState.get_lust()
+		GameState.set_last_battle_result({
+			"win": true,
+			"reason": "win",
+			"level_id": level_id,
+			"lust_before": int(tx.get("before", 0)),
+			"lust_reward": lust_reward,
+			"lust_after": int(tx.get("after", GameState.get_lust())),
+			"lust_base_score": enemy_kill_count + int(round(run_lust_reward_add)),
+			"lust_reward_mul": run_lust_reward_mul,
+			"kill_count": enemy_kill_count,
+			"battle_time": battle_time,
+		}, false)
 		if GameState.has_method("clear_next_battle_consumables"):
 			GameState.clear_next_battle_consumables(false)
 		GameState.autosave("battle_win")
@@ -3405,8 +3464,24 @@ func record_battle_loss(reason: String) -> void:
 	trigger_stage_result_events("loss")
 	if GameState.is_loaded:
 		var lust_reward: int = calculate_battle_lust_reward(false)
-		if lust_reward > 0:
+		var tx: Dictionary = {"before": GameState.get_lust(), "delta": 0, "after": GameState.get_lust()}
+		if lust_reward > 0 and GameState.has_method("add_lust_transaction"):
+			tx = GameState.add_lust_transaction(lust_reward, "battle_loss", false)
+		elif lust_reward > 0:
 			GameState.add_lust(lust_reward, false)
+			tx["delta"] = lust_reward
+			tx["after"] = GameState.get_lust()
+		GameState.set_last_battle_result({
+			"win": false,
+			"reason": reason,
+			"lust_before": int(tx.get("before", 0)),
+			"lust_reward": lust_reward,
+			"lust_after": int(tx.get("after", GameState.get_lust())),
+			"lust_base_score": enemy_kill_count + int(round(run_lust_reward_add)),
+			"lust_reward_mul": run_lust_reward_mul,
+			"kill_count": enemy_kill_count,
+			"battle_time": battle_time,
+		}, false)
 		if GameState.has_method("clear_next_battle_consumables"):
 			GameState.clear_next_battle_consumables(false)
 		GameState.autosave("battle_loss")

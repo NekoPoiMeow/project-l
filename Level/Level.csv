@@ -1,5 +1,5 @@
-id,chapter,level_no,name,x,y,next_ids,scene_path,unlocked,description,Bonus,Bonus2,Bonus_Collect,SelectSFX
-L001,1,1,海岸入口,820,640,L002|L003,res://scenes/Battle/Battle_001.tscn,TRUE,最初的登陆点,女海贼,女海盗头,2,res://Sound+BGM/06LevelSelect/SelectLevel2.mp3
-L002,1,2,废弃码头,1120,520,L004,res://scenes/Battle/Battle_002.tscn,TRUE,通往内陆的旧码头,女水手,女名侦探,1,res://Sound+BGM/06LevelSelect/SelectLevel3.mp3
-L003,1,3,潮汐洞窟,980,850,L004,res://scenes/Battle/Battle_003.tscn,FALSE,涨潮后才显露的洞口,女兵,女将,0,res://Sound+BGM/06LevelSelect/SelectLevel.mp3
-L004,1,4,雾中高塔,1450,720,,res://scenes/Battle/Battle_004.tscn,FALSE,区域核心节点,女魔法师,女魔,0,res://Sound+BGM/06LevelSelect/SelectLevel.mp3
+id,chapter,level_no,name,x,y,next_ids,scene_path,unlocked,description,reward_captive_id,special_captive_id,unlock_flag,SelectSFX
+L001,1,1,海岸入口,820,640,L002|L003,res://scenes/Battle/Battle_001.tscn,TRUE,最初的登陆点,CPT_KNIGHT_001,,START,res://Sound+BGM/06LevelSelect/SelectLevel2.mp3
+L002,1,2,废弃码头,1120,520,L004,res://scenes/Battle/Battle_002.tscn,TRUE,通往内陆的旧码头,CPT_PRIEST_001,,L001_CLEAR,res://Sound+BGM/06LevelSelect/SelectLevel3.mp3
+L003,1,3,潮汐洞窟,980,850,L004,res://scenes/Battle/Battle_003.tscn,FALSE,涨潮后才显露的洞口,CPT_WITCH_001,CPT_PRINCESS_001,L001_CLEAR,res://Sound+BGM/06LevelSelect/SelectLevel.mp3
+L004,1,4,雾中高塔,1450,720,,res://scenes/Battle/Battle_004.tscn,FALSE,区域核心节点,CPT_WITCH_001,,L002_CLEAR|L003_CLEAR,res://Sound+BGM/06LevelSelect/SelectLevel.mp3

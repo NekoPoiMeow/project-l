@@ -9,6 +9,8 @@ const DEFAULT_SLOT_PATH := "res://Save/Save1.txt"
 const AUTO_SLOT_PATHS := ["res://Save/SaveAuto.txt", "res://Save/SaveAuto2.txt"]
 const DEFAULT_SAVE_IMAGE_PATH := "res://Save/Save0.png"
 const BASEMENT_SCENE_PATH := "res://scenes/Basement.tscn"
+const OUTGAME_UPGRADES_CSV := "res://Config/OutGameUpgrades.csv"
+const EQUIPMENTS_CSV := "res://Config/Equipments.csv"
 const SAVE_FORMAT_VERSION := 1
 
 var active_slot_path := ""
@@ -602,6 +604,25 @@ func get_battle_loadout() -> Dictionary:
 		"equipment_id": str(raw.get("equipment_id", "E001")),
 	}
 
+
+func add_lust_transaction(amount: int, source: String = "", autosave_now: bool = true) -> Dictionary:
+	ensure_loaded()
+	var before_value: int = get_lust()
+	var reward_value: int = max(0, amount)
+	data["economy"]["lust"] = before_value + reward_value
+	var tx: Dictionary = {
+		"source": source,
+		"before": before_value,
+		"delta": reward_value,
+		"after": before_value + reward_value,
+		"time": Time.get_datetime_string_from_system(false, true),
+	}
+	data["flags"]["last_lust_transaction"] = tx
+	mark_dirty()
+	if autosave_now:
+		autosave("lust_transaction")
+	return tx
+
 func get_lust() -> int:
 	ensure_loaded()
 	return int(data["economy"].get("lust", 0))
@@ -609,6 +630,113 @@ func get_lust() -> int:
 func get_humiliation() -> int:
 	ensure_loaded()
 	return int(data["economy"].get("humiliation", 0))
+
+
+func set_runtime_battle_modifiers(modifiers: Dictionary, sources: Array = [], autosave_now: bool = false) -> void:
+	ensure_loaded()
+	data["runtime"]["pending_battle_modifiers"] = modifiers.duplicate(true)
+	data["runtime"]["pending_battle_sources"] = sources.duplicate(true)
+	mark_dirty()
+	if autosave_now:
+		save_progress_now("runtime_battle_modifiers")
+
+func get_runtime_battle_modifiers() -> Dictionary:
+	ensure_loaded()
+	var raw: Variant = data.get("runtime", {}).get("pending_battle_modifiers", {})
+	if typeof(raw) == TYPE_DICTIONARY:
+		return raw.duplicate(true)
+	return {}
+
+func build_battle_modifiers() -> Dictionary:
+	# Single source of truth for BattleDirector. Merges permanent outgame upgrades,
+	# merchant next-battle items and runtime cache. Captive materialized equipment remains an Equipment ID.
+	ensure_loaded()
+	var result: Dictionary = {}
+	var sources: Array = []
+	merge_modifier_dict(result, get_outgame_battle_modifiers(), sources, "upgrade")
+	merge_modifier_dict(result, get_merchant_next_battle_effects(), sources, "merchant")
+	merge_modifier_dict(result, get_runtime_battle_modifiers(), sources, "runtime")
+	data["runtime"]["pending_battle_modifiers"] = result.duplicate(true)
+	data["runtime"]["pending_battle_sources"] = sources.duplicate(true)
+	return result
+
+func merge_modifier_dict(target: Dictionary, source: Dictionary, sources: Array = [], source_name: String = "") -> void:
+	for raw_key in source.keys():
+		var key: String = str(raw_key).strip_edges()
+		if key == "":
+			continue
+		var value: float = float(source[raw_key])
+		target[key] = float(target.get(key, 0.0)) + value
+		if source_name != "":
+			sources.append(source_name + ":" + key + "=" + str(value))
+
+func get_outgame_battle_modifiers() -> Dictionary:
+	ensure_loaded()
+	var result: Dictionary = {}
+	if !FileAccess.file_exists(OUTGAME_UPGRADES_CSV):
+		return result
+	var file := FileAccess.open(OUTGAME_UPGRADES_CSV, FileAccess.READ)
+	if file == null:
+		return result
+	var headers := file.get_csv_line()
+	while !file.eof_reached():
+		var cols := file.get_csv_line()
+		if cols.is_empty():
+			continue
+		var row: Dictionary = {}
+		for i in range(headers.size()):
+			var key := headers[i].strip_edges()
+			row[key] = cols[i].strip_edges() if i < cols.size() else ""
+		var id: String = str(row.get("id", "")).strip_edges()
+		var effect_key: String = str(row.get("effect_key", "")).strip_edges()
+		if id == "" or effect_key == "":
+			continue
+		if effect_key in ["unlock_torture_item", "unlock_event", "merchant_stock_level", "merchant_captive_level", "merchant_discount_mul", "captive_manage_mul", "equipment_unlock_mul", "special_captive_event_mul"]:
+			continue
+		var group_key: String = normalize_upgrade_group(str(row.get("group", row.get("tab", "player"))))
+		var level: int = get_upgrade_level(group_key, id)
+		if level <= 0:
+			continue
+		var value_text: String = get_pipe_value(str(row.get("values", "")), level - 1)
+		if value_text == "":
+			continue
+		var value: float = float(value_text)
+		result[effect_key] = float(result.get(effect_key, 0.0)) + value
+	file.close()
+	return result
+
+func get_pipe_value(text: String, index: int) -> String:
+	var parts: PackedStringArray = text.split("|", false)
+	if parts.size() <= 0:
+		return ""
+	var safe_index: int = int(clamp(index, 0, parts.size() - 1))
+	return str(parts[safe_index]).strip_edges()
+
+func get_next_battle_captive_equipment_level() -> int:
+	var equipment_id: String = get_next_battle_captive_equipment_id()
+	if equipment_id == "":
+		return -1
+	var marker := "_LV"
+	if marker in equipment_id:
+		return int(equipment_id.split(marker, false, 1)[1])
+	return 0
+
+func get_unlocked_story_event_ids() -> Array[String]:
+	ensure_loaded()
+	var result: Array[String] = []
+	for category in ["story_events", "cg_events", "narrative_events"]:
+		for value: Variant in data.get("unlocks", {}).get(category, []):
+			var id: String = str(value).strip_edges()
+			if id != "" and !result.has(id):
+				result.append(id)
+	result.sort()
+	return result
+
+func is_story_event_unlocked(event_id: String) -> bool:
+	var clean_id: String = event_id.strip_edges()
+	if clean_id == "":
+		return false
+	return data.get("unlocks", {}).get("story_events", []).has(clean_id) or data.get("unlocks", {}).get("cg_events", []).has(clean_id) or data.get("unlocks", {}).get("narrative_events", []).has(clean_id)
 
 func set_last_battle_result(result: Dictionary, autosave_now: bool = true) -> void:
 	ensure_loaded()

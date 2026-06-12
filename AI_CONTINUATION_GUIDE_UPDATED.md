@@ -681,3 +681,14 @@ CG/剧情取得需要同步：
 新增可选 Autoload：`Script/Debug/ProjectDebug.gd`，名字建议 `ProjectDebug`。发布版不加载。加载后打印当前场景、active slot、lust、商人临时道具、地窖物化装备、俘虏数量。
 
 如果直接运行商人/地窖场景而没有显式 `load_slot()`，`GameState.ensure_loaded()` 会从 `Save1/SaveAuto/SaveAuto2` 中选择最像真实进度的槽位，避免误读 0 进度或旧缓存。
+
+
+## MVP v7 存档与局内传递规则
+
+- GitHub 已被用户 push 到较新状态，但补丁仍应按“用户本地可能未完全同步”处理。
+- GameState 是局外进度唯一来源：淫能、关卡解锁、CG/剧情、俘虏、商人临时道具、地窖物化装备、局外升级都必须写入 SaveDataJSON。
+- BattleDirector 不应分别到处读取商人/升级/地窖，而应优先走 `GameState.build_battle_modifiers()`。
+- `level_bonus_collect` 是废弃兼容字段；关卡解锁用 `progress.unlocked_levels`，关卡通关用 `progress.cleared_levels`。
+- 命中敌人不允许弹“淫能+20”；淫能只在战斗结算、地窖放置/调教、商人/局外消费等明确节点变化。
+- 战斗结算应记录 `lust_before + lust_reward = lust_after`，避免 UI 显示全局值和本局奖励混淆。
+- CG/剧情回想占位 UI 在 `res://scenes/StoryGallery/StoryGallery.tscn`，读取 `Config/StoryEvents.csv` 和 `unlocks.story_events/cg_events/narrative_events`。

@@ -279,7 +279,9 @@ func refresh_header() -> void:
 				captive_text = "\n通关俘虏：" + str(result.get("captive_id", ""))
 			var reward_text: String = str(result.get("lust_reward", 0))
 			var time_text: String = str(round(float(result.get("battle_time", 0.0))))
-			result_label.text = "最近战斗结算" + "\n结果：" + win_text + "\n本次获得淫能：" + reward_text + "\n淫能基数：" + str(result.get("lust_base_score", result.get("kill_count", 0))) + "\n击杀：" + str(result.get("kill_count", 0)) + "\n战斗时间：" + time_text + "秒" + captive_text
+			var before_text: String = str(result.get("lust_before", "?"))
+			var after_text: String = str(result.get("lust_after", GameState.get_lust()))
+			result_label.text = "最近战斗结算" + "\n结果：" + win_text + "\n本次获得淫能：" + reward_text + "\n淫能：" + before_text + " -> " + after_text + "\n淫能基数：" + str(result.get("lust_base_score", result.get("kill_count", 0))) + " x" + str(snapped(float(result.get("lust_reward_mul", 1.0)), 0.01)) + "\n击杀：" + str(result.get("kill_count", 0)) + "\n战斗时间：" + time_text + "秒" + captive_text
 
 func refresh_detail() -> void:
 	if detail_label == null or upgrade_button == null:
